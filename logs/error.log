@@ -1,0 +1,140 @@
+[01-Nov-2025 23:54:00 UTC] PHP Deprecated:  Constant E_STRICT is deprecated in C:\xampp\htdocs\project\includes\error_handler.php on line 50
+{"timestamp":"2025-11-01 23:54:00","type":"WARNING","message":"Cannot modify header information - headers already sent by (output started at C:\\xampp\\htdocs\\project\\test_bulk_direct.php:18)","file":"C:\\xampp\\htdocs\\project\\admin\\sites\\bulk_upload.php","line":10,"ip_address":"Unknown","user_agent":"Unknown","request_uri":"Unknown"}
+[01-Nov-2025 23:54:00 UTC] Bulk upload request received: Array
+(
+)
+
+[01-Nov-2025 23:54:00 UTC] Files received: Array
+(
+    [excel_file] => Array
+        (
+            [name] => test_sites.csv
+            [tmp_name] => C:\xampp\htdocs\project/test_sites.csv
+            [error] => 0
+            [size] => 375
+        )
+
+)
+
+[01-Nov-2025 23:54:21 UTC] PHP Deprecated:  Constant E_STRICT is deprecated in C:\xampp\htdocs\project\includes\error_handler.php on line 50
+{"timestamp":"2025-11-01 23:54:21","type":"WARNING","message":"Cannot modify header information - headers already sent by (output started at C:\\xampp\\htdocs\\project\\test_bulk_direct.php:18)","file":"C:\\xampp\\htdocs\\project\\admin\\sites\\bulk_upload.php","line":10,"ip_address":"Unknown","user_agent":"Unknown","request_uri":"Unknown"}
+[01-Nov-2025 23:54:21 UTC] Bulk upload request received: Array
+(
+)
+
+[01-Nov-2025 23:54:21 UTC] Files received: Array
+(
+    [excel_file] => Array
+        (
+            [name] => test_sites.csv
+            [tmp_name] => C:\xampp\htdocs\project/test_sites.csv
+            [error] => 0
+            [size] => 375
+        )
+
+)
+
+[01-Nov-2025 23:54:21 UTC] PHP Deprecated:  Constant E_STRICT is deprecated in C:\xampp\htdocs\project\includes\error_handler.php on line 50
+{"timestamp":"2025-11-01 23:54:21","type":"DEPRECATED","message":"fgetcsv(): the $escape parameter must be provided as its default value will change","file":"C:\\xampp\\htdocs\\project\\admin\\sites\\bulk_upload.php","line":183,"ip_address":"Unknown","user_agent":"Unknown","request_uri":"Unknown"}
+[01-Nov-2025 23:54:21 UTC] PHP Deprecated:  Constant E_STRICT is deprecated in C:\xampp\htdocs\project\includes\error_handler.php on line 50
+{"timestamp":"2025-11-01 23:54:21","type":"DEPRECATED","message":"fgetcsv(): the $escape parameter must be provided as its default value will change","file":"C:\\xampp\\htdocs\\project\\admin\\sites\\bulk_upload.php","line":184,"ip_address":"Unknown","user_agent":"Unknown","request_uri":"Unknown"}
+[01-Nov-2025 23:54:21 UTC] PHP Deprecated:  Constant E_STRICT is deprecated in C:\xampp\htdocs\project\includes\error_handler.php on line 50
+{"timestamp":"2025-11-01 23:54:21","type":"DEPRECATED","message":"fgetcsv(): the $escape parameter must be provided as its default value will change","file":"C:\\xampp\\htdocs\\project\\admin\\sites\\bulk_upload.php","line":184,"ip_address":"Unknown","user_agent":"Unknown","request_uri":"Unknown"}
+[01-Nov-2025 23:54:21 UTC] PHP Deprecated:  Constant E_STRICT is deprecated in C:\xampp\htdocs\project\includes\error_handler.php on line 50
+{"timestamp":"2025-11-01 23:54:21","type":"DEPRECATED","message":"fgetcsv(): the $escape parameter must be provided as its default value will change","file":"C:\\xampp\\htdocs\\project\\admin\\sites\\bulk_upload.php","line":184,"ip_address":"Unknown","user_agent":"Unknown","request_uri":"Unknown"}
+[01-Nov-2025 23:54:21 UTC] Processing row 2: Array
+(
+    [0] => TEST001
+    [1] => STORE001
+    [2] => Test Location 1
+    [3] => India
+    [4] => Maharashtra
+    [5] => Mumbai
+    [6] => Test Branch
+    [7] => Reliance Industries Ltd
+    [8] => HDFC Bank
+    [9] => PO2024001
+    [10] => 2024-01-15
+    [11] => Test upload
+)
+
+[01-Nov-2025 23:54:21 UTC] Validated data for row 2: Array
+(
+    [data] => Array
+        (
+            [site_id] => TEST001
+            [store_id] => STORE001
+            [location] => Test Location 1
+            [country] => India
+            [state] => Maharashtra
+            [city] => Mumbai
+            [branch] => Test Branch
+            [customer] => Reliance Industries Ltd
+            [bank] => HDFC Bank
+            [po_number] => PO2024001
+            [po_date] => 2024-01-15
+            [remarks] => Test upload
+            [created_by] => bulk_upload
+            [country_id] => 1
+            [state_id] => 1
+            [city_id] => 1
+            [customer_id] => 1
+            [bank_id] => 2
+        )
+
+    [errors] => Array
+        (
+        )
+
+)
+
+[01-Nov-2025 23:54:21 UTC] Created site: TEST001 with ID: 2
+[01-Nov-2025 23:54:21 UTC] Processed row 2 successfully
+[01-Nov-2025 23:54:21 UTC] Processing row 3: Array
+(
+    [0] => TEST002
+    [1] => STORE002
+    [2] => Test Location 2
+    [3] => India
+    [4] => Karnataka
+    [5] => Bangalore
+    [6] => Test Branch 2
+    [7] => Tata Consultancy Services
+    [8] => ICICI Bank
+    [9] => PO2024002
+    [10] => 2024-01-20
+    [11] => Test upload 2
+)
+
+[01-Nov-2025 23:54:21 UTC] Validated data for row 3: Array
+(
+    [data] => Array
+        (
+            [site_id] => TEST002
+            [store_id] => STORE002
+            [location] => Test Location 2
+            [country] => India
+            [state] => Karnataka
+            [city] => Bangalore
+            [branch] => Test Branch 2
+            [customer] => Tata Consultancy Services
+            [bank] => ICICI Bank
+            [po_number] => PO2024002
+            [po_date] => 2024-01-20
+            [remarks] => Test upload 2
+            [created_by] => bulk_upload
+            [country_id] => 1
+            [state_id] => 2
+            [city_id] => 4
+            [customer_id] => 2
+            [bank_id] => 3
+        )
+
+    [errors] => Array
+        (
+        )
+
+)
+
+[01-Nov-2025 23:54:21 UTC] Created site: TEST002 with ID: 3
+[01-Nov-2025 23:54:21 UTC] Processed row 3 successfully

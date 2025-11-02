@@ -1,0 +1,5 @@
+{"timestamp":"2025-11-01 19:13:59","user_id":1,"action":"UPDATE_countries","table_name":"countries","record_id":3,"ip_address":"::1"}
+{"timestamp":"2025-11-01 19:14:10","user_id":1,"action":"UPDATE_countries","table_name":"countries","record_id":2,"ip_address":"::1"}
+{"timestamp":"2025-11-01 19:14:22","user_id":1,"action":"TOGGLE_countries_STATUS","table_name":"countries","record_id":3,"ip_address":"::1"}
+{"timestamp":"2025-11-01 19:14:27","user_id":1,"action":"TOGGLE_countries_STATUS","table_name":"countries","record_id":3,"ip_address":"::1"}
+{"timestamp":"2025-11-01 19:14:36","user_id":1,"action":"DELETE_countries","table_name":"countries","record_id":5,"ip_address":"::1"}

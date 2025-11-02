@@ -1,0 +1,2 @@
+{"timestamp":"2025-11-01 15:05:45","user_id":1,"action":"CREATE_USER","table_name":"users","record_id":"2","ip_address":"::1"}
+{"timestamp":"2025-11-01 15:19:56","user_id":1,"action":"CREATE_USER","table_name":"users","record_id":"3","ip_address":"::1"}

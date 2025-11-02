@@ -1,0 +1,438 @@
+<?php
+require_once __DIR__ . '/../../config/auth.php';
+require_once __DIR__ . '/../../models/MaterialRequest.php';
+require_once __DIR__ . '/../../models/BoqItem.php';
+require_once __DIR__ . '/../../models/SiteSurvey.php';
+
+// Require admin authentication
+Auth::requireRole(ADMIN_ROLE);
+
+$requestId = $_GET['request_id'] ?? null;
+
+if (!$requestId) {
+    header('Location: index.php');
+    exit;
+}
+
+$materialRequestModel = new MaterialRequest();
+$boqModel = new BoqItem();
+$surveyModel = new SiteSurvey();
+
+// Get material request details
+$materialRequest = $materialRequestModel->findWithDetails($requestId);
+
+if (!$materialRequest || $materialRequest['status'] !== 'approved') {
+    header('Location: index.php');
+    exit;
+}
+
+// Parse requested items
+$requestedItems = json_decode($materialRequest['items'], true) ?: [];
+
+// Get BOQ item details for each requested item
+$boqItems = [];
+foreach ($requestedItems as $item) {
+    if (!empty($item['boq_item_id'])) {
+        $boqItem = $boqModel->find($item['boq_item_id']);
+        if ($boqItem) {
+            $boqItems[$item['boq_item_id']] = $boqItem;
+        }
+    }
+}
+
+// Get survey details if available
+$surveyDetails = null;
+if ($materialRequest['survey_id']) {
+    $surveyDetails = $surveyModel->find($materialRequest['survey_id']);
+}
+
+$title = 'Material Dispatch - Request #' . $materialRequest['id'];
+ob_start();
+?>
+
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-2xl font-semibold text-gray-900">Material Dispatch</h1>
+        <p class="mt-2 text-sm text-gray-700">Create dispatch for Material Request #<?php echo $materialRequest['id']; ?></p>
+    </div>
+    <div class="flex space-x-2">
+        <a href="view-request.php?id=<?php echo $materialRequest['id']; ?>" class="btn btn-secondary">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"></path>
+            </svg>
+            Back to Request
+        </a>
+    </div>
+</div>
+
+<!-- Information Cards Row -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Site Information -->
+    <div class="card">
+        <div class="card-body">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                </svg>
+                Site Info
+            </h3>
+            <div class="space-y-2">
+                <div>
+                    <label class="text-xs font-medium text-gray-500">Site Code</label>
+                    <div class="text-sm text-gray-900"><?php echo htmlspecialchars($materialRequest['site_code']); ?></div>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-gray-500">Site Name</label>
+                    <div class="text-sm text-gray-900"><?php echo htmlspecialchars($materialRequest['site_name'] ?? 'N/A'); ?></div>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-gray-500">Location</label>
+                    <div class="text-sm text-gray-900"><?php echo htmlspecialchars($materialRequest['location']); ?></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Vendor Information -->
+    <div class="card">
+        <div class="card-body">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                </svg>
+                Vendor Info
+            </h3>
+            <div class="space-y-2">
+                <div>
+                    <label class="text-xs font-medium text-gray-500">Vendor Name</label>
+                    <div class="text-sm text-gray-900"><?php echo htmlspecialchars($materialRequest['vendor_name']); ?></div>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-gray-500">Contact Person</label>
+                    <div class="text-sm text-gray-900"><?php echo htmlspecialchars($materialRequest['contact_person'] ?? 'Not specified'); ?></div>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-gray-500">Phone</label>
+                    <div class="text-sm text-gray-900"><?php echo htmlspecialchars($materialRequest['phone'] ?? 'Not specified'); ?></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Survey Status -->
+    <div class="card">
+        <div class="card-body">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
+                </svg>
+                Survey Status
+            </h3>
+            <div class="space-y-2">
+                <?php if ($surveyDetails): ?>
+                <div>
+                    <label class="text-xs font-medium text-gray-500">Status</label>
+                    <div class="text-sm">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <?php echo ucfirst($surveyDetails['status'] ?? 'Unknown'); ?>
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-gray-500">Survey Date</label>
+                    <div class="text-sm text-gray-900"><?php echo date('d M Y', strtotime($surveyDetails['survey_date'])); ?></div>
+                </div>
+                <?php else: ?>
+                <div>
+                    <label class="text-xs font-medium text-gray-500">Status</label>
+                    <div class="text-sm text-gray-500">No survey linked</div>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Material Request Info -->
+    <div class="card">
+        <div class="card-body">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                </svg>
+                Request Info
+            </h3>
+            <div class="space-y-2">
+                <div>
+                    <label class="text-xs font-medium text-gray-500">Request Date</label>
+                    <div class="text-sm text-gray-900"><?php echo date('d M Y', strtotime($materialRequest['request_date'])); ?></div>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-gray-500">Required Date</label>
+                    <div class="text-sm text-gray-900"><?php echo $materialRequest['required_date'] ? date('d M Y', strtotime($materialRequest['required_date'])) : 'Not specified'; ?></div>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-gray-500">Priority</label>
+                    <div class="text-sm">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            <?php echo ucfirst($materialRequest['priority'] ?? 'Normal'); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dispatch Form -->
+<form id="dispatchForm">
+    <input type="hidden" name="material_request_id" value="<?php echo $materialRequest['id']; ?>">
+    
+    <!-- Dispatch Information -->
+    <div class="card mb-6">
+        <div class="card-body">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Dispatch Information</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="form-group">
+                    <label for="contact_person_name" class="form-label">Contact Person Name *</label>
+                    <input type="text" id="contact_person_name" name="contact_person_name" class="form-input" required 
+                           value="<?php echo htmlspecialchars($materialRequest['contact_person'] ?? ''); ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="contact_person_phone" class="form-label">Contact Person Phone *</label>
+                    <input type="text" id="contact_person_phone" name="contact_person_phone" class="form-input" required
+                           value="<?php echo htmlspecialchars($materialRequest['phone'] ?? ''); ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="courier_name" class="form-label">Courier Name</label>
+                    <input type="text" id="courier_name" name="courier_name" class="form-input" 
+                           placeholder="e.g., Blue Dart, DTDC, FedEx">
+                </div>
+                
+                <div class="form-group">
+                    <label for="pod_number" class="form-label">POD / Tracking Number</label>
+                    <input type="text" id="pod_number" name="pod_number" class="form-input" 
+                           placeholder="Enter POD or tracking number">
+                </div>
+                
+                <div class="form-group">
+                    <label for="dispatch_date" class="form-label">Dispatch Date *</label>
+                    <input type="date" id="dispatch_date" name="dispatch_date" class="form-input" required 
+                           value="<?php echo date('Y-m-d'); ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="expected_delivery_date" class="form-label">Expected Delivery Date</label>
+                    <input type="date" id="expected_delivery_date" name="expected_delivery_date" class="form-input"
+                           value="<?php echo $materialRequest['required_date'] ?: ''; ?>">
+                </div>
+                
+                <div class="form-group md:col-span-2 lg:col-span-3">
+                    <label for="delivery_address" class="form-label">Delivery Address *</label>
+                    <textarea id="delivery_address" name="delivery_address" rows="3" class="form-input" required
+                              placeholder="Enter delivery address..."><?php echo htmlspecialchars($materialRequest['address'] ?? ''); ?></textarea>
+                </div>
+                
+                <div class="form-group md:col-span-2 lg:col-span-3">
+                    <label for="dispatch_remarks" class="form-label">Dispatch Remarks</label>
+                    <textarea id="dispatch_remarks" name="dispatch_remarks" rows="3" class="form-input" 
+                              placeholder="Any special instructions or remarks for dispatch..."><?php echo htmlspecialchars($materialRequest['request_notes'] ?? ''); ?></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Material Items -->
+    <div class="card mb-6">
+        <div class="card-body">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Material Items</h3>
+            
+            <?php foreach ($requestedItems as $index => $item): ?>
+            <?php $boqItem = $boqItems[$item['boq_item_id']] ?? null; ?>
+            
+            <!-- Material Item Header (Cumulative Total) -->
+            <div class="border border-gray-200 rounded-lg mb-4">
+                <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                                <div class="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                                    <i class="<?php echo $boqItem['icon_class'] ?: 'fas fa-cube'; ?> text-blue-600"></i>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-lg font-medium text-gray-900"><?php echo htmlspecialchars($boqItem['item_name'] ?? 'Unknown Item'); ?></div>
+                                <div class="text-sm text-gray-500"><?php echo htmlspecialchars($boqItem['item_code'] ?? 'N/A'); ?> • Unit: <?php echo htmlspecialchars($boqItem['unit'] ?? 'N/A'); ?></div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-semibold text-blue-600">Requires <?php echo number_format($item['quantity']); ?> items</div>
+                            <div class="text-sm text-gray-500">Total Quantity</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Dispatch Configuration -->
+                <div class="px-4 py-3 bg-white">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="form-label">Dispatch Quantity *</label>
+                            <input type="number" name="items[<?php echo $index; ?>][dispatch_quantity]" 
+                                   class="form-input" step="0.01" min="0" max="<?php echo $item['quantity']; ?>" 
+                                   value="<?php echo $item['quantity']; ?>" required 
+                                   onchange="updateIndividualRows(<?php echo $index; ?>)">
+                            <input type="hidden" name="items[<?php echo $index; ?>][boq_item_id]" value="<?php echo $item['boq_item_id']; ?>">
+                        </div>
+                        <div>
+                            <label class="form-label">Batch Number (Optional)</label>
+                            <input type="text" name="items[<?php echo $index; ?>][batch_number]" 
+                                   class="form-input" placeholder="Enter batch number">
+                        </div>
+                        <div>
+                            <label class="form-label">Dispatch Notes</label>
+                            <textarea name="items[<?php echo $index; ?>][dispatch_notes]" 
+                                      class="form-input" rows="1" 
+                                      placeholder="Notes..."><?php echo htmlspecialchars($item['notes'] ?? ''); ?></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Individual Items Section -->
+                    <div class="border-t border-gray-100 pt-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-md font-medium text-gray-900">Individual Items</h4>
+                            <div class="text-sm text-gray-500">
+                                <span id="individual_count_<?php echo $index; ?>"><?php echo intval($item['quantity']); ?></span> items to dispatch
+                            </div>
+                        </div>
+                        
+                        <div id="individual_items_<?php echo $index; ?>" class="space-y-2">
+                            <!-- Individual items will be generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    
+    <!-- Submit Button -->
+    <div class="flex justify-end space-x-4">
+        <a href="view-request.php?id=<?php echo $materialRequest['id']; ?>" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            Dispatch Continue
+        </button>
+    </div>
+</form>
+
+<script>
+let individualCounters = {};
+
+// Initialize individual items on page load
+document.addEventListener('DOMContentLoaded', function() {
+    <?php foreach ($requestedItems as $index => $item): ?>
+    updateIndividualRows(<?php echo $index; ?>);
+    <?php endforeach; ?>
+});
+
+function updateIndividualRows(itemIndex) {
+    const dispatchQty = parseInt(document.querySelector(`input[name="items[${itemIndex}][dispatch_quantity]"]`).value) || 0;
+    const container = document.getElementById(`individual_items_${itemIndex}`);
+    const countDisplay = document.getElementById(`individual_count_${itemIndex}`);
+    
+    // Update count display
+    countDisplay.textContent = dispatchQty;
+    
+    // Clear existing items
+    container.innerHTML = '';
+    
+    // Create individual item rows
+    for (let i = 0; i < dispatchQty; i++) {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'grid grid-cols-12 gap-2 items-center py-2 border-b border-gray-100 last:border-b-0';
+        itemDiv.innerHTML = `
+            <div class="col-span-1 text-sm text-gray-500 font-medium">#${i + 1}</div>
+            <div class="col-span-5">
+                <input type="text" name="items[${itemIndex}][individual][${i}][serial_number]" 
+                       class="form-input w-full" placeholder="Serial number (optional)" style="font-size: 13px; padding: 6px 10px;">
+            </div>
+            <div class="col-span-3">
+                <input type="text" name="items[${itemIndex}][individual][${i}][batch_number]" 
+                       class="form-input w-full" placeholder="Batch (optional)" style="font-size: 13px; padding: 6px 10px;">
+            </div>
+            <div class="col-span-2">
+                <input type="number" name="items[${itemIndex}][individual][${i}][quantity]" 
+                       class="form-input w-full" value="1" min="0.01" step="0.01" style="font-size: 13px; padding: 6px 10px;">
+            </div>
+            <div class="col-span-1 text-center">
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    Item ${i + 1}
+                </span>
+            </div>
+        `;
+        
+        container.appendChild(itemDiv);
+    }
+    
+    // Add header row if items exist
+    if (dispatchQty > 0) {
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'grid grid-cols-12 gap-2 items-center py-2 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-700';
+        headerDiv.innerHTML = `
+            <div class="col-span-1">#</div>
+            <div class="col-span-5">Serial Number</div>
+            <div class="col-span-3">Batch Number</div>
+            <div class="col-span-2">Quantity</div>
+            <div class="col-span-1 text-center">Status</div>
+        `;
+        
+        container.insertBefore(headerDiv, container.firstChild);
+    }
+}
+
+// Form submission
+document.getElementById('dispatchForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Processing Dispatch...';
+    submitBtn.disabled = true;
+    
+    fetch('process-material-dispatch.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('Material dispatch processed successfully!', 'success');
+            setTimeout(() => {
+                window.location.href = `view-request.php?id=<?php echo $materialRequest['id']; ?>`;
+            }, 1500);
+        } else {
+            showAlert('Error: ' + data.message, 'error');
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('An error occurred while processing the dispatch.', 'error');
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+</script>
+
+<?php
+$content = ob_get_clean();
+include __DIR__ . '/../../includes/admin_layout.php';
+?>

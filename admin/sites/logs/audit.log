@@ -1,0 +1,5 @@
+{"timestamp":"2025-11-01 20:15:57","user_id":1,"action":"CREATE_SITE","table_name":"sites","record_id":"1","ip_address":"::1"}
+{"timestamp":"2025-11-01 20:35:03","user_id":1,"action":"UPDATE_SITE","table_name":"sites","record_id":1,"ip_address":"::1"}
+{"timestamp":"2025-11-02 00:29:57","user_id":1,"action":"DELETE_SITE","table_name":"sites","record_id":2,"ip_address":"::1"}
+{"timestamp":"2025-11-02 00:30:02","user_id":1,"action":"DELETE_SITE","table_name":"sites","record_id":3,"ip_address":"::1"}
+{"timestamp":"2025-11-02 00:30:06","user_id":1,"action":"DELETE_SITE","table_name":"sites","record_id":1,"ip_address":"::1"}

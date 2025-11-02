@@ -1,0 +1,455 @@
+<?php
+require_once __DIR__ . '/../../controllers/UsersController.php';
+
+$controller = new UsersController();
+$data = $controller->index();
+
+$title = 'Users Management';
+ob_start();
+?>
+
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-2xl font-semibold text-gray-900">Users Management</h1>
+        <p class="mt-2 text-sm text-gray-700">Manage system users and their permissions</p>
+    </div>
+    <button onclick="openModal('createUserModal')" class="btn btn-primary">
+        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>
+        </svg>
+        Add New User
+    </button>
+</div>
+
+<!-- Search and Filters -->
+<div class="card mb-6">
+    <div class="card-body">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search users..." value="<?php echo htmlspecialchars($data['search']); ?>">
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <select id="roleFilter" class="form-select">
+                    <option value="">All Roles</option>
+                    <option value="admin">Admin</option>
+                    <option value="vendor">Vendor</option>
+                </select>
+                <select id="statusFilter" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card">
+    <div class="card-body">
+        <div class="overflow-x-auto">
+            <table class="data-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Contact</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($data['users'] as $user): ?>
+                    <tr>
+                        <td>
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white font-medium mr-3">
+                                    <?php echo strtoupper(substr($user['username'], 0, 1)); ?>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($user['username']); ?></div>
+                                    <div class="text-sm text-gray-500">ID: <?php echo $user['id']; ?></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="text-sm text-gray-900"><?php echo htmlspecialchars($user['email']); ?></div>
+                            <div class="text-sm text-gray-500"><?php echo htmlspecialchars($user['phone'] ?? 'N/A'); ?></div>
+                        </td>
+                        <td>
+                            <span class="badge <?php echo $user['role'] === 'admin' ? 'badge-info' : 'badge-secondary'; ?>">
+                                <?php echo ucfirst($user['role']); ?>
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge <?php echo $user['status'] === 'active' ? 'badge-success' : 'badge-danger'; ?>">
+                                <?php echo ucfirst($user['status']); ?>
+                            </span>
+                        </td>
+                        <td class="text-sm text-gray-500">
+                            <?php echo date('M j, Y', strtotime($user['created_at'])); ?>
+                        </td>
+                        <td>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="viewUser(<?php echo $user['id']; ?>)" class="btn btn-sm btn-secondary" title="View">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </button>
+                                <button onclick="editUser(<?php echo $user['id']; ?>)" class="btn btn-sm btn-primary" title="Edit">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
+                                    </svg>
+                                </button>
+                                <button onclick="toggleUserStatus(<?php echo $user['id']; ?>)" class="btn btn-sm <?php echo $user['status'] === 'active' ? 'btn-warning' : 'btn-success'; ?>" title="<?php echo $user['status'] === 'active' ? 'Deactivate' : 'Activate'; ?>">
+                                    <?php if ($user['status'] === 'active'): ?>
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    <?php else: ?>
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    <?php endif; ?>
+                                </button>
+                                <button onclick="deleteUser(<?php echo $user['id']; ?>)" class="btn btn-sm btn-danger" title="Delete">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 012 0v4a1 1 0 11-2 0V7zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V7a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <?php if ($data['pagination']['total_pages'] > 1): ?>
+        <div class="pagination">
+            <div class="pagination-info">
+                Showing <?php echo (($data['pagination']['current_page'] - 1) * $data['pagination']['limit']) + 1; ?> to 
+                <?php echo min($data['pagination']['current_page'] * $data['pagination']['limit'], $data['pagination']['total_records']); ?> of 
+                <?php echo $data['pagination']['total_records']; ?> results
+            </div>
+            <div class="pagination-nav-desktop">
+                <nav class="flex space-x-2">
+                    <?php for ($i = 1; $i <= $data['pagination']['total_pages']; $i++): ?>
+                        <a href="?page=<?php echo $i; ?><?php echo !empty($data['search']) ? '&search=' . urlencode($data['search']) : ''; ?>" 
+                           class="pagination-btn <?php echo $i === $data['pagination']['current_page'] ? 'active' : ''; ?>">
+                            <?php echo $i; ?>
+                        </a>
+                    <?php endfor; ?>
+                </nav>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- Create User Modal -->
+<div id="createUserModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Add New User</h3>
+            <button type="button" class="modal-close" onclick="closeModal('createUserModal')">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
+        <form id="createUserForm" action="create.php" method="POST">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" name="username" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" id="email" name="email" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" class="form-input" placeholder="+1234567890" required>
+                </div>
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="role" class="form-label">Role</label>
+                    <select id="role" name="role" class="form-select" required>
+                        <option value="">Select Role</option>
+                        <option value="admin">Admin</option>
+                        <option value="vendor">Vendor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="status" class="form-label">Status</label>
+                    <select id="status" name="status" class="form-select">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal('createUserModal')" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div id="editUserModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit User</h3>
+            <button type="button" class="modal-close" onclick="closeModal('editUserModal')">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
+        <form id="editUserForm" method="POST">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="edit_username" class="form-label">Username</label>
+                    <input type="text" id="edit_username" name="username" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_email" class="form-label">Email</label>
+                    <input type="email" id="edit_email" name="email" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_phone" class="form-label">Phone Number</label>
+                    <input type="tel" id="edit_phone" name="phone" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_password" class="form-label">Password</label>
+                    <input type="password" id="edit_password" name="password" class="form-input" placeholder="Leave blank to keep current password">
+                </div>
+                <div class="form-group">
+                    <label for="edit_role" class="form-label">Role</label>
+                    <select id="edit_role" name="role" class="form-select" required>
+                        <option value="admin">Admin</option>
+                        <option value="vendor">Vendor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit_status" class="form-label">Status</label>
+                    <select id="edit_status" name="status" class="form-select">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal('editUserModal')" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- View User Modal -->
+<div id="viewUserModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">User Details</h3>
+            <button type="button" class="modal-close" onclick="closeModal('viewUserModal')">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <p id="view_username" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <p id="view_email" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <p id="view_phone" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                    <p id="view_role" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <p id="view_status" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Plain Password</label>
+                    <p id="view_plain_password" class="text-sm text-gray-900 bg-gray-50 p-2 rounded font-mono"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Created At</label>
+                    <p id="view_created_at" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
+                    <p id="view_updated_at" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
+                </div>
+            </div>
+            <div class="mt-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1">JWT Token</label>
+                <div class="bg-gray-50 p-2 rounded">
+                    <p id="view_jwt_token" class="text-xs text-gray-600 font-mono break-all"></p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="closeModal('viewUserModal')" class="btn btn-secondary">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+console.log('Users page script loaded');
+console.log('BASE_URL:', '<?php echo BASE_URL; ?>');
+
+// Search functionality
+document.getElementById('searchInput').addEventListener('keyup', debounce(function() {
+    const searchTerm = this.value;
+    const url = new URL(window.location);
+    if (searchTerm) {
+        url.searchParams.set('search', searchTerm);
+    } else {
+        url.searchParams.delete('search');
+    }
+    url.searchParams.delete('page');
+    window.location.href = url.toString();
+}, 500));
+
+// Create user form submission
+document.getElementById('createUserForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    submitForm('createUserForm', function(data) {
+        closeModal('createUserModal');
+        location.reload();
+    });
+});
+
+// Edit user form submission
+document.getElementById('editUserForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    submitForm('editUserForm', function(data) {
+        closeModal('editUserModal');
+        location.reload();
+    });
+});
+
+// User management functions
+function viewUser(id) {
+    fetch(`view.php?id=${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const user = data.user;
+                document.getElementById('view_username').textContent = user.username;
+                document.getElementById('view_email').textContent = user.email;
+                document.getElementById('view_phone').textContent = user.phone || 'N/A';
+                document.getElementById('view_role').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+                document.getElementById('view_status').textContent = user.status.charAt(0).toUpperCase() + user.status.slice(1);
+                document.getElementById('view_plain_password').textContent = user.plain_password || 'N/A';
+                document.getElementById('view_created_at').textContent = formatDate(user.created_at);
+                document.getElementById('view_updated_at').textContent = formatDate(user.updated_at);
+                document.getElementById('view_jwt_token').textContent = user.jwt_token || 'No token generated';
+                openModal('viewUserModal');
+            } else {
+                showAlert(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Failed to load user data', 'error');
+        });
+}
+
+function editUser(id) {
+    fetch(`edit.php?id=${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const user = data.user;
+                document.getElementById('edit_username').value = user.username;
+                document.getElementById('edit_email').value = user.email;
+                document.getElementById('edit_phone').value = user.phone || '';
+                document.getElementById('edit_password').value = '';
+                document.getElementById('edit_role').value = user.role;
+                document.getElementById('edit_status').value = user.status;
+                document.getElementById('editUserForm').action = `edit.php?id=${id}`;
+                openModal('editUserModal');
+            } else {
+                showAlert(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Failed to load user data', 'error');
+        });
+}
+
+function toggleUserStatus(id) {
+    confirmAction('Are you sure you want to change this user\'s status?', function() {
+        fetch(`toggle_status.php?id=${id}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    location.reload();
+                } else {
+                    showAlert(data.message, 'error');
+                }
+            });
+    });
+}
+
+function deleteUser(id) {
+    confirmAction('Are you sure you want to delete this user? This action cannot be undone.', function() {
+        fetch(`delete.php?id=${id}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showAlert(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('Failed to delete user', 'error');
+            });
+    });
+}
+
+// Utility function to format dates
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+}
+</script>
+
+<?php
+$content = ob_get_clean();
+include __DIR__ . '/../../includes/admin_layout.php';
+?>
