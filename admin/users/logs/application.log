@@ -1,0 +1,2 @@
+{"timestamp":"2025-11-03 14:49:00","level":"ERROR","message":"User deletion failed","user_id":1,"ip_address":"::1","context":{"error":"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'assigned_vendor_id' in 'where clause'","user_id":11}}
+{"timestamp":"2025-11-03 14:49:23","level":"ERROR","message":"User deletion failed","user_id":1,"ip_address":"::1","context":{"error":"SQLSTATE[42S22]: Column not found: 1054 Unknown column 'assigned_vendor_id' in 'where clause'","user_id":11}}

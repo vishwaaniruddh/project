@@ -224,7 +224,7 @@ class UsersController extends BaseController {
             }
             
             // Check if user has assigned sites
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM sites WHERE assigned_vendor_id = ?");
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM sites WHERE vendor = ?");
             $stmt->execute([$id]);
             $assignedSites = $stmt->fetchColumn();
             

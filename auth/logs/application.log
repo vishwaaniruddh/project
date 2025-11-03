@@ -10,3 +10,6 @@
 {"timestamp":"2025-11-03 08:46:02","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
 {"timestamp":"2025-11-03 09:26:52","level":"INFO","message":"User login successful","user_id":5,"ip_address":"::1","context":{"username":"info@quickfix.com","success":true}}
 {"timestamp":"2025-11-03 09:53:39","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-03 11:32:12","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-03 14:47:20","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-03 14:58:22","level":"INFO","message":"User login successful","user_id":12,"ip_address":"::1","context":{"username":"ganesh@gmail.com","success":true}}
