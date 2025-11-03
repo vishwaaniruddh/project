@@ -534,7 +534,7 @@ function loadVendors(selectId) {
     // Show loading state
     vendorSelect.innerHTML = '<option value="">Loading vendors...</option>';
     
-    fetch('/project/api/masters.php?path=vendors&status=active')
+    fetch('../../api/masters.php?path=vendors&status=active')
         .then(response => response.json())
         .then(data => {
             if (data.success && data.data && data.data.records) {
@@ -549,7 +549,7 @@ function loadVendors(selectId) {
         .catch(error => {
             console.error('Error loading vendors:', error);
             // Fallback: try direct vendor API
-            fetch('/project/admin/vendors/get-vendor.php?action=list')
+            fetch('../vendors/get-vendor.php?action=list')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.vendors) {
