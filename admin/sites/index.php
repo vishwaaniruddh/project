@@ -13,11 +13,27 @@ ob_start();
         <p class="mt-2 text-sm text-gray-700">Manage installation sites and track progress</p>
     </div>
     <div class="flex space-x-2">
-        <button onclick="openModal('bulkUploadModal')" class="btn btn-secondary" title="Bulk Upload Sites">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-            </svg>
-        </button>
+        <div class="relative inline-block">
+            <button onclick="toggleBulkUploadMenu()" class="btn btn-secondary" title="Bulk Upload Sites">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                Bulk Upload
+                <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+            <div id="bulkUploadMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                <div class="py-1">
+                    <button onclick="openModal('bulkUploadModal'); closeBulkUploadMenu();" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        Quick Upload (Modal)
+                    </button>
+                    <a href="bulk_upload.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        Full Upload Page
+                    </a>
+                </div>
+            </div>
+        </div>
         <button onclick="openModal('createSiteModal')" class="btn btn-primary" title="Add New Site">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>
@@ -1317,6 +1333,27 @@ window.closeModal = function(modalId) {
 };
 
 // Functions are now properly defined
+
+// Bulk upload dropdown menu functions
+function toggleBulkUploadMenu() {
+    const menu = document.getElementById('bulkUploadMenu');
+    menu.classList.toggle('hidden');
+}
+
+function closeBulkUploadMenu() {
+    const menu = document.getElementById('bulkUploadMenu');
+    menu.classList.add('hidden');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const menu = document.getElementById('bulkUploadMenu');
+    const button = event.target.closest('.relative');
+    
+    if (!button || !button.contains(event.target)) {
+        menu.classList.add('hidden');
+    }
+});
 </script>
 
 <?php

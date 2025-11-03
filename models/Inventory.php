@@ -17,43 +17,63 @@ class Inventory {
         $conditions = [];
         
         if (!empty($search)) {
-            $conditions[] = "(bi.item_name LIKE ? OR bi.item_code LIKE ?)";
+            $conditions[] = "(item_name LIKE ? OR item_code LIKE ?)";
             $searchTerm = "%$search%";
             $params = array_merge($params, [$searchTerm, $searchTerm]);
         }
         
         if (!empty($category)) {
-            $conditions[] = "bi.category = ?";
+            $conditions[] = "category = ?";
             $params[] = $category;
-        }
-        
-        if ($lowStock) {
-            $conditions[] = "iss.total_stock <= iss.minimum_stock";
         }
         
         if (!empty($conditions)) {
             $whereClause = "WHERE " . implode(" AND ", $conditions);
         }
         
-        // Use the summary view for aggregated stock data
-        $sql = "SELECT iss.*, bi.item_name, bi.item_code, bi.unit, bi.category, bi.icon_class,
-                       CASE 
-                           WHEN iss.total_stock <= iss.minimum_stock THEN 'low'
-                           WHEN iss.total_stock >= iss.maximum_stock THEN 'high'
-                           ELSE 'normal'
-                       END as stock_status,
-                       iss.total_stock as current_stock,
-                       iss.total_available as available_stock,
-                       iss.total_reserved as reserved_stock,
-                       iss.total_value,
-                       iss.avg_unit_cost as unit_cost
-                FROM inventory_stock_summary iss
-                JOIN boq_items bi ON iss.boq_item_id = bi.id
-                $whereClause
-                ORDER BY bi.item_name";
+        // Use the new inventory_summary view for aggregated stock data
+        $sql = "SELECT * FROM inventory_summary $whereClause ORDER BY item_name";
         
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function getAvailableStock($boqItemId, $requiredQuantity = null) {
+        $sql = "SELECT ist.*, bi.item_name, bi.item_code, bi.unit
+                FROM inventory_stock ist
+                JOIN boq_items bi ON ist.boq_item_id = bi.id
+                WHERE ist.boq_item_id = ? 
+                AND ist.item_status = 'available'
+                AND ist.quality_status = 'good'
+                ORDER BY ist.id ASC";
+        
+        $params = [$boqItemId];
+        if ($requiredQuantity) {
+            $sql .= " LIMIT ?";
+            $params[] = $requiredQuantity;
+        }
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function getStockBySerialNumbers($serialNumbers) {
+        if (empty($serialNumbers)) {
+            return [];
+        }
+        
+        $placeholders = str_repeat('?,', count($serialNumbers) - 1) . '?';
+        $sql = "SELECT ist.*, bi.item_name, bi.item_code, bi.unit
+                FROM inventory_stock ist
+                JOIN boq_items bi ON ist.boq_item_id = bi.id
+                WHERE ist.serial_number IN ($placeholders)
+                AND ist.item_status = 'available'
+                ORDER BY ist.id ASC";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($serialNumbers);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
@@ -107,22 +127,23 @@ class Inventory {
     public function updateStockLevels($boqItemId, $minStock, $maxStock, $unitCost) {
         $currentUser = Auth::getCurrentUser();
         
-        // Update all entries for this BOQ item
-        $sql = "UPDATE inventory_stock 
-                SET minimum_stock = ?, maximum_stock = ?, updated_by = ?
-                WHERE boq_item_id = ?";
-        
-        $stmt = $this->db->prepare($sql);
-        $result = $stmt->execute([$minStock, $maxStock, $currentUser['id'], $boqItemId]);
-        
-        // Update unit cost only if provided and different
+        // In the new schema, we don't have min/max stock per item
+        // This method is now primarily for updating unit costs
         if ($unitCost > 0) {
             $sql = "UPDATE inventory_stock 
-                    SET unit_cost = ?, total_value = current_stock * ?, updated_by = ?
+                    SET unit_cost = ?, updated_by = ?
+                    WHERE boq_item_id = ? AND item_status = 'available'";
+            
+            $stmt = $this->db->prepare($sql);
+            $result = $stmt->execute([$unitCost, $currentUser['id'], $boqItemId]);
+        } else {
+            // Just update the updated_by field to mark as processed
+            $sql = "UPDATE inventory_stock 
+                    SET updated_by = ?
                     WHERE boq_item_id = ?";
             
             $stmt = $this->db->prepare($sql);
-            $stmt->execute([$unitCost, $unitCost, $currentUser['id'], $boqItemId]);
+            $result = $stmt->execute([$currentUser['id'], $boqItemId]);
         }
         
         return $result;
@@ -133,40 +154,56 @@ class Inventory {
         $userId = $currentUser ? $currentUser['id'] : null;
         
         $sql = "INSERT INTO inventory_stock 
-                (boq_item_id, current_stock, available_stock, reserved_stock, minimum_stock, maximum_stock,
-                 unit_cost, total_value, batch_number, serial_number, location_type, location_id, 
-                 location_name, purchase_date, expiry_date, supplier_name, quality_status, 
-                 warranty_period, notes, updated_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        $availableStock = $data['current_stock'] - ($data['reserved_stock'] ?? 0);
-        $totalValue = $data['current_stock'] * $data['unit_cost'];
+                (boq_item_id, serial_number, batch_number, unit_cost, purchase_date, 
+                 expiry_date, warranty_period, location_type, location_id, location_name,
+                 item_status, quality_status, supplier_name, purchase_order_number, 
+                 invoice_number, notes, created_by, updated_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         $stmt = $this->db->prepare($sql);
         $result = $stmt->execute([
             $data['boq_item_id'],
-            $data['current_stock'],
-            $availableStock,
-            $data['reserved_stock'] ?? 0,
-            $data['minimum_stock'] ?? 0,
-            $data['maximum_stock'] ?? 0,
-            $data['unit_cost'],
-            $totalValue,
-            $data['batch_number'] ?? null,
             $data['serial_number'] ?? null,
+            $data['batch_number'] ?? null,
+            $data['unit_cost'],
+            $data['purchase_date'] ?? null,
+            $data['expiry_date'] ?? null,
+            $data['warranty_period'] ?? null,
             $data['location_type'] ?? 'warehouse',
             $data['location_id'] ?? null,
             $data['location_name'] ?? 'Main Warehouse',
-            $data['purchase_date'] ?? null,
-            $data['expiry_date'] ?? null,
-            $data['supplier_name'] ?? null,
+            'available', // Default status
             $data['quality_status'] ?? 'good',
-            $data['warranty_period'] ?? null,
+            $data['supplier_name'] ?? null,
+            $data['purchase_order_number'] ?? null,
+            $data['invoice_number'] ?? null,
             $data['notes'] ?? null,
+            $userId,
             $userId
         ]);
         
         return $result ? $this->db->lastInsertId() : false;
+    }
+    
+    public function addBulkStockEntries($boqItemId, $quantity, $data) {
+        $stockIds = [];
+        
+        for ($i = 0; $i < $quantity; $i++) {
+            $itemData = $data;
+            $itemData['boq_item_id'] = $boqItemId;
+            
+            // Generate serial number if not provided
+            if (empty($itemData['serial_number']) && !empty($data['serial_prefix'])) {
+                $itemData['serial_number'] = $data['serial_prefix'] . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
+            }
+            
+            $stockId = $this->addIndividualStockEntry($itemData);
+            if ($stockId) {
+                $stockIds[] = $stockId;
+            }
+        }
+        
+        return $stockIds;
     }
     
     public function updateIndividualStockEntry($id, $data) {
@@ -176,9 +213,9 @@ class Inventory {
         $values = [];
         
         $allowedFields = [
-            'current_stock', 'reserved_stock', 'minimum_stock', 'maximum_stock', 'unit_cost',
-            'batch_number', 'serial_number', 'location_type', 'location_id', 'location_name',
-            'purchase_date', 'expiry_date', 'supplier_name', 'quality_status', 'warranty_period', 'notes'
+            'unit_cost', 'batch_number', 'serial_number', 'location_type', 'location_id', 'location_name',
+            'purchase_date', 'expiry_date', 'supplier_name', 'quality_status', 'warranty_period', 
+            'item_status', 'notes'
         ];
         
         foreach ($allowedFields as $field) {
@@ -192,9 +229,7 @@ class Inventory {
             return false;
         }
         
-        // Always update calculated fields
-        $fields[] = "available_stock = current_stock - reserved_stock";
-        $fields[] = "total_value = current_stock * unit_cost";
+        // Always update the updated_by field
         $fields[] = "updated_by = ?";
         $values[] = $currentUser['id'];
         
@@ -298,30 +333,23 @@ class Inventory {
     }
     
     private function createSingleStockEntry($boqItemId, $quantity, $unitCost, $batchNumber, $serialNumber, $supplier, $purchaseDate, $expiryDate, $qualityStatus, $remarks, $userId) {
-        $sql = "INSERT INTO inventory_stock 
-                (boq_item_id, current_stock, available_stock, unit_cost, total_value, 
-                 batch_number, serial_number, location_type, location_name, 
-                 purchase_date, expiry_date, supplier_name, quality_status, notes, updated_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'warehouse', 'Main Warehouse', ?, ?, ?, ?, ?, ?)";
-        
-        $stmt = $this->db->prepare($sql);
-        $totalValue = $quantity * $unitCost;
-        
-        $stmt->execute([
-            $boqItemId,
-            $quantity,
-            $quantity, // available_stock = current_stock initially
-            $unitCost,
-            $totalValue,
-            $batchNumber,
-            $serialNumber,
-            $purchaseDate,
-            $expiryDate,
-            $supplier,
-            $qualityStatus,
-            $remarks,
-            $userId
-        ]);
+        // In the new schema, each item is individual, so quantity should always be 1
+        // This method creates individual entries for each item
+        for ($i = 0; $i < $quantity; $i++) {
+            $itemData = [
+                'boq_item_id' => $boqItemId,
+                'unit_cost' => $unitCost,
+                'batch_number' => $batchNumber,
+                'serial_number' => $serialNumber,
+                'supplier_name' => $supplier,
+                'purchase_date' => $purchaseDate,
+                'expiry_date' => $expiryDate,
+                'quality_status' => $qualityStatus,
+                'notes' => $remarks
+            ];
+            
+            $this->addIndividualStockEntry($itemData);
+        }
     }
     
     public function getInwardReceipts($page = 1, $limit = 20, $search = '', $status = '') {
@@ -437,43 +465,120 @@ class Inventory {
     }
     
     public function addDispatchItems($dispatchId, $items) {
-        $sql = "INSERT INTO inventory_dispatch_items 
-                (dispatch_id, boq_item_id, quantity_dispatched, unit_cost, batch_number,
-                 serial_numbers, item_condition, warranty_period, remarks)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        $stmt = $this->db->prepare($sql);
+        $currentUser = Auth::getCurrentUser();
+        $totalItems = 0;
+        $totalValue = 0;
         
         foreach ($items as $item) {
-            $serialNumbers = !empty($item['serial_numbers']) ? json_encode($item['serial_numbers']) : null;
+            $boqItemId = $item['boq_item_id'];
+            $requestedQuantity = intval($item['quantity_dispatched']);
+            $specifiedSerials = $item['serial_numbers'] ?? [];
             
-            $stmt->execute([
-                $dispatchId,
-                $item['boq_item_id'],
-                $item['quantity_dispatched'],
-                $item['unit_cost'],
-                $item['batch_number'],
-                $serialNumbers,
-                $item['item_condition'] ?? 'new',
-                $item['warranty_period'] ?? null,
-                $item['remarks']
-            ]);
+            // Get available stock items for dispatch
+            $stockItems = [];
+            
+            if (!empty($specifiedSerials)) {
+                // Admin specified serial numbers - try to get those specific items
+                $stockItems = $this->getStockBySerialNumbers($specifiedSerials);
+                
+                // Check if all specified serials are available
+                $foundSerials = array_column($stockItems, 'serial_number');
+                $missingSerials = array_diff($specifiedSerials, $foundSerials);
+                
+                if (!empty($missingSerials)) {
+                    throw new Exception("Serial numbers not available: " . implode(', ', $missingSerials));
+                }
+                
+                // Check if we have enough items
+                if (count($stockItems) < $requestedQuantity) {
+                    throw new Exception("Not enough items available for BOQ item ID $boqItemId");
+                }
+            } else {
+                // No serial numbers specified - auto-select available items
+                $stockItems = $this->getAvailableStock($boqItemId, $requestedQuantity);
+                
+                if (count($stockItems) < $requestedQuantity) {
+                    $available = count($stockItems);
+                    throw new Exception("Insufficient stock for BOQ item ID $boqItemId. Requested: $requestedQuantity, Available: $available");
+                }
+            }
+            
+            // Dispatch the selected items
+            $itemsToDispatch = array_slice($stockItems, 0, $requestedQuantity);
+            
+            foreach ($itemsToDispatch as $stockItem) {
+                // Insert dispatch item record
+                $sql = "INSERT INTO inventory_dispatch_items 
+                        (dispatch_id, inventory_stock_id, boq_item_id, unit_cost, 
+                         item_condition, dispatch_notes, warranty_period)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)";
+                
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute([
+                    $dispatchId,
+                    $stockItem['id'],
+                    $boqItemId,
+                    $stockItem['unit_cost'],
+                    $item['item_condition'] ?? 'new',
+                    $item['remarks'] ?? null,
+                    $item['warranty_period'] ?? null
+                ]);
+                
+                // Update stock item status to 'dispatched'
+                $this->updateStockItemStatus($stockItem['id'], 'dispatched', $dispatchId);
+                
+                $totalItems++;
+                $totalValue += $stockItem['unit_cost'];
+            }
         }
         
         // Update dispatch totals
-        $this->updateDispatchTotals($dispatchId);
+        $this->updateDispatchTotals($dispatchId, $totalItems, $totalValue);
         
         return true;
     }
     
-    private function updateDispatchTotals($dispatchId) {
-        $sql = "UPDATE inventory_dispatches 
-                SET total_items = (SELECT COUNT(*) FROM inventory_dispatch_items WHERE dispatch_id = ?),
-                    total_value = (SELECT SUM(total_cost) FROM inventory_dispatch_items WHERE dispatch_id = ?)
+    public function updateStockItemStatus($stockId, $status, $dispatchId = null) {
+        $currentUser = Auth::getCurrentUser();
+        
+        $sql = "UPDATE inventory_stock 
+                SET item_status = ?, 
+                    dispatch_id = ?,
+                    dispatched_at = CASE WHEN ? = 'dispatched' THEN NOW() ELSE dispatched_at END,
+                    delivered_at = CASE WHEN ? = 'delivered' THEN NOW() ELSE delivered_at END,
+                    updated_by = ?
                 WHERE id = ?";
         
         $stmt = $this->db->prepare($sql);
-        $stmt->execute([$dispatchId, $dispatchId, $dispatchId]);
+        return $stmt->execute([
+            $status,
+            $dispatchId,
+            $status,
+            $status,
+            $currentUser['id'],
+            $stockId
+        ]);
+    }
+    
+    private function updateDispatchTotals($dispatchId, $totalItems = null, $totalValue = null) {
+        if ($totalItems === null || $totalValue === null) {
+            // Calculate from database
+            $sql = "UPDATE inventory_dispatches 
+                    SET total_items = (SELECT COUNT(*) FROM inventory_dispatch_items WHERE dispatch_id = ?),
+                        total_value = (SELECT SUM(unit_cost) FROM inventory_dispatch_items WHERE dispatch_id = ?)
+                    WHERE id = ?";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$dispatchId, $dispatchId, $dispatchId]);
+        } else {
+            // Use provided values
+            $sql = "UPDATE inventory_dispatches 
+                    SET total_items = ?, total_value = ?
+                    WHERE id = ?";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$totalItems, $totalValue, $dispatchId]);
+        }
     }
     
     public function getDispatches($page = 1, $limit = 20, $search = '', $status = '', $siteId = null) {
@@ -600,15 +705,15 @@ class Inventory {
     public function getInventoryStats() {
         $stats = [];
         
-        // Total unique BOQ items and aggregated values
+        // Use the new inventory_summary view for aggregated data
         $sql = "SELECT 
-                    COUNT(DISTINCT iss.boq_item_id) as total_items,
-                    SUM(iss.total_stock) as total_quantity,
-                    SUM(iss.total_value) as total_value,
-                    COUNT(CASE WHEN iss.total_stock <= iss.minimum_stock THEN 1 END) as low_stock_items
-                FROM inventory_stock_summary iss
-                JOIN boq_items bi ON iss.boq_item_id = bi.id
-                WHERE bi.status = 'active'";
+                    COUNT(DISTINCT boq_item_id) as total_items,
+                    SUM(total_stock) as total_quantity,
+                    SUM(total_value) as total_value,
+                    SUM(available_stock) as available_quantity,
+                    SUM(dispatched_stock) as dispatched_quantity,
+                    SUM(delivered_stock) as delivered_quantity
+                FROM inventory_summary";
         
         $stmt = $this->db->query($sql);
         $stats = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -622,13 +727,13 @@ class Inventory {
         $stmt = $this->db->query($sql);
         $stats['total_entries'] = $stmt->fetchColumn();
         
-        // Recent movements
-        $sql = "SELECT COUNT(*) as recent_movements
-                FROM inventory_movements 
-                WHERE movement_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
+        // Recent additions (last 7 days)
+        $sql = "SELECT COUNT(*) as recent_additions
+                FROM inventory_stock 
+                WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
         
         $stmt = $this->db->query($sql);
-        $stats['recent_movements'] = $stmt->fetchColumn();
+        $stats['recent_additions'] = $stmt->fetchColumn();
         
         // Pending dispatches
         $sql = "SELECT COUNT(*) as pending_dispatches
@@ -638,8 +743,20 @@ class Inventory {
         $stmt = $this->db->query($sql);
         $stats['pending_dispatches'] = $stmt->fetchColumn();
         
+        // Status-wise breakdown
+        $sql = "SELECT item_status, COUNT(*) as count
+                FROM inventory_stock 
+                GROUP BY item_status";
+        
+        $stmt = $this->db->query($sql);
+        $statusStats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stats['by_status'] = [];
+        foreach ($statusStats as $status) {
+            $stats['by_status'][$status['item_status']] = $status['count'];
+        }
+        
         // Location-wise breakdown
-        $sql = "SELECT location_type, COUNT(*) as count, SUM(current_stock) as total_stock
+        $sql = "SELECT location_type, COUNT(*) as count
                 FROM inventory_stock 
                 GROUP BY location_type";
         
@@ -647,10 +764,7 @@ class Inventory {
         $locationStats = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $stats['by_location'] = [];
         foreach ($locationStats as $location) {
-            $stats['by_location'][$location['location_type']] = [
-                'entries' => $location['count'],
-                'stock' => $location['total_stock']
-            ];
+            $stats['by_location'][$location['location_type']] = $location['count'];
         }
         
         return $stats;
@@ -790,15 +904,86 @@ class Inventory {
     }
     
     public function getDispatchItems($dispatchId) {
-        $sql = "SELECT idi.*, bi.item_name, bi.item_code, bi.unit, bi.icon_class
+        $sql = "SELECT idi.*, ist.serial_number, ist.batch_number, ist.item_status,
+                       bi.item_name, bi.item_code, bi.unit, bi.icon_class
                 FROM inventory_dispatch_items idi
+                LEFT JOIN inventory_stock ist ON idi.inventory_stock_id = ist.id
                 LEFT JOIN boq_items bi ON idi.boq_item_id = bi.id
                 WHERE idi.dispatch_id = ?
-                ORDER BY idi.id";
+                ORDER BY bi.item_name, ist.serial_number";
         
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$dispatchId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function getDispatchItemsSummary($dispatchId) {
+        $sql = "SELECT bi.id as boq_item_id, bi.item_name, bi.item_code, bi.unit, bi.icon_class,
+                       COUNT(idi.id) as quantity_dispatched,
+                       AVG(idi.unit_cost) as avg_unit_cost,
+                       SUM(idi.unit_cost) as total_cost,
+                       GROUP_CONCAT(ist.serial_number ORDER BY ist.serial_number) as serial_numbers
+                FROM inventory_dispatch_items idi
+                LEFT JOIN inventory_stock ist ON idi.inventory_stock_id = ist.id
+                LEFT JOIN boq_items bi ON idi.boq_item_id = bi.id
+                WHERE idi.dispatch_id = ?
+                GROUP BY bi.id, bi.item_name, bi.item_code, bi.unit, bi.icon_class
+                ORDER BY bi.item_name";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$dispatchId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function checkStockAvailabilityForItems($requestedItems) {
+        $stockAvailability = [];
+        
+        foreach ($requestedItems as $item) {
+            if (empty($item['boq_item_id'])) {
+                continue;
+            }
+            
+            $boqItemId = $item['boq_item_id'];
+            $requestedQuantity = intval($item['quantity']);
+            
+            // Get available stock for this item
+            $availableStock = $this->getAvailableStock($boqItemId);
+            $availableQuantity = count($availableStock);
+            
+            // Get item details
+            $sql = "SELECT item_name, item_code, unit FROM boq_items WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$boqItemId]);
+            $itemDetails = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            $stockAvailability[$boqItemId] = [
+                'item_name' => $itemDetails['item_name'] ?? 'Unknown Item',
+                'item_code' => $itemDetails['item_code'] ?? 'N/A',
+                'unit' => $itemDetails['unit'] ?? 'Nos',
+                'requested_quantity' => $requestedQuantity,
+                'available_quantity' => $availableQuantity,
+                'is_sufficient' => $availableQuantity >= $requestedQuantity,
+                'shortage' => max(0, $requestedQuantity - $availableQuantity),
+                'available_items' => $availableStock
+            ];
+        }
+        
+        return $stockAvailability;
+    }
+    
+    public function getStockSummaryForItem($boqItemId) {
+        $sql = "SELECT 
+                    COUNT(CASE WHEN item_status = 'available' THEN 1 END) as available_stock,
+                    COUNT(CASE WHEN item_status = 'dispatched' THEN 1 END) as dispatched_stock,
+                    COUNT(CASE WHEN item_status = 'delivered' THEN 1 END) as delivered_stock,
+                    COUNT(*) as total_stock,
+                    AVG(unit_cost) as avg_unit_cost
+                FROM inventory_stock 
+                WHERE boq_item_id = ?";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$boqItemId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
 }

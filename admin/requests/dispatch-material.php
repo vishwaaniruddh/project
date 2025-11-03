@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../config/auth.php';
 require_once __DIR__ . '/../../models/MaterialRequest.php';
 require_once __DIR__ . '/../../models/BoqItem.php';
 require_once __DIR__ . '/../../models/SiteSurvey.php';
+require_once __DIR__ . '/../../models/Inventory.php';
 
 // Require admin authentication
 Auth::requireRole(ADMIN_ROLE);
@@ -37,6 +38,20 @@ foreach ($requestedItems as $item) {
         if ($boqItem) {
             $boqItems[$item['boq_item_id']] = $boqItem;
         }
+    }
+}
+
+// Check stock availability for all requested items
+$inventoryModel = new Inventory();
+$stockAvailability = $inventoryModel->checkStockAvailabilityForItems($requestedItems);
+
+// Check if any items are out of stock
+$hasStockIssues = false;
+$outOfStockItems = [];
+foreach ($stockAvailability as $boqItemId => $stock) {
+    if (!$stock['is_sufficient']) {
+        $hasStockIssues = true;
+        $outOfStockItems[] = $stock;
     }
 }
 
@@ -183,6 +198,113 @@ ob_start();
     </div>
 </div>
 
+<?php if ($hasStockIssues): ?>
+<!-- Stock Availability Warning -->
+<div class="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+    <div class="flex">
+        <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+        </div>
+        <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Stock Availability Issues</h3>
+            <div class="mt-2 text-sm text-red-700">
+                <p>The following items have insufficient stock for dispatch:</p>
+                <ul class="list-disc list-inside mt-2 space-y-1">
+                    <?php foreach ($outOfStockItems as $item): ?>
+                    <li>
+                        <strong><?php echo htmlspecialchars($item['item_name']); ?></strong> 
+                        (<?php echo htmlspecialchars($item['item_code']); ?>) - 
+                        Requested: <?php echo $item['requested_quantity']; ?> <?php echo htmlspecialchars($item['unit']); ?>, 
+                        Available: <?php echo $item['available_quantity']; ?> <?php echo htmlspecialchars($item['unit']); ?>
+                        <?php if ($item['shortage'] > 0): ?>
+                            <span class="text-red-600 font-medium">(Short by <?php echo $item['shortage']; ?> <?php echo htmlspecialchars($item['unit']); ?>)</span>
+                        <?php endif; ?>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
+                <div class="mt-3 p-3 bg-red-100 border border-red-300 rounded">
+                    <p class="font-medium text-red-800">⚠️ Dispatch cannot proceed until stock is replenished or request quantities are adjusted.</p>
+                    <div class="mt-2 flex space-x-3">
+                        <a href="../inventory/index.php" class="text-red-700 underline hover:text-red-900">View Inventory</a>
+                        <a href="../inventory/inwards/index.php" class="text-red-700 underline hover:text-red-900">Add Stock</a>
+                        <a href="view-request.php?id=<?php echo $materialRequest['id']; ?>" class="text-red-700 underline hover:text-red-900">Back to Request</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<!-- Stock Availability Summary -->
+<div class="card mb-6">
+    <div class="card-body">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Stock Availability Summary</h3>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Available</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <?php foreach ($stockAvailability as $boqItemId => $stock): ?>
+                    <tr class="<?php echo !$stock['is_sufficient'] ? 'bg-red-50' : 'bg-green-50'; ?>">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-8 w-8">
+                                    <div class="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                                        <i class="fas fa-cube text-blue-600 text-sm"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($stock['item_name']); ?></div>
+                                    <div class="text-sm text-gray-500"><?php echo htmlspecialchars($stock['item_code']); ?></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900"><?php echo $stock['requested_quantity']; ?> <?php echo htmlspecialchars($stock['unit']); ?></div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900"><?php echo $stock['available_quantity']; ?> <?php echo htmlspecialchars($stock['unit']); ?></div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <?php if ($stock['is_sufficient']): ?>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    In Stock
+                                </span>
+                            <?php else: ?>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Out of Stock
+                                </span>
+                            <?php endif; ?>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <a href="../inventory/index.php?search=<?php echo urlencode($stock['item_code']); ?>" 
+                               class="text-blue-600 hover:text-blue-900">View Details</a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <!-- Dispatch Form -->
 <form id="dispatchForm">
     <input type="hidden" name="material_request_id" value="<?php echo $materialRequest['id']; ?>">
@@ -250,25 +372,44 @@ ob_start();
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Material Items</h3>
             
             <?php foreach ($requestedItems as $index => $item): ?>
-            <?php $boqItem = $boqItems[$item['boq_item_id']] ?? null; ?>
+            <?php 
+                $boqItem = $boqItems[$item['boq_item_id']] ?? null; 
+                $stockInfo = $stockAvailability[$item['boq_item_id']] ?? null;
+                $isOutOfStock = $stockInfo && !$stockInfo['is_sufficient'];
+            ?>
             
             <!-- Material Item Header (Cumulative Total) -->
-            <div class="border border-gray-200 rounded-lg mb-4">
-                <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+            <div class="border border-gray-200 rounded-lg mb-4 <?php echo $isOutOfStock ? 'border-red-300 bg-red-50' : ''; ?>">
+                <div class="<?php echo $isOutOfStock ? 'bg-red-100' : 'bg-gray-50'; ?> px-4 py-3 border-b border-gray-200">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 h-10 w-10">
-                                <div class="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                                    <i class="<?php echo $boqItem['icon_class'] ?: 'fas fa-cube'; ?> text-blue-600"></i>
+                                <div class="h-10 w-10 rounded-lg <?php echo $isOutOfStock ? 'bg-red-100' : 'bg-blue-100'; ?> flex items-center justify-center">
+                                    <i class="<?php echo $boqItem['icon_class'] ?: 'fas fa-cube'; ?> <?php echo $isOutOfStock ? 'text-red-600' : 'text-blue-600'; ?>"></i>
                                 </div>
                             </div>
                             <div class="ml-4">
-                                <div class="text-lg font-medium text-gray-900"><?php echo htmlspecialchars($boqItem['item_name'] ?? 'Unknown Item'); ?></div>
+                                <div class="text-lg font-medium text-gray-900">
+                                    <?php echo htmlspecialchars($boqItem['item_name'] ?? 'Unknown Item'); ?>
+                                    <?php if ($isOutOfStock): ?>
+                                        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            Out of Stock
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
                                 <div class="text-sm text-gray-500"><?php echo htmlspecialchars($boqItem['item_code'] ?? 'N/A'); ?> • Unit: <?php echo htmlspecialchars($boqItem['unit'] ?? 'N/A'); ?></div>
+                                <?php if ($stockInfo): ?>
+                                <div class="text-sm <?php echo $isOutOfStock ? 'text-red-600' : 'text-green-600'; ?> mt-1">
+                                    Available: <?php echo $stockInfo['available_quantity']; ?> <?php echo htmlspecialchars($stockInfo['unit']); ?>
+                                    <?php if ($isOutOfStock): ?>
+                                        • Short by: <?php echo $stockInfo['shortage']; ?> <?php echo htmlspecialchars($stockInfo['unit']); ?>
+                                    <?php endif; ?>
+                                </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="text-right">
-                            <div class="text-lg font-semibold text-blue-600">Requires <?php echo number_format($item['quantity']); ?> items</div>
+                            <div class="text-lg font-semibold <?php echo $isOutOfStock ? 'text-red-600' : 'text-blue-600'; ?>">Requires <?php echo number_format($item['quantity']); ?> items</div>
                             <div class="text-sm text-gray-500">Total Quantity</div>
                         </div>
                     </div>
@@ -276,25 +417,51 @@ ob_start();
                 
                 <!-- Dispatch Configuration -->
                 <div class="px-4 py-3 bg-white">
+                    <?php if ($isOutOfStock): ?>
+                    <div class="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div class="text-sm text-red-700">
+                                <strong>Cannot dispatch this item:</strong> Insufficient stock available. 
+                                Please add stock to inventory or reduce the requested quantity.
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div>
                             <label class="form-label">Dispatch Quantity *</label>
                             <input type="number" name="items[<?php echo $index; ?>][dispatch_quantity]" 
-                                   class="form-input" step="0.01" min="0" max="<?php echo $item['quantity']; ?>" 
-                                   value="<?php echo $item['quantity']; ?>" required 
+                                   class="form-input <?php echo $isOutOfStock ? 'bg-gray-100 cursor-not-allowed' : ''; ?>" 
+                                   step="0.01" min="0" 
+                                   max="<?php echo $stockInfo ? min($item['quantity'], $stockInfo['available_quantity']) : $item['quantity']; ?>" 
+                                   value="<?php echo $stockInfo ? min($item['quantity'], $stockInfo['available_quantity']) : $item['quantity']; ?>" 
+                                   <?php echo $isOutOfStock ? 'disabled readonly' : 'required'; ?>
                                    onchange="updateIndividualRows(<?php echo $index; ?>)">
                             <input type="hidden" name="items[<?php echo $index; ?>][boq_item_id]" value="<?php echo $item['boq_item_id']; ?>">
+                            <?php if ($stockInfo): ?>
+                            <div class="text-xs text-gray-500 mt-1">
+                                Max available: <?php echo $stockInfo['available_quantity']; ?> <?php echo htmlspecialchars($stockInfo['unit']); ?>
+                            </div>
+                            <?php endif; ?>
                         </div>
                         <div>
                             <label class="form-label">Batch Number (Optional)</label>
                             <input type="text" name="items[<?php echo $index; ?>][batch_number]" 
-                                   class="form-input" placeholder="Enter batch number">
+                                   class="form-input <?php echo $isOutOfStock ? 'bg-gray-100 cursor-not-allowed' : ''; ?>" 
+                                   placeholder="Enter batch number"
+                                   <?php echo $isOutOfStock ? 'disabled readonly' : ''; ?>>
                         </div>
                         <div>
                             <label class="form-label">Dispatch Notes</label>
                             <textarea name="items[<?php echo $index; ?>][dispatch_notes]" 
-                                      class="form-input" rows="1" 
-                                      placeholder="Notes..."><?php echo htmlspecialchars($item['notes'] ?? ''); ?></textarea>
+                                      class="form-input <?php echo $isOutOfStock ? 'bg-gray-100 cursor-not-allowed' : ''; ?>" 
+                                      rows="1" 
+                                      placeholder="Notes..."
+                                      <?php echo $isOutOfStock ? 'disabled readonly' : ''; ?>><?php echo htmlspecialchars($item['notes'] ?? ''); ?></textarea>
                         </div>
                     </div>
                     
@@ -320,12 +487,21 @@ ob_start();
     <!-- Submit Button -->
     <div class="flex justify-end space-x-4">
         <a href="view-request.php?id=<?php echo $materialRequest['id']; ?>" class="btn btn-secondary">Cancel</a>
+        <?php if ($hasStockIssues): ?>
+        <button type="button" class="btn btn-secondary cursor-not-allowed" disabled>
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"></path>
+            </svg>
+            Cannot Dispatch - Stock Issues
+        </button>
+        <?php else: ?>
         <button type="submit" class="btn btn-primary">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
             </svg>
             Dispatch Continue
         </button>
+        <?php endif; ?>
     </div>
 </form>
 

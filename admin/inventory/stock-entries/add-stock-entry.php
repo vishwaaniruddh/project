@@ -16,17 +16,18 @@ try {
     $inventoryModel = new Inventory();
     
     // Validate required fields
-    $requiredFields = ['boq_item_id', 'current_stock', 'unit_cost'];
+    $requiredFields = ['boq_item_id', 'quantity', 'unit_cost'];
     foreach ($requiredFields as $field) {
         if (empty($_POST[$field])) {
             throw new Exception("Field '$field' is required");
         }
     }
     
+    $quantity = intval($_POST['quantity']);
+    
     // Prepare stock entry data
     $stockData = [
         'boq_item_id' => intval($_POST['boq_item_id']),
-        'current_stock' => floatval($_POST['current_stock']),
         'unit_cost' => floatval($_POST['unit_cost']),
         'batch_number' => $_POST['batch_number'] ?? null,
         'serial_number' => $_POST['serial_number'] ?? null,
@@ -41,7 +42,7 @@ try {
     ];
     
     // Validate values
-    if ($stockData['current_stock'] <= 0) {
+    if ($quantity <= 0) {
         throw new Exception('Quantity must be greater than 0');
     }
     
@@ -49,29 +50,79 @@ try {
         throw new Exception('Unit cost cannot be negative');
     }
     
-    // Check if serial number already exists for this BOQ item
-    if (!empty($stockData['serial_number'])) {
-        $db = Database::getInstance()->getConnection();
-        $checkSql = "SELECT id FROM inventory_stock WHERE boq_item_id = ? AND serial_number = ?";
-        $checkStmt = $db->prepare($checkSql);
-        $checkStmt->execute([$stockData['boq_item_id'], $stockData['serial_number']]);
+    // Handle serial number logic based on quantity
+    $db = Database::getInstance()->getConnection();
+    
+    if ($quantity == 1) {
+        // Single item - use provided serial number as-is
+        if (!empty($stockData['serial_number'])) {
+            // Check if serial number already exists
+            $checkSql = "SELECT id FROM inventory_stock WHERE boq_item_id = ? AND serial_number = ?";
+            $checkStmt = $db->prepare($checkSql);
+            $checkStmt->execute([$stockData['boq_item_id'], $stockData['serial_number']]);
+            
+            if ($checkStmt->fetch()) {
+                throw new Exception('Serial number already exists for this item');
+            }
+        }
+    } else {
+        // Multiple items - handle serial number generation
+        if (!empty($stockData['serial_number'])) {
+            // User provided a serial number for multiple items - use it as base
+            $baseSerial = $stockData['serial_number'];
+        } else {
+            // No serial number provided - generate a base using timestamp and BOQ item ID
+            $baseSerial = 'ITM' . $stockData['boq_item_id'] . '_' . date('YmdHis');
+        }
         
-        if ($checkStmt->fetch()) {
-            throw new Exception('Serial number already exists for this item');
+        // Check if any of the generated serial numbers would conflict
+        for ($i = 0; $i < $quantity; $i++) {
+            $generatedSerial = $baseSerial . '-' . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
+            
+            $checkSql = "SELECT id FROM inventory_stock WHERE boq_item_id = ? AND serial_number = ?";
+            $checkStmt = $db->prepare($checkSql);
+            $checkStmt->execute([$stockData['boq_item_id'], $generatedSerial]);
+            
+            if ($checkStmt->fetch()) {
+                throw new Exception("Generated serial number '$generatedSerial' already exists. Please use a different base serial number or leave it empty for auto-generation.");
+            }
         }
     }
     
-    // Add the stock entry
-    $entryId = $inventoryModel->addIndividualStockEntry($stockData);
+    // Add multiple individual stock entries based on quantity
+    $entryIds = [];
     
-    if (!$entryId) {
-        throw new Exception('Failed to add stock entry');
+    for ($i = 0; $i < $quantity; $i++) {
+        $itemData = $stockData;
+        
+        // Handle serial number for each item
+        if ($quantity == 1) {
+            // Single item - use serial number as provided (can be null)
+            $itemData['serial_number'] = $stockData['serial_number'];
+        } else {
+            // Multiple items - generate unique serial numbers
+            if (!empty($stockData['serial_number'])) {
+                $baseSerial = $stockData['serial_number'];
+            } else {
+                $baseSerial = 'ITM' . $stockData['boq_item_id'] . '_' . date('YmdHis');
+            }
+            $itemData['serial_number'] = $baseSerial . '-' . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
+        }
+        
+        $entryId = $inventoryModel->addIndividualStockEntry($itemData);
+        
+        if (!$entryId) {
+            throw new Exception('Failed to add stock entry ' . ($i + 1) . (isset($itemData['serial_number']) ? ' (Serial: ' . $itemData['serial_number'] . ')' : ''));
+        }
+        
+        $entryIds[] = $entryId;
     }
     
     echo json_encode([
         'success' => true,
-        'message' => 'Stock entry added successfully',
-        'entry_id' => $entryId
+        'message' => "Successfully added $quantity stock entries",
+        'entry_ids' => $entryIds,
+        'total_entries' => count($entryIds)
     ]);
     
 } catch (Exception $e) {

@@ -1,1 +1,9 @@
 {"timestamp":"2025-11-02 20:53:24","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-02 22:03:31","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-02 22:42:15","level":"INFO","message":"User login successful","user_id":8,"ip_address":"::1","context":{"username":"contact@eliteservices.com","success":true}}
+{"timestamp":"2025-11-02 22:45:40","level":"INFO","message":"User logout","user_id":8,"ip_address":"::1","context":{"username":"elite_services"}}
+{"timestamp":"2025-11-02 22:46:56","level":"INFO","message":"User login successful","user_id":6,"ip_address":"::1","context":{"username":"support@proinstall.com","success":true}}
+{"timestamp":"2025-11-02 23:07:54","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-03 05:29:37","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-03 06:31:09","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-03 07:43:33","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}

@@ -217,7 +217,7 @@ ob_start();
 
     <!-- Survey-Based Recommendations (if survey exists) -->
     <?php if ($survey): ?>
-    <div class="bg-blue-50 rounded-lg border border-blue-200 p-6 mb-8">
+    <div class="bg-blue-50 rounded-lg border border-blue-200 p-6 mb-8" style="display:none;">
         <h3 class="text-lg font-semibold text-blue-900 mb-4">Survey-Based Recommendations</h3>
         <p class="text-sm text-blue-700 mb-4">Based on your site survey, here are some recommended materials:</p>
         

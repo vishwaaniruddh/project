@@ -39,6 +39,22 @@ try {
         throw new Exception('No items to dispatch');
     }
     
+    // Parse requested items from material request to validate stock
+    $requestedItems = json_decode($materialRequest['items'], true) ?: [];
+    $stockAvailability = $inventoryModel->checkStockAvailabilityForItems($requestedItems);
+    
+    // Check if any items are out of stock
+    $stockIssues = [];
+    foreach ($stockAvailability as $boqItemId => $stock) {
+        if (!$stock['is_sufficient']) {
+            $stockIssues[] = $stock['item_name'] . ' (Available: ' . $stock['available_quantity'] . ', Required: ' . $stock['requested_quantity'] . ')';
+        }
+    }
+    
+    if (!empty($stockIssues)) {
+        throw new Exception('Insufficient stock for items: ' . implode(', ', $stockIssues));
+    }
+    
     // Generate dispatch number
     $dispatchNumber = $inventoryModel->generateDispatchNumber();
     

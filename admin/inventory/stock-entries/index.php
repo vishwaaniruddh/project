@@ -150,11 +150,20 @@ ob_start();
                             </td>
                             <td>
                                 <div>
-                                    <div class="text-sm font-medium text-gray-900"><?php echo number_format($entry['current_stock'], 2); ?> <?php echo htmlspecialchars($entry['unit']); ?></div>
-                                    <div class="text-sm text-gray-500">Available: <?php echo number_format($entry['available_stock'], 2); ?></div>
-                                    <?php if ($entry['reserved_stock'] > 0): ?>
-                                        <div class="text-sm text-yellow-600">Reserved: <?php echo number_format($entry['reserved_stock'], 2); ?></div>
-                                    <?php endif; ?>
+                                    <div class="text-sm font-medium text-gray-900">1.00 <?php echo htmlspecialchars($entry['unit']); ?></div>
+                                    <div class="text-sm text-gray-500">
+                                        Status: 
+                                        <?php
+                                        $statusClasses = [
+                                            'available' => 'text-green-600',
+                                            'dispatched' => 'text-blue-600',
+                                            'delivered' => 'text-purple-600',
+                                            'damaged' => 'text-red-600'
+                                        ];
+                                        $statusClass = $statusClasses[$entry['item_status']] ?? 'text-gray-600';
+                                        ?>
+                                        <span class="<?php echo $statusClass; ?>"><?php echo ucfirst($entry['item_status']); ?></span>
+                                    </div>
                                 </div>
                             </td>
                             <td>
@@ -202,7 +211,7 @@ ob_start();
                             <td>
                                 <div>
                                     <div class="text-sm font-medium text-gray-900">₹<?php echo number_format($entry['unit_cost'], 2); ?></div>
-                                    <div class="text-sm text-gray-500">Total: ₹<?php echo number_format($entry['total_value'], 2); ?></div>
+                                    <div class="text-sm text-gray-500">Total: ₹<?php echo number_format($entry['unit_cost'], 2); ?></div>
                                 </div>
                             </td>
                             <td>
@@ -261,8 +270,9 @@ ob_start();
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="current_stock" class="form-label">Quantity *</label>
-                        <input type="number" id="current_stock" name="current_stock" step="0.01" class="form-input" required>
+                        <label for="quantity" class="form-label">Quantity *</label>
+                        <input type="number" id="quantity" name="quantity" step="0.01" class="form-input" required value="1">
+                        <div class="text-xs text-gray-500 mt-1">Note: Each entry represents individual items. For bulk entries, use the bulk stock entry feature.</div>
                     </div>
                     <div class="form-group">
                         <label for="unit_cost" class="form-label">Unit Cost *</label>
@@ -274,7 +284,10 @@ ob_start();
                     </div>
                     <div class="form-group">
                         <label for="serial_number" class="form-label">Serial Number</label>
-                        <input type="text" id="serial_number" name="serial_number" class="form-input">
+                        <input type="text" id="serial_number" name="serial_number" class="form-input" placeholder="Optional - leave empty for auto-generation">
+                        <div class="text-xs text-gray-500 mt-1">
+                            For multiple items: Use as base (e.g., "DEVICE123" becomes "DEVICE123-001", "DEVICE123-002", etc.)
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="location_type" class="form-label">Location Type *</label>
@@ -397,6 +410,34 @@ function markDamaged(entryId) {
 function exportStockEntries() {
     const params = new URLSearchParams(window.location.search);
     window.open(`export-stock-entries.php?${params.toString()}`, '_blank');
+}
+
+// Quantity change handler to show serial number preview
+document.getElementById('quantity').addEventListener('input', function() {
+    updateSerialNumberPreview();
+});
+
+document.getElementById('serial_number').addEventListener('input', function() {
+    updateSerialNumberPreview();
+});
+
+function updateSerialNumberPreview() {
+    const quantity = parseInt(document.getElementById('quantity').value) || 1;
+    const serialNumber = document.getElementById('serial_number').value.trim();
+    const serialHelp = document.querySelector('#serial_number + .text-xs');
+    
+    if (quantity > 1) {
+        if (serialNumber) {
+            serialHelp.innerHTML = `For ${quantity} items: "${serialNumber}-001", "${serialNumber}-002", ... "${serialNumber}-${String(quantity).padStart(3, '0')}"`;
+            serialHelp.className = 'text-xs text-blue-600 mt-1';
+        } else {
+            serialHelp.innerHTML = `For ${quantity} items: Auto-generated serials will be created (e.g., "ITM12_20241203123456-001", "ITM12_20241203123456-002", etc.)`;
+            serialHelp.className = 'text-xs text-gray-500 mt-1';
+        }
+    } else {
+        serialHelp.innerHTML = 'For single item: Use exact serial number or leave empty';
+        serialHelp.className = 'text-xs text-gray-500 mt-1';
+    }
 }
 
 // Form submission

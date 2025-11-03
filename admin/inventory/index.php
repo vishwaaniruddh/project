@@ -55,6 +55,12 @@ ob_start();
             </svg>
             Reconciliation
         </a>
+        <a href="stock-entries/add-individual-stock.php" class="btn btn-primary">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
+            </svg>
+            Add Individual Items
+        </a>
     </div>
 </div>
 
@@ -112,8 +118,8 @@ ob_start();
                 </div>
                 <div class="ml-5 w-0 flex-1">
                     <dl>
-                        <dt class="text-sm font-medium text-gray-500 truncate">Low Stock Items</dt>
-                        <dd class="text-lg font-medium text-gray-900"><?php echo number_format($stats['low_stock_items']); ?></dd>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Dispatched Items</dt>
+                        <dd class="text-lg font-medium text-gray-900"><?php echo number_format($stats['dispatched_quantity'] ?? 0); ?></dd>
                     </dl>
                 </div>
             </div>
@@ -210,7 +216,7 @@ ob_start();
                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>
                 </svg>
-                Update Stock Levels
+                Update Unit Cost
             </button>
         </div>
         
@@ -220,9 +226,9 @@ ob_start();
                     <tr>
                         <th>Item Details</th>
                         <th>Category</th>
-                        <th>Current Stock</th>
+                        <th>Total Stock</th>
                         <th>Available</th>
-                        <th>Reserved</th>
+                        <th>Dispatched</th>
                         <th>Stock Status</th>
                         <th>Unit Cost</th>
                         <th>Total Value</th>
@@ -251,29 +257,40 @@ ob_start();
                             </span>
                         </td>
                         <td>
-                            <div class="text-sm text-gray-900"><?php echo number_format($item['current_stock'], 2); ?> <?php echo htmlspecialchars($item['unit']); ?></div>
+                            <div class="text-sm text-gray-900"><?php echo number_format($item['total_stock'] ?? 0); ?> <?php echo htmlspecialchars($item['unit']); ?></div>
                         </td>
                         <td>
-                            <div class="text-sm text-gray-900"><?php echo number_format($item['available_stock'], 2); ?> <?php echo htmlspecialchars($item['unit']); ?></div>
+                            <div class="text-sm text-gray-900"><?php echo number_format($item['available_stock'] ?? 0); ?> <?php echo htmlspecialchars($item['unit']); ?></div>
                         </td>
                         <td>
-                            <div class="text-sm text-gray-900"><?php echo number_format($item['reserved_stock'], 2); ?> <?php echo htmlspecialchars($item['unit']); ?></div>
+                            <div class="text-sm text-gray-900"><?php echo number_format($item['dispatched_stock'] ?? 0); ?> <?php echo htmlspecialchars($item['unit']); ?></div>
                         </td>
                         <td>
                             <?php
-                            $statusClasses = [
-                                'low' => 'bg-red-100 text-red-800',
-                                'normal' => 'bg-green-100 text-green-800',
-                                'high' => 'bg-blue-100 text-blue-800'
-                            ];
-                            $statusClass = $statusClasses[$item['stock_status']] ?? 'bg-gray-100 text-gray-800';
+                            // Calculate stock status based on available stock
+                            $availableStock = $item['available_stock'] ?? 0;
+                            $totalStock = $item['total_stock'] ?? 0;
+                            
+                            if ($totalStock == 0) {
+                                $stockStatus = 'empty';
+                                $statusClass = 'bg-red-100 text-red-800';
+                            } elseif ($availableStock == 0) {
+                                $stockStatus = 'out of stock';
+                                $statusClass = 'bg-orange-100 text-orange-800';
+                            } elseif ($availableStock < ($totalStock * 0.2)) {
+                                $stockStatus = 'low';
+                                $statusClass = 'bg-yellow-100 text-yellow-800';
+                            } else {
+                                $stockStatus = 'normal';
+                                $statusClass = 'bg-green-100 text-green-800';
+                            }
                             ?>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo $statusClass; ?>">
-                                <?php echo ucfirst($item['stock_status']); ?>
+                                <?php echo ucfirst($stockStatus); ?>
                             </span>
                         </td>
                         <td>
-                            <div class="text-sm text-gray-900">₹<?php echo number_format($item['unit_cost'], 2); ?></div>
+                            <div class="text-sm text-gray-900">₹<?php echo number_format($item['avg_unit_cost'] ?? 0, 2); ?></div>
                         </td>
                         <td>
                             <div class="text-sm text-gray-900">₹<?php echo number_format($item['total_value'], 2); ?></div>
@@ -301,11 +318,11 @@ ob_start();
     </div>
 </div>
 
-<!-- Update Stock Levels Modal -->
+<!-- Update Unit Cost Modal -->
 <div id="updateStockModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3 class="modal-title">Update Stock Levels</h3>
+            <h3 class="modal-title">Update Unit Cost</h3>
             <button type="button" class="modal-close" onclick="closeModal('updateStockModal')">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
@@ -331,18 +348,15 @@ ob_start();
                         <input type="number" id="unit_cost" name="unit_cost" step="0.01" class="form-input" required>
                     </div>
                     <div class="form-group">
-                        <label for="minimum_stock" class="form-label">Minimum Stock Level *</label>
-                        <input type="number" id="minimum_stock" name="minimum_stock" step="0.01" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="maximum_stock" class="form-label">Maximum Stock Level *</label>
-                        <input type="number" id="maximum_stock" name="maximum_stock" step="0.01" class="form-input" required>
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea id="notes" name="notes" rows="3" class="form-input" 
+                                  placeholder="Any notes about this unit cost update..."></textarea>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" onclick="closeModal('updateStockModal')" class="btn btn-secondary">Cancel</button>
-                <button type="submit" class="btn btn-primary">Update Stock Levels</button>
+                <button type="submit" class="btn btn-primary">Update Unit Cost</button>
             </div>
         </form>
     </div>

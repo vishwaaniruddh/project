@@ -1,14 +1,19 @@
 <?php
 require_once __DIR__ . '/../../config/auth.php';
 require_once __DIR__ . '/../../models/SiteSurvey.php';
+require_once __DIR__ . '/../../models/Installation.php';
+require_once __DIR__ . '/../../models/Vendor.php';
 
 // Require admin authentication
 Auth::requireRole(ADMIN_ROLE);
 
 $surveyModel = new SiteSurvey();
+$installationModel = new Installation();
+$vendorModel = new Vendor();
 
-// Get all surveys
+// Get all surveys with installation status
 $surveys = $surveyModel->getAllSurveys();
+$activeVendors = $vendorModel->getActiveVendors();
 
 $title = 'Site Surveys Management';
 ob_start();
@@ -32,6 +37,9 @@ ob_start();
                 </span>
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
                     <?php echo count(array_filter($surveys, fn($s) => $s['survey_status'] === 'rejected')); ?> Rejected
+                </span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                    <?php echo count(array_filter($surveys, fn($s) => ($s['installation_status'] ?? 'not_delegated') === 'delegated')); ?> Delegated for Installation
                 </span>
             </div>
         </div>
@@ -61,10 +69,10 @@ ob_start();
                     <thead class="table-header">
                         <tr>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ATM ID</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Engineer</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Remarks</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Site Code</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Survey Status</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Installation Status</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Survey Date</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
@@ -76,7 +84,8 @@ ob_start();
                                 <?php echo $survey['id']; ?>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
-                                <?php echo htmlspecialchars($survey['site_code'] ?? 'N/A'); ?>
+                                <div class="font-medium"><?php echo htmlspecialchars($survey['site_code'] ?? 'N/A'); ?></div>
+                                <div class="text-xs text-gray-500"><?php echo htmlspecialchars(substr($survey['location'] ?? '', 0, 30)); ?></div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
                                 <?php echo htmlspecialchars($survey['vendor_name'] ?? 'Unknown'); ?>
@@ -103,23 +112,58 @@ ob_start();
                                     <?php echo $statusText; ?>
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-center text-sm text-gray-900">
-                                <div class="max-w-xs truncate" title="<?php echo htmlspecialchars($survey['technical_remarks'] ?? 'No remarks'); ?>">
-                                    <?php echo htmlspecialchars($survey['technical_remarks'] ?? 'No remarks'); ?>
-                                </div>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <?php
+                                $installationStatus = $survey['installation_status'] ?? 'not_delegated';
+                                $installationClass = '';
+                                $installationText = '';
+                                switch($installationStatus) {
+                                    case 'delegated':
+                                        $installationClass = 'bg-blue-100 text-blue-800';
+                                        $installationText = 'Delegated';
+                                        break;
+                                    case 'in_progress':
+                                        $installationClass = 'bg-purple-100 text-purple-800';
+                                        $installationText = 'In Progress';
+                                        break;
+                                    case 'completed':
+                                        $installationClass = 'bg-green-100 text-green-800';
+                                        $installationText = 'Completed';
+                                        break;
+                                    default:
+                                        $installationClass = 'bg-gray-100 text-gray-800';
+                                        $installationText = 'Not Delegated';
+                                }
+                                ?>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo $installationClass; ?>" id="installation_status_<?php echo $survey['id']; ?>">
+                                    <?php echo $installationText; ?>
+                                </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
                                 <?php echo date('Y-m-d H:i', strtotime($survey['created_at'])); ?>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                 <div class="flex items-center justify-center space-x-2">
-                                    <a href="../../shared/view-survey.php?id=<?php echo $survey['id']; ?>" class="text-blue-600 hover:text-blue-900">View</a>
+                                    <a href="../../shared/view-survey.php?id=<?php echo $survey['id']; ?>" class="text-blue-600 hover:text-blue-900 text-xs">View</a>
+                                    
                                     <?php if ($survey['survey_status'] === 'pending'): ?>
-                                        <select class="form-control form-control-sm action-dropdown ml-2" data-id="<?php echo $survey['id']; ?>" style="width:auto; display:inline-block;">
-                                            <option value="">Select</option>
+                                        <select class="form-control form-control-sm action-dropdown" data-id="<?php echo $survey['id']; ?>" style="width:auto; display:inline-block; font-size: 11px;">
+                                            <option value="">Survey Action</option>
                                             <option value="approve">Approve</option>
                                             <option value="reject">Reject</option>
                                         </select>
+                                    <?php endif; ?>
+                                    
+                                    <?php if ($survey['survey_status'] === 'approved' && ($survey['installation_status'] ?? 'not_delegated') === 'not_delegated'): ?>
+                                        <button onclick="delegateForInstallation(<?php echo $survey['id']; ?>)" class="text-green-600 hover:text-green-900 text-xs">
+                                            Delegate Installation
+                                        </button>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (($survey['installation_status'] ?? 'not_delegated') === 'delegated'): ?>
+                                        <a href="../installations/view.php?survey_id=<?php echo $survey['id']; ?>" class="text-purple-600 hover:text-purple-900 text-xs">
+                                            View Installation
+                                        </a>
                                     <?php endif; ?>
                                 </div>
                             </td>
@@ -132,8 +176,86 @@ ob_start();
     </div>
 </div>
 
+<!-- Installation Delegation Modal -->
+<div id="installationDelegationModal" class="modal">
+    <div class="modal-content max-w-2xl">
+        <div class="modal-header">
+            <h3 class="modal-title">Delegate for Installation</h3>
+            <button type="button" class="modal-close" onclick="closeModal('installationDelegationModal')">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
+        <form id="installationDelegationForm">
+            <input type="hidden" id="delegation_survey_id" name="survey_id">
+            <div class="modal-body">
+                <div id="surveyInfo" class="mb-4 p-3 bg-gray-50 rounded"></div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="vendor_id" class="form-label">Select Vendor *</label>
+                        <select id="vendor_id" name="vendor_id" class="form-select" required>
+                            <option value="">Choose Vendor</option>
+                            <?php foreach ($activeVendors as $vendor): ?>
+                                <option value="<?php echo $vendor['id']; ?>">
+                                    <?php echo htmlspecialchars($vendor['name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="priority" class="form-label">Priority</label>
+                        <select id="priority" name="priority" class="form-select">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="expected_start_date" class="form-label">Expected Start Date</label>
+                        <input type="date" id="expected_start_date" name="expected_start_date" class="form-input" min="<?php echo date('Y-m-d'); ?>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="expected_completion_date" class="form-label">Expected Completion Date</label>
+                        <input type="date" id="expected_completion_date" name="expected_completion_date" class="form-input" min="<?php echo date('Y-m-d'); ?>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="installation_type" class="form-label">Installation Type</label>
+                        <select id="installation_type" name="installation_type" class="form-select">
+                            <option value="standard">Standard Installation</option>
+                            <option value="complex">Complex Installation</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="upgrade">Upgrade</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group md:col-span-2">
+                        <label for="special_instructions" class="form-label">Special Instructions</label>
+                        <textarea id="special_instructions" name="special_instructions" rows="3" class="form-input" placeholder="Any special instructions for the installation team..."></textarea>
+                    </div>
+                    
+                    <div class="form-group md:col-span-2">
+                        <label for="delegation_notes" class="form-label">Notes</label>
+                        <textarea id="delegation_notes" name="notes" rows="2" class="form-input" placeholder="Additional notes or comments..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal('installationDelegationModal')" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Delegate Installation</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
-// Handle approval/rejection
+// Handle approval/rejection and installation delegation
 document.addEventListener('DOMContentLoaded', function() {
     const dropdowns = document.querySelectorAll('.action-dropdown');
     
@@ -178,6 +300,16 @@ function updateSurveyStatus(surveyId, action, remarks) {
                 }
             }
             
+            // Remove dropdown and add delegation button if approved
+            const actionsCell = document.querySelector(`[data-id="${surveyId}"]`).closest('td');
+            if (action === 'approve') {
+                const delegateBtn = document.createElement('button');
+                delegateBtn.onclick = () => delegateForInstallation(surveyId);
+                delegateBtn.className = 'text-green-600 hover:text-green-900 text-xs ml-2';
+                delegateBtn.textContent = 'Delegate Installation';
+                actionsCell.appendChild(delegateBtn);
+            }
+            
             // Remove dropdown
             const dropdown = document.querySelector(`[data-id="${surveyId}"]`);
             if (dropdown) {
@@ -194,6 +326,75 @@ function updateSurveyStatus(surveyId, action, remarks) {
         showAlert('An error occurred. Please try again.', 'error');
     });
 }
+
+function delegateForInstallation(surveyId) {
+    // Fetch survey details
+    fetch(`get-survey-details.php?id=${surveyId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const survey = data.survey;
+                
+                // Populate survey info
+                document.getElementById('delegation_survey_id').value = surveyId;
+                document.getElementById('surveyInfo').innerHTML = `
+                    <h5 class="font-medium text-gray-900">Survey Details</h5>
+                    <div class="grid grid-cols-2 gap-4 mt-2 text-sm">
+                        <div><span class="text-gray-500">Site:</span> ${survey.site_code}</div>
+                        <div><span class="text-gray-500">Location:</span> ${survey.location || 'N/A'}</div>
+                        <div><span class="text-gray-500">Survey Vendor:</span> ${survey.vendor_name}</div>
+                        <div><span class="text-gray-500">Survey Date:</span> ${new Date(survey.created_at).toLocaleDateString()}</div>
+                    </div>
+                `;
+                
+                openModal('installationDelegationModal');
+            } else {
+                showAlert(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Failed to load survey details', 'error');
+        });
+}
+
+// Installation delegation form submission
+document.getElementById('installationDelegationForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Processing...';
+    
+    fetch('process-installation-delegation.php', {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(data.message, 'success');
+            closeModal('installationDelegationModal');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showAlert(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('An error occurred while delegating installation.', 'error');
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    });
+});
 </script>
 
 <?php

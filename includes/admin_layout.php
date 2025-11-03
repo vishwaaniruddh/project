@@ -609,6 +609,31 @@ $currentUser = Auth::getCurrentUser();
             transform: rotate(90deg);
         }
         
+        /* Improved submenu transitions */
+        [id^="submenu-"], #inventory-submenu, #admin-submenu {
+            transition: all 0.3s ease-in-out;
+            overflow: hidden;
+        }
+        
+        [id^="submenu-"].hidden, #inventory-submenu.hidden, #admin-submenu.hidden {
+            opacity: 0;
+            max-height: 0;
+            margin-top: 0;
+            margin-bottom: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        
+        [id^="submenu-"]:not(.hidden), #inventory-submenu:not(.hidden), #admin-submenu:not(.hidden) {
+            opacity: 1;
+            max-height: 500px;
+        }
+        
+        /* Arrow transitions */
+        [id^="arrow-"], #inventory-arrow, #admin-arrow {
+            transition: transform 0.3s ease-in-out;
+        }
+        
         /* Dark sidebar styles already defined above */
         
         /* Nested menu items */
@@ -971,7 +996,7 @@ $currentUser = Auth::getCurrentUser();
             });
         });
         
-        // Toggle inventory submenu with accordion behavior
+        // Toggle inventory submenu - allow multiple submenus to stay open
         function toggleInventoryMenu() {
             const submenu = document.getElementById('inventory-submenu');
             const arrow = document.getElementById('inventory-arrow');
@@ -980,23 +1005,7 @@ $currentUser = Auth::getCurrentUser();
             
             const isCurrentlyHidden = submenu.classList.contains('hidden');
             
-            // Accordion behavior - close all other submenus first
-            const allSubmenus = document.querySelectorAll('[id^="submenu-"], #inventory-submenu, #admin-submenu');
-            const allArrows = document.querySelectorAll('[id^="arrow-"], #inventory-arrow, #admin-arrow');
-            
-            allSubmenus.forEach(otherSubmenu => {
-                if (otherSubmenu.id !== 'inventory-submenu') {
-                    otherSubmenu.classList.add('hidden');
-                }
-            });
-            
-            allArrows.forEach(otherArrow => {
-                if (otherArrow.id !== 'inventory-arrow') {
-                    otherArrow.style.transform = 'rotate(0deg)';
-                }
-            });
-            
-            // Toggle the inventory submenu
+            // Simple toggle - no accordion behavior
             if (isCurrentlyHidden) {
                 submenu.classList.remove('hidden');
                 if (arrow) arrow.style.transform = 'rotate(180deg)';
@@ -1006,7 +1015,7 @@ $currentUser = Auth::getCurrentUser();
             }
         }
         
-        // Toggle admin submenu with accordion behavior
+        // Toggle admin submenu - allow multiple submenus to stay open
         function toggleAdminMenu() {
             const submenu = document.getElementById('admin-submenu');
             const arrow = document.getElementById('admin-arrow');
@@ -1015,23 +1024,7 @@ $currentUser = Auth::getCurrentUser();
             
             const isCurrentlyHidden = submenu.classList.contains('hidden');
             
-            // Accordion behavior - close all other submenus first
-            const allSubmenus = document.querySelectorAll('[id^="submenu-"], #inventory-submenu, #admin-submenu');
-            const allArrows = document.querySelectorAll('[id^="arrow-"], #inventory-arrow, #admin-arrow');
-            
-            allSubmenus.forEach(otherSubmenu => {
-                if (otherSubmenu.id !== 'admin-submenu') {
-                    otherSubmenu.classList.add('hidden');
-                }
-            });
-            
-            allArrows.forEach(otherArrow => {
-                if (otherArrow.id !== 'admin-arrow') {
-                    otherArrow.style.transform = 'rotate(0deg)';
-                }
-            });
-            
-            // Toggle the admin submenu
+            // Simple toggle - no accordion behavior
             if (isCurrentlyHidden) {
                 submenu.classList.remove('hidden');
                 if (arrow) arrow.style.transform = 'rotate(180deg)';
@@ -1085,7 +1078,7 @@ $currentUser = Auth::getCurrentUser();
             });
         });
         
-        // Dynamic menu functionality for database-driven menus with accordion behavior
+        // Dynamic menu functionality for database-driven menus - allow multiple open submenus
         function toggleSubmenu(submenuId) {
             const submenu = document.getElementById(submenuId);
             if (!submenu) return;
@@ -1096,23 +1089,7 @@ $currentUser = Auth::getCurrentUser();
             
             const isCurrentlyHidden = submenu.classList.contains('hidden');
             
-            // Accordion behavior - close all other submenus first
-            const allSubmenus = document.querySelectorAll('[id^="submenu-"]');
-            const allArrows = document.querySelectorAll('[id^="arrow-"]');
-            
-            allSubmenus.forEach(otherSubmenu => {
-                if (otherSubmenu.id !== submenuId) {
-                    otherSubmenu.classList.add('hidden');
-                }
-            });
-            
-            allArrows.forEach(otherArrow => {
-                if (otherArrow.id !== 'arrow-' + menuId) {
-                    otherArrow.style.transform = 'rotate(0deg)';
-                }
-            });
-            
-            // Toggle the clicked submenu
+            // Simple toggle - no accordion behavior, allow multiple submenus to be open
             if (isCurrentlyHidden) {
                 submenu.classList.remove('hidden');
                 if (arrow) arrow.style.transform = 'rotate(180deg)';
