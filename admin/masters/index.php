@@ -364,7 +364,7 @@ document.getElementById('createMasterForm').addEventListener('submit', function(
     submitBtn.disabled = true;
     submitBtn.textContent = 'Creating...';
     
-    fetch(`/project/api/masters.php?path=${currentMasterType}`, {
+    fetch(`../../api/masters.php?path=${currentMasterType}`, {
         method: 'POST',
         body: formData
     })
@@ -390,7 +390,7 @@ document.getElementById('createMasterForm').addEventListener('submit', function(
 
 // Master management functions
 function viewMaster(id) {
-    fetch(`/project/api/masters.php?path=${currentMasterType}/${id}`)
+    fetch(`../../api/masters.php?path=${currentMasterType}/${id}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -438,7 +438,7 @@ function editMaster(id) {
 
 function toggleMasterStatus(id) {
     confirmAction(`Are you sure you want to change this ${currentSingular.toLowerCase()}'s status?`, function() {
-        fetch(`/project/api/masters.php?path=${currentMasterType}/${id}/toggle-status`, { method: 'POST' })
+        fetch(`../../api/masters.php?path=${currentMasterType}/${id}/toggle-status`, { method: 'POST' })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -457,7 +457,7 @@ function toggleMasterStatus(id) {
 
 function deleteMaster(id) {
     confirmAction(`Are you sure you want to delete this ${currentSingular.toLowerCase()}? This action cannot be undone.`, function() {
-        fetch(`/project/api/masters.php?path=${currentMasterType}/${id}`, { method: 'DELETE' })
+        fetch(`../../api/masters.php?path=${currentMasterType}/${id}`, { method: 'DELETE' })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -522,7 +522,7 @@ function loadCountries() {
     const countrySelect = document.getElementById('country_id');
     if (!countrySelect) return;
     
-    fetch('/project/api/masters.php?path=countries')
+    fetch('../api/masters.php?path=countries')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -544,7 +544,7 @@ function loadStates(countryId) {
     
     if (!countryId) return;
     
-    fetch(`/project/api/masters.php?path=states&country_id=${countryId}`)
+    fetch(`../../api/masters.php?path=states&country_id=${countryId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
