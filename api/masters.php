@@ -14,7 +14,7 @@ $id = $pathParts[1] ?? null;
 $action = $pathParts[2] ?? '';
 
 // Validate master type
-$validTypes = ['zones', 'countries', 'states', 'cities', 'banks', 'customers', 'boq'];
+$validTypes = ['zones', 'countries', 'states', 'cities', 'banks', 'customers', 'boq','vendors'];
 if (!in_array($type, $validTypes)) {
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Invalid master type']);

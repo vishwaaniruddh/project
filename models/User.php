@@ -68,19 +68,24 @@ class User extends BaseModel {
         $params = [];
         
         if (!empty($search)) {
-            $whereClause = "WHERE username LIKE ? OR email LIKE ? OR role LIKE ?";
+            $whereClause = "WHERE u.username LIKE ? OR u.email LIKE ? OR u.role LIKE ? OR v.name LIKE ?";
             $searchTerm = "%$search%";
-            $params = [$searchTerm, $searchTerm, $searchTerm];
+            $params = [$searchTerm, $searchTerm, $searchTerm, $searchTerm];
         }
         
         // Get total count
-        $countSql = "SELECT COUNT(*) FROM {$this->table} $whereClause";
+        $countSql = "SELECT COUNT(*) FROM {$this->table} u LEFT JOIN vendors v ON u.vendor_id = v.id $whereClause";
         $stmt = $this->db->prepare($countSql);
         $stmt->execute($params);
         $total = $stmt->fetchColumn();
         
-        // Get paginated results
-        $sql = "SELECT * FROM {$this->table} $whereClause ORDER BY created_at DESC LIMIT $limit OFFSET $offset";
+        // Get paginated results with vendor information
+        $sql = "SELECT u.*, v.name as vendor_name 
+                FROM {$this->table} u 
+                LEFT JOIN vendors v ON u.vendor_id = v.id 
+                $whereClause 
+                ORDER BY u.created_at DESC 
+                LIMIT $limit OFFSET $offset";
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         $users = $stmt->fetchAll();
@@ -163,7 +168,32 @@ class User extends BaseModel {
             $errors['status'] = 'Invalid status selected';
         }
         
+        // Vendor validation for vendor role
+        if ($data['role'] === 'vendor') {
+            if (empty($data['vendor_id'])) {
+                $errors['vendor_id'] = 'Please select a vendor when role is vendor';
+            } else {
+                // Check if vendor exists and is active
+                $stmt = $this->db->prepare("SELECT id FROM vendors WHERE id = ? AND status = 'active'");
+                $stmt->execute([$data['vendor_id']]);
+                if (!$stmt->fetch()) {
+                    $errors['vendor_id'] = 'Selected vendor is not valid or inactive';
+                }
+            }
+        }
+        
         return $errors;
+    }
+    
+    public function findWithVendor($id) {
+        $stmt = $this->db->prepare("
+            SELECT u.*, v.name as vendor_name 
+            FROM {$this->table} u 
+            LEFT JOIN vendors v ON u.vendor_id = v.id 
+            WHERE u.id = ?
+        ");
+        $stmt->execute([$id]);
+        return $stmt->fetch();
     }
     
     public function getUserStats() {

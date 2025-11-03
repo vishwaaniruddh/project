@@ -7,6 +7,7 @@ require_once __DIR__ . '/../models/City.php';
 require_once __DIR__ . '/../models/Bank.php';
 require_once __DIR__ . '/../models/Customer.php';
 require_once __DIR__ . '/../models/BoqMaster.php';
+require_once __DIR__ . '/../models/Vendor.php';
 
 class ApiController extends BaseController {
     
@@ -49,6 +50,8 @@ class ApiController extends BaseController {
                 return new Customer();
             case 'boq':
                 return new BoqMaster();
+            case 'vendors':
+                return new Vendor();
             default:
                 return null;
         }
@@ -299,6 +302,13 @@ class ApiController extends BaseController {
                 $data = [
                     'boq_name' => trim($_POST['boq_name'] ?? ''),
                     'is_serial_number_required' => isset($_POST['is_serial_number_required']) ? 1 : 0,
+                    'status' => $_POST['status'] ?? 'active'
+                ];
+                break;
+                
+            case 'vendors':
+                $data = [
+                    'name' => trim($_POST['name'] ?? ''),
                     'status' => $_POST['status'] ?? 'active'
                 ];
                 break;

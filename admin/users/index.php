@@ -88,6 +88,15 @@ ob_start();
                             <span class="badge <?php echo $user['role'] === 'admin' ? 'badge-info' : 'badge-secondary'; ?>">
                                 <?php echo ucfirst($user['role']); ?>
                             </span>
+                            <?php if ($user['role'] === 'vendor' && !empty($user['vendor_name'])): ?>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <?php echo htmlspecialchars($user['vendor_name']); ?>
+                                </div>
+                            <?php elseif ($user['role'] === 'vendor' && !empty($user['vendor_id'])): ?>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    Vendor ID: <?php echo $user['vendor_id']; ?>
+                                </div>
+                            <?php endif; ?>
                         </td>
                         <td>
                             <span class="badge <?php echo $user['status'] === 'active' ? 'badge-success' : 'badge-danger'; ?>">
@@ -189,10 +198,17 @@ ob_start();
                 </div>
                 <div class="form-group">
                     <label for="role" class="form-label">Role</label>
-                    <select id="role" name="role" class="form-select" required>
+                    <select id="role" name="role" class="form-select" required onchange="toggleVendorField(this.value)">
                         <option value="">Select Role</option>
                         <option value="admin">Admin</option>
                         <option value="vendor">Vendor</option>
+                    </select>
+                </div>
+                <div class="form-group" id="vendor_field" style="display: none;">
+                    <label for="vendor_id" class="form-label">Select Vendor *</label>
+                    <select id="vendor_id" name="vendor_id" class="form-select">
+                        <option value="">Choose Vendor</option>
+                        <!-- Vendors will be loaded dynamically -->
                     </select>
                 </div>
                 <div class="form-group">
@@ -242,9 +258,16 @@ ob_start();
                 </div>
                 <div class="form-group">
                     <label for="edit_role" class="form-label">Role</label>
-                    <select id="edit_role" name="role" class="form-select" required>
+                    <select id="edit_role" name="role" class="form-select" required onchange="toggleEditVendorField(this.value)">
                         <option value="admin">Admin</option>
                         <option value="vendor">Vendor</option>
+                    </select>
+                </div>
+                <div class="form-group" id="edit_vendor_field" style="display: none;">
+                    <label for="edit_vendor_id" class="form-label">Select Vendor *</label>
+                    <select id="edit_vendor_id" name="vendor_id" class="form-select">
+                        <option value="">Choose Vendor</option>
+                        <!-- Vendors will be loaded dynamically -->
                     </select>
                 </div>
                 <div class="form-group">
@@ -291,6 +314,10 @@ ob_start();
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
                     <p id="view_role" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
+                </div>
+                <div id="view_vendor_info" style="display: none;">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Vendor</label>
+                    <p id="view_vendor_name" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -373,6 +400,16 @@ function viewUser(id) {
                 document.getElementById('view_created_at').textContent = formatDate(user.created_at);
                 document.getElementById('view_updated_at').textContent = formatDate(user.updated_at);
                 document.getElementById('view_jwt_token').textContent = user.jwt_token || 'No token generated';
+                
+                // Show vendor information if user is a vendor
+                const vendorInfo = document.getElementById('view_vendor_info');
+                if (user.role === 'vendor' && user.vendor_name) {
+                    document.getElementById('view_vendor_name').textContent = user.vendor_name;
+                    vendorInfo.style.display = 'block';
+                } else {
+                    vendorInfo.style.display = 'none';
+                }
+                
                 openModal('viewUserModal');
             } else {
                 showAlert(data.message, 'error');
@@ -396,6 +433,16 @@ function editUser(id) {
                 document.getElementById('edit_password').value = '';
                 document.getElementById('edit_role').value = user.role;
                 document.getElementById('edit_status').value = user.status;
+                
+                // Handle vendor field
+                toggleEditVendorField(user.role);
+                if (user.role === 'vendor' && user.vendor_id) {
+                    // Wait for vendors to load, then set the value
+                    setTimeout(() => {
+                        document.getElementById('edit_vendor_id').value = user.vendor_id;
+                    }, 500);
+                }
+                
                 document.getElementById('editUserForm').action = `edit.php?id=${id}`;
                 openModal('editUserModal');
             } else {
@@ -446,6 +493,139 @@ function deleteUser(id) {
 function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+}
+
+// Toggle vendor field visibility based on role selection
+function toggleVendorField(role) {
+    const vendorField = document.getElementById('vendor_field');
+    const vendorSelect = document.getElementById('vendor_id');
+    
+    if (role === 'vendor') {
+        vendorField.style.display = 'block';
+        vendorSelect.required = true;
+        loadVendors('vendor_id');
+    } else {
+        vendorField.style.display = 'none';
+        vendorSelect.required = false;
+        vendorSelect.value = '';
+    }
+}
+
+function toggleEditVendorField(role) {
+    const vendorField = document.getElementById('edit_vendor_field');
+    const vendorSelect = document.getElementById('edit_vendor_id');
+    
+    if (role === 'vendor') {
+        vendorField.style.display = 'block';
+        vendorSelect.required = true;
+        loadVendors('edit_vendor_id');
+    } else {
+        vendorField.style.display = 'none';
+        vendorSelect.required = false;
+        vendorSelect.value = '';
+    }
+}
+
+// Load vendors from API
+function loadVendors(selectId) {
+    const vendorSelect = document.getElementById(selectId);
+    if (!vendorSelect) return;
+    
+    // Show loading state
+    vendorSelect.innerHTML = '<option value="">Loading vendors...</option>';
+    
+    fetch('/project/api/masters.php?path=vendors&status=active')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.data && data.data.records) {
+                vendorSelect.innerHTML = '<option value="">Choose Vendor</option>';
+                data.data.records.forEach(vendor => {
+                    vendorSelect.innerHTML += `<option value="${vendor.id}">${vendor.name}</option>`;
+                });
+            } else {
+                throw new Error('Invalid API response');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading vendors:', error);
+            // Fallback: try direct vendor API
+            fetch('/project/admin/vendors/get-vendor.php?action=list')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.vendors) {
+                        vendorSelect.innerHTML = '<option value="">Choose Vendor</option>';
+                        data.vendors.forEach(vendor => {
+                            vendorSelect.innerHTML += `<option value="${vendor.id}">${vendor.name}</option>`;
+                        });
+                    } else {
+                        vendorSelect.innerHTML = '<option value="">No vendors available</option>';
+                    }
+                })
+                .catch(err => {
+                    console.error('Fallback vendor loading failed:', err);
+                    vendorSelect.innerHTML = '<option value="">Error loading vendors</option>';
+                });
+        });
+}
+
+// Utility functions for alerts and confirmations
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `fixed top-4 right-4 z-50 p-4 rounded-md shadow-lg ${
+        type === 'success' ? 'bg-green-100 border border-green-400 text-green-700' :
+        type === 'error' ? 'bg-red-100 border border-red-400 text-red-700' :
+        'bg-blue-100 border border-blue-400 text-blue-700'
+    }`;
+    alertDiv.textContent = message;
+    
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.parentNode.removeChild(alertDiv);
+        }
+    }, 3000);
+}
+
+function confirmAction(message, callback) {
+    if (confirm(message)) {
+        callback();
+    }
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function submitForm(formId, callback) {
+    const form = document.getElementById(formId);
+    const formData = new FormData(form);
+    
+    fetch(form.action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(data.message, 'success');
+            callback(data);
+        } else {
+            showAlert(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('An error occurred', 'error');
+    });
 }
 </script>
 

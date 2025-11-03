@@ -128,6 +128,49 @@ class Vendor extends BaseModel {
         return 'VND' . str_pad($result['next_id'], 4, '0', STR_PAD_LEFT);
     }
     
+    public function getAllWithPagination($page = 1, $limit = 20, $search = '', $status = '') {
+        $offset = ($page - 1) * $limit;
+        
+        $whereClause = '';
+        $params = [];
+        $conditions = [];
+        
+        if (!empty($search)) {
+            $conditions[] = "(name LIKE ? OR vendor_code LIKE ? OR email LIKE ? OR phone LIKE ? OR company_name LIKE ?)";
+            $searchTerm = "%$search%";
+            $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm]);
+        }
+        
+        if (!empty($status)) {
+            $conditions[] = "status = ?";
+            $params[] = $status;
+        }
+        
+        if (!empty($conditions)) {
+            $whereClause = "WHERE " . implode(" AND ", $conditions);
+        }
+        
+        // Get total count
+        $countSql = "SELECT COUNT(*) FROM {$this->table} $whereClause";
+        $stmt = $this->db->prepare($countSql);
+        $stmt->execute($params);
+        $total = $stmt->fetchColumn();
+        
+        // Get paginated results
+        $sql = "SELECT * FROM {$this->table} $whereClause ORDER BY name LIMIT $limit OFFSET $offset";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $records = $stmt->fetchAll();
+        
+        return [
+            'records' => $records,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'pages' => ceil($total / $limit)
+        ];
+    }
+    
     public function getVendorStats() {
         $stats = [];
         

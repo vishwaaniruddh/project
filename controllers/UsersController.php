@@ -50,6 +50,13 @@ class UsersController extends BaseController {
                 'status' => $_POST['status'] ?? 'active'
             ];
             
+            // Add vendor_id if role is vendor
+            if ($data['role'] === 'vendor' && !empty($_POST['vendor_id'])) {
+                $data['vendor_id'] = (int)$_POST['vendor_id'];
+            } else {
+                $data['vendor_id'] = null;
+            }
+            
             // Validate data
             $errors = $this->userModel->validateUserData($data);
             
@@ -90,7 +97,7 @@ class UsersController extends BaseController {
     }
     
     public function show($id) {
-        $user = $this->userModel->find($id);
+        $user = $this->userModel->findWithVendor($id);
         
         if (!$user) {
             return $this->jsonResponse([
@@ -109,17 +116,26 @@ class UsersController extends BaseController {
     }
     
     public function edit($id) {
-        $user = $this->userModel->find($id);
+        $user = $this->userModel->findWithVendor($id);
         
         if (!$user) {
-            return ['error' => 'User not found'];
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
         }
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             return $this->update($id);
         }
         
-        return ['user' => $user];
+        // Remove password hash from response
+        unset($user['password_hash']);
+        
+        return $this->jsonResponse([
+            'success' => true,
+            'user' => $user
+        ]);
     }
     
     public function update($id) {
@@ -141,6 +157,13 @@ class UsersController extends BaseController {
                 'role' => $_POST['role'] ?? '',
                 'status' => $_POST['status'] ?? 'active'
             ];
+            
+            // Add vendor_id if role is vendor
+            if ($data['role'] === 'vendor' && !empty($_POST['vendor_id'])) {
+                $data['vendor_id'] = (int)$_POST['vendor_id'];
+            } else {
+                $data['vendor_id'] = null;
+            }
             
             // Validate data
             $errors = $this->userModel->validateUserData($data, true, $id);

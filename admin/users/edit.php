@@ -9,20 +9,15 @@ if (!$id) {
     exit;
 }
 
+header('Content-Type: application/json');
+
 $controller = new UsersController();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    header('Content-Type: application/json');
     $result = $controller->update($id);
     echo json_encode($result);
 } else {
-    header('Content-Type: application/json');
     $result = $controller->edit($id);
-    
-    if (isset($result['error'])) {
-        echo json_encode(['success' => false, 'message' => $result['error']]);
-    } else {
-        echo json_encode(['success' => true, 'user' => $result['user']]);
-    }
+    echo json_encode($result);
 }
 ?>
