@@ -77,7 +77,7 @@ class Installation {
     
     public function getAllInstallations($status = null, $vendorId = null) {
         $sql = "SELECT id.*, ss.survey_status, ss.technical_remarks as survey_remarks,
-                       s.site_id as site_code, s.location, s.address,
+                       s.site_id as site_code, s.location,
                        ct.name as city_name, st.name as state_name,
                        v.name as vendor_name, v.email as vendor_email, v.phone as vendor_phone,
                        u1.username as delegated_by_name, u2.username as updated_by_name
@@ -117,7 +117,7 @@ class Installation {
     public function getInstallationDetails($id) {
         $sql = "SELECT id.*, ss.survey_status, ss.technical_remarks as survey_remarks,
                        ss.checkin_datetime, ss.checkout_datetime, ss.working_hours,
-                       s.site_id as site_code, s.location, s.address,
+                       s.site_id as site_code, s.location,
                        ct.name as city_name, st.name as state_name,
                        v.name as vendor_name, v.email as vendor_email, v.phone as vendor_phone,
                        u1.username as delegated_by_name, u2.username as updated_by_name

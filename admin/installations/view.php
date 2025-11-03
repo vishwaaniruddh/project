@@ -134,8 +134,8 @@ ob_start();
                 <span class="font-medium"><?php echo htmlspecialchars($installation['state_name'] ?? 'N/A'); ?></span>
             </div>
             <div class="flex justify-between">
-                <span class="text-gray-500">Address:</span>
-                <span class="font-medium"><?php echo htmlspecialchars($installation['address'] ?? 'N/A'); ?></span>
+                <span class="text-gray-500">Remarks:</span>
+                <span class="font-medium"><?php echo htmlspecialchars($installation['remarks'] ?? 'N/A'); ?></span>
             </div>
         </div>
     </div>
