@@ -3,41 +3,75 @@ console.log('Admin JS loaded');
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded');
-    // Sidebar toggle functionality
+    // Sidebar toggle functionality - Updated to work with admin layout
     const toggleSidebar = document.getElementById('toggleSidebar');
-    const sidebar = document.getElementById('sidebar');
+    const sidebar = document.querySelector('.admin-sidebar');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
     
     if (toggleSidebar && sidebar) {
         toggleSidebar.addEventListener('click', function() {
-            sidebar.classList.toggle('-translate-x-full');
+            sidebar.classList.toggle('show');
             if (sidebarOverlay) {
                 sidebarOverlay.classList.toggle('hidden');
             }
         });
     }
     
-    // Close sidebar when clicking overlay
-    if (sidebarOverlay) {
-        sidebarOverlay.addEventListener('click', function() {
-            sidebar.classList.add('-translate-x-full');
-            sidebarOverlay.classList.add('hidden');
+    // Close sidebar when clicking overlay (but not sidebar content)
+    if (sidebarOverlay && sidebar) {
+        sidebarOverlay.addEventListener('click', function(e) {
+            // Only close if clicking the overlay itself, not sidebar content
+            if (e.target === this) {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.add('hidden');
+            }
+        });
+        
+        // Prevent sidebar from closing when clicking inside sidebar
+        sidebar.addEventListener('click', function(e) {
+            e.stopPropagation();
         });
     }
     
     // Close sidebar on window resize if mobile
     window.addEventListener('resize', function() {
         if (window.innerWidth >= 1024) { // lg breakpoint
-            sidebar.classList.remove('-translate-x-full');
-            if (sidebarOverlay) {
-                sidebarOverlay.classList.add('hidden');
-            }
+            if (sidebar) sidebar.classList.remove('show');
+            if (sidebarOverlay) sidebarOverlay.classList.add('hidden');
         } else {
-            sidebar.classList.add('-translate-x-full');
-            if (sidebarOverlay) {
-                sidebarOverlay.classList.add('hidden');
-            }
+            if (sidebar) sidebar.classList.remove('show');
+            if (sidebarOverlay) sidebarOverlay.classList.add('hidden');
         }
+    });
+
+    // Handle mobile navigation - close sidebar after clicking menu links
+    function handleMobileNavigation() {
+        // Only apply on mobile devices
+        if (window.innerWidth >= 1024) return;
+        
+        // Close sidebar on mobile after navigation
+        if (sidebar && sidebarOverlay) {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.add('hidden');
+        }
+    }
+
+    // Add click handlers to all navigation links for mobile
+    const navLinks = document.querySelectorAll('.sidebar-item[href], .sidebar-subitem[href]');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            // Don't prevent default navigation, just close sidebar on mobile
+            setTimeout(handleMobileNavigation, 100);
+        });
+    });
+
+    // Prevent submenu toggle buttons from closing sidebar
+    const submenuToggles = document.querySelectorAll('.sidebar-item:not([href])');
+    submenuToggles.forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // Don't close sidebar for submenu toggles
+        });
     });
     
     // User dropdown functionality

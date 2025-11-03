@@ -277,7 +277,7 @@ $currentUser = Auth::getCurrentUser();
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 20;
+            z-index: 50;
             height: 100vh;
             transform: translateX(-100%);
             transition: transform 0.3s ease;
@@ -301,7 +301,7 @@ $currentUser = Auth::getCurrentUser();
         .sidebar-item {
             display: flex;
             align-items: center;
-            padding: 12px 16px;
+            padding: 0 16px;
             margin: 4px 0;
             border-radius: 8px;
             transition: all 0.2s ease;
@@ -338,6 +338,16 @@ $currentUser = Auth::getCurrentUser();
             .sidebar-item {
                 padding: 0.875rem 1rem;
                 font-size: 0.9rem;
+            }
+            
+            /* Ensure sidebar is above overlay */
+            .admin-sidebar {
+                z-index: 50;
+            }
+            
+            /* Make sure overlay doesn't interfere with sidebar clicks */
+            #sidebar-overlay {
+                z-index: 40;
             }
         }
         
@@ -729,18 +739,6 @@ $currentUser = Auth::getCurrentUser();
                 <h1 class="text-xl font-bold text-white">Admin Panel</h1>
             </div>
             
-            <!-- Admin Info -->
-            <div class="px-4 py-4 border-b border-blue-800">
-                <div class="flex items-center">
-                    <div class="admin-badge w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                        <?php echo strtoupper(substr($currentUser['username'], 0, 1)); ?>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium text-white"><?php echo htmlspecialchars($currentUser['username']); ?></p>
-                        <p class="text-xs text-blue-200">Administrator</p>
-                    </div>
-                </div>
-            </div>
 
             <!-- Navigation -->
             <nav class="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
@@ -860,14 +858,14 @@ $currentUser = Auth::getCurrentUser();
                     </div>
                     
                     <a href="<?php echo BASE_URL; ?>/admin/surveys/" class="sidebar-item text-white hover:bg-blue-800">
-                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-5 h-5 " fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
                         </svg>
                         Surveys
                     </a>
 
                     <a href="<?php echo BASE_URL; ?>/admin/reports/" class="sidebar-item text-white hover:bg-blue-800">
-                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-5 h-5 " fill="currentColor" viewBox="0 0 20 20">
                             <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path>
                         </svg>
                         Reports
@@ -880,13 +878,13 @@ $currentUser = Auth::getCurrentUser();
             <!-- User Menu -->
             <div class="px-4 py-4 border-t border-blue-800">
                 <a href="<?php echo BASE_URL; ?>/admin/profile.php" class="sidebar-item text-white hover:bg-blue-800">
-                    <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                     </svg>
                     Profile
                 </a>
                 <a href="<?php echo BASE_URL; ?>/auth/logout.php" class="sidebar-item text-white hover:bg-red-600">
-                    <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path>
                     </svg>
                     Logout
@@ -950,23 +948,7 @@ $currentUser = Auth::getCurrentUser();
     <script src="<?php echo BASE_URL; ?>/assets/js/admin.js"></script>
     <script src="<?php echo BASE_URL; ?>/assets/js/masters-api.js"></script>
     <script>
-        // Mobile sidebar toggle
-        document.getElementById('toggleSidebar')?.addEventListener('click', function() {
-            const sidebar = document.querySelector('.admin-sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            
-            sidebar.classList.toggle('show');
-            overlay.classList.toggle('hidden');
-        });
-
-        // Close sidebar when clicking overlay
-        document.getElementById('sidebar-overlay')?.addEventListener('click', function() {
-            const sidebar = document.querySelector('.admin-sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            
-            sidebar.classList.remove('show');
-            overlay.classList.add('hidden');
-        });
+        // Mobile sidebar toggle is handled in admin.js
 
         // User dropdown toggle
         document.getElementById('user-menu-button')?.addEventListener('click', function() {
@@ -1098,6 +1080,8 @@ $currentUser = Auth::getCurrentUser();
                 if (arrow) arrow.style.transform = 'rotate(0deg)';
             }
         }
+
+        // Mobile navigation handling is in admin.js
     </script>
     
     <!-- Common JavaScript Functions -->
