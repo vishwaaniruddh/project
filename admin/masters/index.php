@@ -88,7 +88,7 @@ ob_start();
             <option value="cities" <?php echo $masterType === 'cities' ? 'selected' : ''; ?>>Cities</option>
             <option value="boq" <?php echo $masterType === 'boq' ? 'selected' : ''; ?>>BOQ Master</option>
         </select>
-        <button onclick="openModal('createMasterModal')" class="btn btn-primary">
+        <button onclick="openCreateModal()" class="btn btn-primary">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>
             </svg>
@@ -259,7 +259,7 @@ ob_start();
                 </svg>
             </button>
         </div>
-        <form id="createMasterForm" action="create.php" method="POST">
+        <form id="createMasterForm">
             <div class="modal-body">
                 <div class="form-group">
                     <label for="<?php echo $masterType === 'boq' ? 'boq_name' : 'name'; ?>" class="form-label"><?php echo $singular; ?> Name *</label>
@@ -354,21 +354,49 @@ function applyFilters() {
 // Form submission
 document.getElementById('createMasterForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    submitMasterForm('createMasterForm', function(data) {
-        closeModal('createMasterModal');
-        showAlert(`${currentSingular} created successfully!`, 'success');
-        setTimeout(() => location.reload(), 1500);
+    
+    const formData = new FormData(this);
+    formData.append('action', 'create');
+    formData.append('type', currentMasterType);
+    
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating...';
+    
+    fetch(`/project/api/masters.php?path=${currentMasterType}`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeModal('createMasterModal');
+            showAlert(`${currentSingular} created successfully!`, 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showAlert(data.message || 'Failed to create record', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('An error occurred while creating the record', 'error');
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
     });
 });
 
 // Master management functions
 function viewMaster(id) {
-    fetch(`${currentMasterType}/view.php?id=${id}`)
+    fetch(`/project/api/masters.php?path=${currentMasterType}/${id}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const record = data.record;
-                alert(`${currentSingular} Details:\n\nName: ${record.name}\nStatus: ${record.status}\nCreated: ${formatDate(record.created_at)}\nUpdated: ${formatDate(record.updated_at)}`);
+                const record = data.data.record;
+                const nameField = currentMasterType === 'boq' ? 'boq_name' : 'name';
+                alert(`${currentSingular} Details:\n\nName: ${record[nameField]}\nStatus: ${record.status}\nCreated: ${formatDate(record.created_at)}\nUpdated: ${formatDate(record.updated_at)}`);
             } else {
                 showAlert(data.message, 'error');
             }
@@ -381,13 +409,14 @@ function viewMaster(id) {
 
 function editMaster(id) {
     // For now, show a simple prompt - can be enhanced with a modal later
+    const nameField = currentMasterType === 'boq' ? 'boq_name' : 'name';
     const newName = prompt(`Enter new name for ${currentSingular}:`);
     if (newName && newName.trim()) {
         const formData = new FormData();
-        formData.append('name', newName.trim());
+        formData.append(nameField, newName.trim());
         formData.append('status', 'active');
         
-        fetch(`${currentMasterType}/edit.php?id=${id}`, {
+        fetch(`/project/api/masters.php?path=${currentMasterType}/${id}`, {
             method: 'POST',
             body: formData
         })
@@ -409,7 +438,7 @@ function editMaster(id) {
 
 function toggleMasterStatus(id) {
     confirmAction(`Are you sure you want to change this ${currentSingular.toLowerCase()}'s status?`, function() {
-        fetch(`${currentMasterType}/toggle_status.php?id=${id}`, { method: 'POST' })
+        fetch(`/project/api/masters.php?path=${currentMasterType}/${id}/toggle-status`, { method: 'POST' })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -428,7 +457,7 @@ function toggleMasterStatus(id) {
 
 function deleteMaster(id) {
     confirmAction(`Are you sure you want to delete this ${currentSingular.toLowerCase()}? This action cannot be undone.`, function() {
-        fetch(`${currentMasterType}/delete.php?id=${id}`, { method: 'POST' })
+        fetch(`/project/api/masters.php?path=${currentMasterType}/${id}`, { method: 'DELETE' })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -448,6 +477,93 @@ function deleteMaster(id) {
 function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function confirmAction(message, callback) {
+    if (confirm(message)) {
+        callback();
+    }
+}
+
+function showAlert(message, type) {
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `fixed top-4 right-4 z-50 p-4 rounded-md shadow-lg ${
+        type === 'success' ? 'bg-green-100 border border-green-400 text-green-700' :
+        type === 'error' ? 'bg-red-100 border border-red-400 text-red-700' :
+        'bg-blue-100 border border-blue-400 text-blue-700'
+    }`;
+    alertDiv.textContent = message;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.parentNode.removeChild(alertDiv);
+        }
+    }, 3000);
+}
+
+// Load countries for states and cities forms
+function loadCountries() {
+    const countrySelect = document.getElementById('country_id');
+    if (!countrySelect) return;
+    
+    fetch('/project/api/masters.php?path=countries')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                countrySelect.innerHTML = '<option value="">Select Country</option>';
+                data.data.records.forEach(country => {
+                    countrySelect.innerHTML += `<option value="${country.id}">${country.name}</option>`;
+                });
+            }
+        })
+        .catch(error => console.error('Error loading countries:', error));
+}
+
+// Load states when country is selected
+function loadStates(countryId) {
+    const stateSelect = document.getElementById('state_id');
+    if (!stateSelect) return;
+    
+    stateSelect.innerHTML = '<option value="">Select State</option>';
+    
+    if (!countryId) return;
+    
+    fetch(`/project/api/masters.php?path=states&country_id=${countryId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                data.data.records.forEach(state => {
+                    if (state.country_id == countryId) {
+                        stateSelect.innerHTML += `<option value="${state.id}">${state.name}</option>`;
+                    }
+                });
+            }
+        })
+        .catch(error => console.error('Error loading states:', error));
+}
+
+function openCreateModal() {
+    // Load countries for states and cities
+    if (currentMasterType === 'states' || currentMasterType === 'cities') {
+        loadCountries();
+    }
+    openModal('createMasterModal');
 }
 
 </script>
