@@ -39,10 +39,10 @@ if (Auth::isLoggedIn() && Auth::isAdmin()) {
         <form class="mt-8 space-y-6" id="loginForm">
             <div class="rounded-md shadow-sm -space-y-px">
                 <div>
-                    <label for="username" class="sr-only">Username</label>
+                    <label for="username" class="sr-only">Email or Phone</label>
                     <input id="username" name="username" type="text" required 
                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
-                           placeholder="Username">
+                           placeholder="Email or Phone Number">
                 </div>
                 <div>
                     <label for="password" class="sr-only">Password</label>
@@ -77,8 +77,9 @@ if (Auth::isLoggedIn() && Auth::isAdmin()) {
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h3 class="text-sm font-medium text-blue-800 mb-2">Test Credentials:</h3>
                 <div class="text-xs text-blue-600 space-y-1">
-                    <div><strong>Admin:</strong> admin_test / admin123</div>
-                    <div><strong>Vendor:</strong> vendor_test1 / vendor123</div>
+                    <div><strong>Admin:</strong> admin@test.com / admin123</div>
+                    <div><strong>Vendor:</strong> vendor1@test.com / vendor123</div>
+                    <div class="text-gray-500 mt-1">Use email or phone to login</div>
                 </div>
             </div>
         </div>
@@ -187,11 +188,11 @@ if (Auth::isLoggedIn() && Auth::isAdmin()) {
         
         // Auto-fill test credentials when clicking on them
         document.addEventListener('click', function(e) {
-            if (e.target.textContent.includes('admin_test')) {
-                document.getElementById('username').value = 'admin_test';
+            if (e.target.textContent.includes('admin@test.com')) {
+                document.getElementById('username').value = 'admin@test.com';
                 document.getElementById('password').value = 'admin123';
-            } else if (e.target.textContent.includes('vendor_test1')) {
-                document.getElementById('username').value = 'vendor_test1';
+            } else if (e.target.textContent.includes('vendor1@test.com')) {
+                document.getElementById('username').value = 'vendor1@test.com';
                 document.getElementById('password').value = 'vendor123';
             }
         });

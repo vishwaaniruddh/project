@@ -70,34 +70,43 @@ try {
         exit;
     }
     
-    // Step 3: Find user
+    // Step 3: Find user by email, phone, or username
     $userModel = new User();
-    $user = $userModel->findByUsername($username);
+    
+    // Try to find user by email or phone first (primary method)
+    $user = $userModel->findByEmailOrPhone($username);
+    $response['debug']['found_by_email_phone'] = !empty($user);
+    
+    // If not found, try by username (fallback)
+    if (!$user) {
+        $user = $userModel->findByUsername($username);
+        $response['debug']['found_by_username'] = !empty($user);
+    }
     
     $response['debug']['user_found'] = !empty($user);
     
     if (!$user) {
         // Check if user exists with different case
-        $stmt = $db->prepare("SELECT * FROM users WHERE LOWER(username) = LOWER(?)");
-        $stmt->execute([$username]);
+        $stmt = $db->prepare("SELECT * FROM users WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?) OR phone = ?");
+        $stmt->execute([$username, $username, $username]);
         $userCaseInsensitive = $stmt->fetch(PDO::FETCH_ASSOC);
         
         $response['debug']['user_case_insensitive'] = !empty($userCaseInsensitive);
         
         if ($userCaseInsensitive) {
-            $response['message'] = 'Username case mismatch. Try: ' . $userCaseInsensitive['username'];
+            $response['message'] = 'Try with: ' . ($userCaseInsensitive['email'] ?: $userCaseInsensitive['phone'] ?: $userCaseInsensitive['username']);
         } else {
             // Check if any users exist at all
             $stmt = $db->query("SELECT COUNT(*) as count FROM users");
             $userCount = $stmt->fetch(PDO::FETCH_ASSOC);
             $response['debug']['total_users'] = $userCount['count'];
             
-            // Get list of existing usernames for debugging
-            $stmt = $db->query("SELECT username FROM users LIMIT 5");
-            $existingUsers = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            // Get list of existing emails/phones for debugging
+            $stmt = $db->query("SELECT username, email, phone FROM users LIMIT 5");
+            $existingUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $response['debug']['existing_users'] = $existingUsers;
             
-            $response['message'] = 'User not found';
+            $response['message'] = 'User not found. Try with email or phone number.';
         }
         echo json_encode($response);
         exit;

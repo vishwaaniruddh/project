@@ -39,10 +39,10 @@ if (Auth::isLoggedIn() && Auth::isVendor()) {
         <form class="mt-8 space-y-6" id="loginForm">
             <div class="rounded-md shadow-sm -space-y-px">
                 <div>
-                    <label for="username" class="sr-only">Username</label>
+                    <label for="username" class="sr-only">Email or Phone</label>
                     <input id="username" name="username" type="text" required 
                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" 
-                           placeholder="Username">
+                           placeholder="Email or Phone Number">
                 </div>
                 <div>
                     <label for="password" class="sr-only">Password</label>
@@ -77,16 +77,17 @@ if (Auth::isLoggedIn() && Auth::isVendor()) {
             <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                 <h3 class="text-sm font-medium text-green-800 mb-2">Test Credentials:</h3>
                 <div class="text-xs text-green-600 space-y-1 cursor-pointer">
-                    <div class="hover:bg-green-100 p-1 rounded" onclick="fillCredentials('vendor_test1', 'vendor123')">
-                        <strong>Vendor 1:</strong> vendor_test1 / vendor123
+                    <div class="hover:bg-green-100 p-1 rounded" onclick="fillCredentials('vendor1@test.com', 'vendor123')">
+                        <strong>Vendor 1:</strong> vendor1@test.com / vendor123
                     </div>
-                    <div class="hover:bg-green-100 p-1 rounded" onclick="fillCredentials('vendor_test2', 'vendor123')">
-                        <strong>Vendor 2:</strong> vendor_test2 / vendor123
+                    <div class="hover:bg-green-100 p-1 rounded" onclick="fillCredentials('vendor2@test.com', 'vendor123')">
+                        <strong>Vendor 2:</strong> vendor2@test.com / vendor123
                     </div>
-                    <div class="hover:bg-green-100 p-1 rounded" onclick="fillCredentials('vendor_test3', 'vendor123')">
-                        <strong>Vendor 3:</strong> vendor_test3 / vendor123
+                    <div class="hover:bg-green-100 p-1 rounded" onclick="fillCredentials('vendor3@test.com', 'vendor123')">
+                        <strong>Vendor 3:</strong> vendor3@test.com / vendor123
                     </div>
                 </div>
+                <div class="text-xs text-gray-500 mt-2">Use email or phone to login</div>
             </div>
             
             <div class="mt-4">

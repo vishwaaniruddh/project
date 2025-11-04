@@ -43,19 +43,21 @@ try {
         
         echo str_repeat("-", 100) . "\n\n";
         
-        // Test password verification for admin_test
+        // Test password verification for admin user
         echo "🔐 Password Verification Test:\n";
         $testUser = null;
         foreach ($users as $user) {
-            if ($user['username'] === 'admin_test') {
+            if ($user['role'] === 'admin') {
                 $testUser = $user;
                 break;
             }
         }
         
         if ($testUser) {
-            echo "Testing admin_test user:\n";
+            echo "Testing admin user:\n";
             echo "- Username: " . $testUser['username'] . "\n";
+            echo "- Email: " . ($testUser['email'] ?: 'N/A') . "\n";
+            echo "- Phone: " . ($testUser['phone'] ?: 'N/A') . "\n";
             echo "- Role: " . $testUser['role'] . "\n";
             echo "- Status: " . $testUser['status'] . "\n";
             echo "- Has password_hash: " . (!empty($testUser['password_hash']) ? 'Yes' : 'No') . "\n";
@@ -72,9 +74,19 @@ try {
                 $plainVerified = ($testPassword === $testUser['plain_password']);
                 echo "- Plain password verification: " . ($plainVerified ? '✅ PASS' : '❌ FAIL') . "\n";
             }
+            
+            echo "\n💡 Login with:\n";
+            if ($testUser['email']) {
+                echo "- Email: " . $testUser['email'] . " / admin123\n";
+            }
+            if ($testUser['phone']) {
+                echo "- Phone: " . $testUser['phone'] . " / admin123\n";
+            }
+            echo "- Username: " . $testUser['username'] . " / admin123 (fallback)\n";
+            
         } else {
-            echo "❌ admin_test user not found!\n";
-            echo "Available usernames: " . implode(', ', array_column($users, 'username')) . "\n";
+            echo "❌ No admin user found!\n";
+            echo "Available users: " . implode(', ', array_column($users, 'username')) . "\n";
         }
     }
     
