@@ -1,12 +1,20 @@
 <?php
 require_once __DIR__ . '/../../config/auth.php';
 require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../config/compatibility.php';
 require_once __DIR__ . '/../../controllers/SitesController.php';
 require_once __DIR__ . '/../../includes/master_functions.php';
-require_once __DIR__ . '/../../vendor/autoload.php';
 
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
+// Try to load PhpSpreadsheet if available
+if (COMPOSER_AVAILABLE) {
+    try {
+        require_once __DIR__ . '/../../vendor/autoload.php';
+        use PhpOffice\PhpSpreadsheet\IOFactory;
+        use PhpOffice\PhpSpreadsheet\Shared\Date;
+    } catch (Exception $e) {
+        logCompatibilityIssue("Failed to load PhpSpreadsheet: " . $e->getMessage());
+    }
+}
 
 // Require admin authentication
 Auth::requireRole(ADMIN_ROLE);
