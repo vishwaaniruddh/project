@@ -9,23 +9,19 @@ class Menu extends BaseModel {
     }
     
     public function getMenuForUser($userId, $userRole) {
-        // Get menu items that the user has access to based on role and individual permissions
+        // Get menu items that the user has explicit access to (no default access)
         $sql = "
-            SELECT DISTINCT m.*, 
-                   COALESCE(ump.can_access, rmp.can_access, FALSE) as can_access
+            SELECT DISTINCT m.*
             FROM menu_items m
-            LEFT JOIN role_menu_permissions rmp ON m.id = rmp.menu_item_id AND rmp.role = ?
-            LEFT JOIN user_menu_permissions ump ON m.id = ump.menu_item_id AND ump.user_id = ?
+            INNER JOIN user_menu_permissions ump ON m.id = ump.menu_item_id 
             WHERE m.status = 'active' 
-            AND (
-                (rmp.can_access = TRUE AND ump.can_access IS NULL) OR 
-                (ump.can_access = TRUE)
-            )
+            AND ump.user_id = ?
+            AND ump.can_access = TRUE
             ORDER BY m.parent_id ASC, m.sort_order ASC, m.title ASC
         ";
         
         $stmt = $this->db->prepare($sql);
-        $stmt->execute([$userRole, $userId]);
+        $stmt->execute([$userId]);
         $menuItems = $stmt->fetchAll();
         
         return $this->buildMenuTree($menuItems);
@@ -138,22 +134,19 @@ class Menu extends BaseModel {
     }
     
     public function hasAccess($userId, $userRole, $url) {
-        // Check if user has access to a specific URL
+        // Check if user has explicit access to a specific URL
         $sql = "
             SELECT COUNT(*) > 0 as has_access
             FROM menu_items m
-            LEFT JOIN role_menu_permissions rmp ON m.id = rmp.menu_item_id AND rmp.role = ?
-            LEFT JOIN user_menu_permissions ump ON m.id = ump.menu_item_id AND ump.user_id = ?
+            INNER JOIN user_menu_permissions ump ON m.id = ump.menu_item_id
             WHERE m.url = ? 
             AND m.status = 'active'
-            AND (
-                (rmp.can_access = TRUE AND ump.can_access IS NULL) OR 
-                (ump.can_access = TRUE)
-            )
+            AND ump.user_id = ?
+            AND ump.can_access = TRUE
         ";
         
         $stmt = $this->db->prepare($sql);
-        $stmt->execute([$userRole, $userId, $url]);
+        $stmt->execute([$url, $userId]);
         $result = $stmt->fetch();
         
         return $result['has_access'] == 1;

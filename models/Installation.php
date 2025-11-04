@@ -216,5 +216,58 @@ class Installation {
         $stmt->execute([$installationId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    public function getVendorInstallationStats($vendorId) {
+        $sql = "SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as in_progress,
+                    SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
+                    SUM(CASE WHEN status IN ('assigned', 'acknowledged', 'in_progress') 
+                             AND expected_completion_date < CURDATE() THEN 1 ELSE 0 END) as overdue
+                FROM installation_delegations 
+                WHERE vendor_id = ?";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$vendorId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    
+    public function updateInstallationTimings($installationId, $arrivalTime, $installationStartTime, $updatedBy) {
+        $sql = "UPDATE installation_delegations 
+                SET actual_start_date = ?, installation_start_time = ?, updated_by = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?";
+        
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$arrivalTime, $installationStartTime, $updatedBy, $installationId]);
+    }
+    
+    public function addInstallationProgressUpdate($progressData) {
+        $sql = "INSERT INTO installation_progress 
+                (installation_id, progress_date, progress_percentage, work_description, 
+                 issues_faced, next_steps, updated_by, created_at)
+                VALUES (?, CURDATE(), ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
+        
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            $progressData['installation_id'],
+            $progressData['progress_percentage'],
+            $progressData['work_description'],
+            $progressData['issues_faced'],
+            $progressData['next_steps'],
+            $progressData['updated_by']
+        ]);
+    }
+    
+    public function completeInstallation($installationId, $updatedBy) {
+        $sql = "UPDATE installation_delegations 
+                SET status = 'completed', 
+                    actual_completion_date = CURRENT_TIMESTAMP,
+                    updated_by = ?, 
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?";
+        
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$updatedBy, $installationId]);
+    }
 }
 ?>

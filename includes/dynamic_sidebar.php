@@ -7,13 +7,45 @@ function renderDynamicSidebar($currentUser) {
     
     $currentUrl = $_SERVER['REQUEST_URI'];
     
-    echo '<div class="flex-1 px-3 space-y-1">';
-    
-    foreach ($menuItems as $item) {
-        renderMenuItem($item, $currentUrl, 0);
+    // Check if user has any menu permissions
+    if (empty($menuItems)) {
+        echo '<div class="p-4 text-center text-gray-500">';
+        echo '<svg class="w-12 h-12 mx-auto mb-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">';
+        echo '<path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>';
+        echo '</svg>';
+        echo '<p class="text-sm">No menu access granted</p>';
+        echo '<p class="text-xs mt-1">Contact administrator for permissions</p>';
+        echo '</div>';
+        return;
     }
     
-    echo '</div>';
+    // Group menu items by sections
+    $sections = [];
+    $currentSection = 'Main';
+    
+    foreach ($menuItems as $item) {
+        // Check if this is a section header (items without URL and with children)
+        if (!$item['url'] && !empty($item['children'])) {
+            $currentSection = $item['title'];
+            $sections[$currentSection] = $item['children'];
+        } else {
+            // Regular menu item
+            if (!isset($sections[$currentSection])) {
+                $sections[$currentSection] = [];
+            }
+            $sections[$currentSection][] = $item;
+        }
+    }
+    
+    // Render sections
+    foreach ($sections as $sectionName => $sectionItems) {
+        if (!empty($sectionItems)) {
+            echo '<div class="menu-section-header">' . htmlspecialchars($sectionName) . '</div>';
+            foreach ($sectionItems as $item) {
+                renderMenuItem($item, $currentUrl, 0);
+            }
+        }
+    }
 }
 
 function renderMenuItem($item, $currentUrl, $level = 0) {
@@ -24,21 +56,21 @@ function renderMenuItem($item, $currentUrl, $level = 0) {
     $activeClass = ($isActive || $hasActiveChild) ? 'active' : '';
     
     if ($hasChildren) {
-        // Parent menu item with children - use vendor-style dropdown
+        // Parent menu item with children - use clean modern dropdown
         echo '<div class="relative">';
-        echo '<button onclick="toggleSubmenu(\'submenu-' . $item['id'] . '\')" class="sidebar-item text-white hover:bg-blue-800 w-full flex items-center justify-between ' . $activeClass . '">';
+        echo '<button onclick="toggleSubmenu(\'submenu-' . $item['id'] . '\')" class="sidebar-item w-full flex items-center justify-between ' . $activeClass . '">';
         echo '<div class="flex items-center">';
         echo renderMenuIcon($item['icon'], false);
-        echo '<span class="ml-3">' . htmlspecialchars($item['title']) . '</span>';
+        echo '<span>' . htmlspecialchars($item['title']) . '</span>';
         echo '</div>';
         echo '<svg id="arrow-' . $item['id'] . '" class="w-4 h-4 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">';
         echo '<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>';
         echo '</svg>';
         echo '</button>';
         
-        // Submenu container - vendor style
+        // Submenu container - clean modern style
         $submenuClass = ($isActive || $hasActiveChild) ? '' : 'hidden';
-        echo '<div id="submenu-' . $item['id'] . '" class="' . $submenuClass . ' ml-8 mt-2 space-y-1">';
+        echo '<div id="submenu-' . $item['id'] . '" class="' . $submenuClass . ' mt-2 space-y-1">';
         
         foreach ($item['children'] as $child) {
             renderMenuItem($child, $currentUrl, $level + 1);
@@ -48,7 +80,7 @@ function renderMenuItem($item, $currentUrl, $level = 0) {
         echo '</div>';
     } else {
         // Leaf menu item
-        $itemClass = $level > 0 ? 'sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800' : 'sidebar-item text-white hover:bg-blue-800';
+        $itemClass = $level > 0 ? 'sidebar-subitem' : 'sidebar-item';
         
         if ($item['url']) {
             echo '<a href="' . BASE_URL . $item['url'] . '" class="' . $itemClass . ' ' . $activeClass . '">';
@@ -57,7 +89,7 @@ function renderMenuItem($item, $currentUrl, $level = 0) {
         }
         
         echo renderMenuIcon($item['icon'], $level > 0);
-        echo '<span class="ml-3">' . htmlspecialchars($item['title']) . '</span>';
+        echo '<span>' . htmlspecialchars($item['title']) . '</span>';
         
         if ($item['url']) {
             echo '</a>';

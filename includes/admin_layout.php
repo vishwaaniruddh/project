@@ -270,17 +270,18 @@ $currentUser = Auth::getCurrentUser();
         }
     </script>
     <style>
-        /* Admin Sidebar Styling - Match Vendor Style */
+        /* Clean Modern Sidebar Styling */
         .admin-sidebar {
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+            border-right: 1px solid #f1f5f9;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.04);
             position: fixed;
             top: 0;
             left: 0;
             z-index: 50;
             height: 100vh;
             transform: translateX(-100%);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .admin-sidebar.show {
@@ -294,55 +295,143 @@ $currentUser = Auth::getCurrentUser();
         }
         
         .admin-badge {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
         .sidebar-item {
             display: flex;
             align-items: center;
-            padding: 0 16px;
-            margin: 4px 0;
-            border-radius: 8px;
+            padding: 12px 20px;
+            margin: 2px 12px;
+            border-radius: 12px;
             transition: all 0.2s ease;
             text-decoration: none;
+            min-height: 48px;
+            color: #4b5563 !important;
+            font-weight: 500;
+            font-size: 0.9rem;
         }
         
         .sidebar-item:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            transform: translateX(4px);
+            background-color: #f8fafc;
+            color: #1f2937 !important;
+            transform: translateX(2px);
         }
         
         .sidebar-item.active {
-            background-color: rgba(255, 255, 255, 0.15);
-            border-left: 4px solid #f59e0b;
+            background-color: #6366f1;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        
+        .sidebar-item svg {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            color: inherit;
         }
         
         .sidebar-subitem {
             display: flex;
             align-items: center;
-            padding: 0.5rem 1rem;
+            padding: 8px 12px;
+            margin: 2px 16px;
             text-decoration: none;
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
             transition: all 0.2s;
+            min-height: 36px;
+            color: #6b7280 !important;
+            font-weight: 400;
         }
         
         .sidebar-subitem:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: #f1f5f9;
+            color: #374151 !important;
             transform: translateX(2px);
+        }
+        
+        .sidebar-subitem.active {
+            background-color: #e0e7ff;
+            color: #6366f1 !important;
+            font-weight: 500;
+        }
+        
+        .sidebar-subitem svg {
+            flex-shrink: 0;
+            width: 16px;
+            height: 16px;
+            margin-right: 10px;
+            color: inherit;
+        }
+        
+        /* Override any conflicting text colors */
+        .admin-sidebar .sidebar-item,
+        .admin-sidebar .sidebar-item span,
+        .admin-sidebar .sidebar-subitem,
+        .admin-sidebar .sidebar-subitem span {
+            color: inherit !important;
+        }
+        
+        /* Ensure button text is visible */
+        .admin-sidebar button.sidebar-item {
+            color: #4b5563 !important;
+        }
+        
+        .admin-sidebar button.sidebar-item:hover {
+            color: #1f2937 !important;
+        }
+        
+        /* Large device improvements */
+        @media (min-width: 1024px) {
+            .sidebar-item {
+                margin: 2px 12px;
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+            
+            [id$="-submenu"] {
+                margin: 8px 12px;
+                padding: 8px 0;
+            }
+            
+            [id$="-submenu"] .sidebar-subitem {
+                margin: 2px 16px;
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
         }
         
         /* Responsive styles */
         @media (max-width: 1023px) {
-            .sidebar-item {
-                padding: 0.875rem 1rem;
-                font-size: 0.9rem;
+            .admin-sidebar {
+                background: #ffffff;
+                z-index: 50;
             }
             
-            /* Ensure sidebar is above overlay */
-            .admin-sidebar {
-                z-index: 50;
+            .sidebar-item {
+                padding: 12px 16px;
+                font-size: 0.9rem;
+                margin: 2px 8px;
+            }
+            
+            [id$="-submenu"] {
+                margin: 6px 8px;
+                padding: 6px 0;
+            }
+            
+            [id$="-submenu"] .sidebar-subitem {
+                margin: 1px 12px;
+                padding: 6px 8px;
+                font-size: 0.75rem;
+            }
+            
+            [id$="-submenu"] .sidebar-subitem svg {
+                width: 12px;
+                height: 12px;
+                margin-right: 6px;
             }
             
             /* Make sure overlay doesn't interfere with sidebar clicks */
@@ -427,6 +516,13 @@ $currentUser = Auth::getCurrentUser();
         }
         .btn-danger:hover {
             background-color: #b91c1c;
+        }
+        .btn-info {
+            color: white;
+            background-color: #0ea5e9;
+        }
+        .btn-info:hover {
+            background-color: #0284c7;
         }
         .btn-sm {
             padding: 0.5rem 0.75rem;
@@ -641,7 +737,14 @@ $currentUser = Auth::getCurrentUser();
         
         /* Arrow transitions */
         [id^="arrow-"], #inventory-arrow, #admin-arrow {
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #9ca3af;
+        }
+        
+        .sidebar-item:hover [id^="arrow-"], 
+        .sidebar-item:hover #inventory-arrow, 
+        .sidebar-item:hover #admin-arrow {
+            color: #6b7280;
         }
         
         /* Dark sidebar styles already defined above */
@@ -657,6 +760,42 @@ $currentUser = Auth::getCurrentUser();
         
         .ml-12 {
             margin-left: 3rem;
+        }
+        
+        /* Submenu container styling */
+        [id$="-submenu"] {
+            background: #f8fafc;
+            border-radius: 8px;
+            margin: 8px 12px;
+            padding: 8px 0;
+            border-left: 3px solid #e2e8f0;
+        }
+        
+        [id$="-submenu"] .sidebar-subitem {
+            margin: 2px 16px;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+        }
+        
+        [id$="-submenu"] .sidebar-subitem svg {
+            width: 14px;
+            height: 14px;
+            margin-right: 8px;
+        }
+        
+        /* Menu section headers */
+        .menu-section-header {
+            color: #9ca3af !important;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 16px 20px 8px 20px;
+            margin-top: 24px;
+        }
+        
+        .menu-section-header:first-child {
+            margin-top: 8px;
         }
         .form-input, .form-select {
             background-color: #f9fafb;
@@ -726,6 +865,46 @@ $currentUser = Auth::getCurrentUser();
         nav::-webkit-scrollbar-thumb:hover {
             background-color: rgba(255, 255, 255, 0.5);
         }
+        
+        /* Real-time datetime display */
+        .datetime-display {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 12px;
+            text-align: center;
+        }
+        
+        .datetime-display .date {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+        
+        .datetime-display .time {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-weight: 500;
+        }
+        
+        /* Responsive datetime display */
+        @media (max-width: 1023px) {
+            .datetime-display {
+                margin: 12px 8px;
+                padding: 12px;
+            }
+            
+            .datetime-display .date {
+                font-size: 0.8rem;
+            }
+            
+            .datetime-display .time {
+                font-size: 0.7rem;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -735,10 +914,25 @@ $currentUser = Auth::getCurrentUser();
     <div class="admin-sidebar w-64 shadow-lg">
         <div class="flex flex-col h-full">
             <!-- Logo -->
-            <div class="flex items-center justify-center h-16 px-4 bg-black bg-opacity-20">
-                <h1 class="text-xl font-bold text-white">Admin Panel</h1>
+            <div class="flex items-center px-6 py-6 border-b border-gray-100">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h1 class="text-lg font-bold text-gray-900">Admin</h1>
+                        <p class="text-xs text-gray-500">Control Panel</p>
+                    </div>
+                </div>
             </div>
             
+            <!-- Real-time Date/Time Display -->
+            <div class="datetime-display">
+                <div class="date" id="current-date"></div>
+                <div class="time" id="current-time"></div>
+            </div>
 
             <!-- Navigation -->
             <nav class="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
@@ -746,145 +940,25 @@ $currentUser = Auth::getCurrentUser();
                 try {
                     require_once __DIR__ . '/dynamic_sidebar.php';
                     renderDynamicSidebar($currentUser); 
-                    echo '<script>console.log("Dynamic sidebar loaded successfully");</script>';
                 } catch (Exception $e) {
-                    echo '<script>console.log("Dynamic sidebar failed, using static menu:", "' . addslashes($e->getMessage()) . '");</script>';
-                    // Fallback static sidebar with clean vendor-style design
-                    ?>
-                    <a href="<?php echo BASE_URL; ?>/admin/dashboard.php" class="sidebar-item text-white hover:bg-blue-800">
-                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
-                        </svg>
-                        Dashboard
-                    </a>
-                    
-                    <a href="<?php echo BASE_URL; ?>/admin/sites/" class="sidebar-item text-white hover:bg-blue-800">
-                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                        </svg>
-                        Sites
-                    </a>
-                    
-                    <!-- Admin Main Menu with Dropdown -->
-                    <div class="relative">
-                        <button onclick="toggleAdminMenu()" class="sidebar-item text-white hover:bg-blue-800 w-full flex items-center justify-between">
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
-                                </svg>
-                                Admin
-                            </div>
-                            <svg id="admin-arrow" class="w-4 h-4 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                            </svg>
-                        </button>
-                        
-                        <!-- Admin Submenu -->
-                        <div id="admin-submenu" class="hidden ml-8 mt-2 space-y-1">
-                            <a href="<?php echo BASE_URL; ?>/admin/users/" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
-                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
-                                </svg>
-                                Users
-                            </a>
-                            
-                            <a href="<?php echo BASE_URL; ?>/admin/vendors/" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
-                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd"></path>
-                                </svg>
-                                Vendors
-                            </a>
-                            
-                            <a href="<?php echo BASE_URL; ?>/admin/masters/" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
-                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
-                                </svg>
-                                Masters
-                            </a>
-                            
-                            <a href="<?php echo BASE_URL; ?>/admin/boq/" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
-                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
-                                </svg>
-                                BOQ Management
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <!-- Inventory Main Menu with Dropdown -->
-                    <div class="relative">
-                        <button onclick="toggleInventoryMenu()" class="sidebar-item text-white hover:bg-blue-800 w-full flex items-center justify-between">
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 2L3 7v11a1 1 0 001 1h12a1 1 0 001-1V7l-7-5zM8 15a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-                                </svg>
-                                Inventory
-                            </div>
-                            <svg id="inventory-arrow" class="w-4 h-4 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                            </svg>
-                        </button>
-                        
-                        <!-- Inventory Submenu -->
-                        <div id="inventory-submenu" class="hidden ml-8 mt-2 space-y-1">
-                            <a href="<?php echo BASE_URL; ?>/admin/inventory/" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
-                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
-                                </svg>
-                                All Stocks
-                            </a>
-                            
-                            <a href="<?php echo BASE_URL; ?>/admin/requests/" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
-                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                                </svg>
-                                Material Requests
-                            </a>
-                            
-                            <a href="<?php echo BASE_URL; ?>/admin/inventory/inwards/" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
-                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                </svg>
-                                Material Received
-                            </a>
-                            
-                            <a href="<?php echo BASE_URL; ?>/admin/inventory/dispatches/" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
-                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                </svg>
-                                Material Dispatches
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <a href="<?php echo BASE_URL; ?>/admin/surveys/" class="sidebar-item text-white hover:bg-blue-800">
-                        <svg class="w-5 h-5 " fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
-                        </svg>
-                        Surveys
-                    </a>
-
-                    <a href="<?php echo BASE_URL; ?>/admin/reports/" class="sidebar-item text-white hover:bg-blue-800">
-                        <svg class="w-5 h-5 " fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path>
-                        </svg>
-                        Reports
-                    </a>
-                    <?php
+                    echo '<div class="p-4 text-red-500 text-sm">';
+                    echo 'Menu system error: ' . htmlspecialchars($e->getMessage());
+                    echo '<br><small>Please contact administrator to setup menu permissions.</small>';
+                    echo '</div>';
                 }
                 ?>
             </nav>
 
             <!-- User Menu -->
-            <div class="px-4 py-4 border-t border-blue-800">
-                <a href="<?php echo BASE_URL; ?>/admin/profile.php" class="sidebar-item text-white hover:bg-blue-800">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <div class="px-4 py-4 border-t border-gray-100 mt-auto">
+                <a href="<?php echo BASE_URL; ?>/admin/profile.php" class="sidebar-item">
+                    <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                     </svg>
                     Profile
                 </a>
-                <a href="<?php echo BASE_URL; ?>/auth/logout.php" class="sidebar-item text-white hover:bg-red-600">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <a href="<?php echo BASE_URL; ?>/auth/logout.php" class="sidebar-item text-red-500 hover:bg-red-50 hover:text-red-600">
+                    <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path>
                     </svg>
                     Logout
@@ -894,7 +968,7 @@ $currentUser = Auth::getCurrentUser();
     </div>
 
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-hidden lg:ml-64">
+        <div class="flex-1 flex flex-col overflow-hidden lg:ml-64 bg-gray-50">
             <!-- Top Header -->
             <header class="admin-header">
                 <div class="flex items-center justify-between px-6 py-4">
@@ -1082,6 +1156,40 @@ $currentUser = Auth::getCurrentUser();
         }
 
         // Mobile navigation handling is in admin.js
+        
+        // Real-time date/time update
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Format date as DD - Month - YYYY
+            const dateOptions = { 
+                day: '2-digit', 
+                month: 'long', 
+                year: 'numeric' 
+            };
+            const formattedDate = now.toLocaleDateString('en-US', dateOptions).replace(/,/g, ' -');
+            
+            // Format time as HH:MM (24-hour format)
+            const timeOptions = { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false
+            };
+            const formattedTime = now.toLocaleTimeString('en-US', timeOptions);
+            
+            // Update the display
+            const dateElement = document.getElementById('current-date');
+            const timeElement = document.getElementById('current-time');
+            
+            if (dateElement) dateElement.textContent = formattedDate;
+            if (timeElement) timeElement.textContent = formattedTime;
+        }
+        
+        // Update datetime immediately and then every second
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        });
     </script>
     
     <!-- Common JavaScript Functions -->

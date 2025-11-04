@@ -223,6 +223,36 @@ class MaterialRequest {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
+    public function createRequest($data) {
+        // Create items array for single material request
+        $items = [[
+            'material_name' => $data['material_name'],
+            'quantity' => $data['quantity_requested'],
+            'current_stock' => $data['current_stock'] ?? 0,
+            'reason' => $data['reason']
+        ]];
+        
+        $sql = "INSERT INTO {$this->table} (
+            site_id, vendor_id, survey_id, request_date, required_date,
+            request_notes, items, status, created_date
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        $stmt = $this->db->prepare($sql);
+        $result = $stmt->execute([
+            $data['site_id'],
+            $data['vendor_id'],
+            $data['installation_id'] ?? null, // Using installation_id as survey_id for now
+            $data['request_date'],
+            date('Y-m-d', strtotime('+3 days')), // Default required date
+            $data['reason'],
+            json_encode($items),
+            $data['status'] ?? 'pending',
+            date('Y-m-d H:i:s')
+        ]);
+        
+        return $result ? $this->db->lastInsertId() : false;
+    }
+    
     public function getVendorRequests($vendorId) {
         $sql = "SELECT mr.*, 
                        s.site_id, s.location
