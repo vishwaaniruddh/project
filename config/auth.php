@@ -88,6 +88,14 @@ class Auth {
         return null;
     }
     
+    public static function updateSession($user) {
+        if (self::isLoggedIn()) {
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['role'] = $user['role'];
+            $_SESSION['vendor_id'] = $user['vendor_id'] ?? null;
+        }
+    }
+    
     public static function getUserId() {
         return $_SESSION['user_id'] ?? null;
     }

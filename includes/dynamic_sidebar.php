@@ -40,7 +40,7 @@ function renderDynamicSidebar($currentUser) {
     // Render sections
     foreach ($sections as $sectionName => $sectionItems) {
         if (!empty($sectionItems)) {
-            echo '<div class="menu-section-header">' . htmlspecialchars($sectionName) . '</div>';
+            echo '<div class="menu-section-header"><span class="sidebar-text">' . htmlspecialchars($sectionName) . '</span></div>';
             foreach ($sectionItems as $item) {
                 renderMenuItem($item, $currentUrl, 0);
             }
@@ -58,10 +58,10 @@ function renderMenuItem($item, $currentUrl, $level = 0) {
     if ($hasChildren) {
         // Parent menu item with children - use clean modern dropdown
         echo '<div class="relative">';
-        echo '<button onclick="toggleSubmenu(\'submenu-' . $item['id'] . '\')" class="sidebar-item w-full flex items-center justify-between ' . $activeClass . '">';
+        echo '<button onclick="toggleSubmenu(\'submenu-' . $item['id'] . '\')" class="sidebar-item w-full flex items-center justify-between ' . $activeClass . '" data-tooltip="' . htmlspecialchars($item['title']) . '">';
         echo '<div class="flex items-center">';
         echo renderMenuIcon($item['icon'], false);
-        echo '<span>' . htmlspecialchars($item['title']) . '</span>';
+        echo '<span class="sidebar-text">' . htmlspecialchars($item['title']) . '</span>';
         echo '</div>';
         echo '<svg id="arrow-' . $item['id'] . '" class="w-4 h-4 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">';
         echo '<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>';
@@ -83,13 +83,13 @@ function renderMenuItem($item, $currentUrl, $level = 0) {
         $itemClass = $level > 0 ? 'sidebar-subitem' : 'sidebar-item';
         
         if ($item['url']) {
-            echo '<a href="' . BASE_URL . $item['url'] . '" class="' . $itemClass . ' ' . $activeClass . '">';
+            echo '<a href="' . BASE_URL . $item['url'] . '" class="' . $itemClass . ' ' . $activeClass . '" data-tooltip="' . htmlspecialchars($item['title']) . '">';
         } else {
-            echo '<div class="' . $itemClass . ' ' . $activeClass . '">';
+            echo '<div class="' . $itemClass . ' ' . $activeClass . '" data-tooltip="' . htmlspecialchars($item['title']) . '">';
         }
         
         echo renderMenuIcon($item['icon'], $level > 0);
-        echo '<span>' . htmlspecialchars($item['title']) . '</span>';
+        echo '<span class="sidebar-text">' . htmlspecialchars($item['title']) . '</span>';
         
         if ($item['url']) {
             echo '</a>';

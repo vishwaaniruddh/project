@@ -8,17 +8,17 @@ $title = 'Users Management';
 ob_start();
 ?>
 
-<div class="flex justify-between items-center mb-6">
-    <div>
-        <h1 class="text-2xl font-semibold text-gray-900">Users Management</h1>
-        <p class="mt-2 text-sm text-gray-700">Manage system users and their permissions</p>
+<div class="mb-6">
+    <h1 class="text-2xl font-semibold text-gray-900 mb-2">Users Management</h1>
+    
+    <div class="flex justify-between items-center">
+        <div class="flex gap-3">
+            <button onclick="exportUsersData()" class="btn btn-secondary">Export</button>
+            <button onclick="resetCreateUserForm(); openModal('createUserModal')" class="btn btn-primary">Add User</button>
+        </div>
+        
+        <p class="text-sm text-gray-600">Manage system users and their permissions</p>
     </div>
-    <button onclick="openModal('createUserModal')" class="btn btn-primary">
-        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>
-        </svg>
-        Add New User
-    </button>
 </div>
 
 <!-- Search and Filters -->
@@ -32,16 +32,16 @@ ob_start();
                             <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
                         </svg>
                     </div>
-                    <input type="text" id="searchInput" class="search-input" placeholder="Search users..." value="<?php echo htmlspecialchars($data['search']); ?>">
+                    <input type="text" id="searchInput" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" value="<?php echo htmlspecialchars($data['search']); ?>" onkeyup="filterUsersTable()">
                 </div>
             </div>
             <div class="flex gap-2">
-                <select id="roleFilter" class="form-select">
+                <select id="roleFilter" class="form-select" onchange="filterUsersTable()">
                     <option value="">All Roles</option>
                     <option value="admin">Admin</option>
                     <option value="vendor">Vendor</option>
                 </select>
-                <select id="statusFilter" class="form-select">
+                <select id="statusFilter" class="form-select" onchange="filterUsersTable()">
                     <option value="">All Status</option>
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -66,7 +66,7 @@ ob_start();
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="usersTableBody">
                     <?php foreach ($data['users'] as $user): ?>
                     <tr>
                         <td>
@@ -185,42 +185,54 @@ ob_start();
         </div>
         <form id="createUserForm" action="create.php" method="POST">
             <div class="modal-body">
-                <div class="form-group">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" id="username" name="username" class="form-input" required>
+                <!-- Row 1: Username and Email -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" id="username" name="username" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" name="email" class="form-input" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" id="email" name="email" class="form-input" required>
+                
+                <!-- Row 2: Phone and Password -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" id="password" name="password" class="form-input" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="phone" class="form-label">Phone Number</label>
-                    <input type="tel" id="phone" name="phone" class="form-input" placeholder="+1234567890" required>
+                
+                <!-- Row 3: Role and Status -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="role" class="form-label">Role</label>
+                        <select id="role" name="role" class="form-select" required onchange="toggleVendorField(this.value)">
+                            <option value="">Select Role</option>
+                            <option value="admin">Admin</option>
+                            <option value="vendor">Vendor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="status" class="form-label">Status</label>
+                        <select id="status" name="status" class="form-select">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" name="password" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label for="role" class="form-label">Role</label>
-                    <select id="role" name="role" class="form-select" required onchange="toggleVendorField(this.value)">
-                        <option value="">Select Role</option>
-                        <option value="admin">Admin</option>
-                        <option value="vendor">Vendor</option>
-                    </select>
-                </div>
+                
+                <!-- Vendor Field (Full Width when visible) -->
                 <div class="form-group" id="vendor_field" style="display: none;">
                     <label for="vendor_id" class="form-label">Select Vendor *</label>
                     <select id="vendor_id" name="vendor_id" class="form-select">
                         <option value="">Choose Vendor</option>
-                        <!-- Vendors will be loaded dynamically -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="status" class="form-label">Status</label>
-                    <select id="status" name="status" class="form-select">
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
                     </select>
                 </div>
             </div>
@@ -245,41 +257,53 @@ ob_start();
         </div>
         <form id="editUserForm" method="POST">
             <div class="modal-body">
-                <div class="form-group">
-                    <label for="edit_username" class="form-label">Username</label>
-                    <input type="text" id="edit_username" name="username" class="form-input" required>
+                <!-- Row 1: Username and Email -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="edit_username" class="form-label">Username</label>
+                        <input type="text" id="edit_username" name="username" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_email" class="form-label">Email</label>
+                        <input type="email" id="edit_email" name="email" class="form-input" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="edit_email" class="form-label">Email</label>
-                    <input type="email" id="edit_email" name="email" class="form-input" required>
+                
+                <!-- Row 2: Phone and Password -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="edit_phone" class="form-label">Phone Number</label>
+                        <input type="tel" id="edit_phone" name="phone" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_password" class="form-label">Password</label>
+                        <input type="password" id="edit_password" name="password" class="form-input">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="edit_phone" class="form-label">Phone Number</label>
-                    <input type="tel" id="edit_phone" name="phone" class="form-input" required>
+                
+                <!-- Row 3: Role and Status -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="edit_role" class="form-label">Role</label>
+                        <select id="edit_role" name="role" class="form-select" required onchange="toggleEditVendorField(this.value)">
+                            <option value="admin">Admin</option>
+                            <option value="vendor">Vendor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_status" class="form-label">Status</label>
+                        <select id="edit_status" name="status" class="form-select">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="edit_password" class="form-label">Password</label>
-                    <input type="password" id="edit_password" name="password" class="form-input" placeholder="Leave blank to keep current password">
-                </div>
-                <div class="form-group">
-                    <label for="edit_role" class="form-label">Role</label>
-                    <select id="edit_role" name="role" class="form-select" required onchange="toggleEditVendorField(this.value)">
-                        <option value="admin">Admin</option>
-                        <option value="vendor">Vendor</option>
-                    </select>
-                </div>
+                
+                <!-- Vendor Field (Full Width when visible) -->
                 <div class="form-group" id="edit_vendor_field" style="display: none;">
                     <label for="edit_vendor_id" class="form-label">Select Vendor *</label>
                     <select id="edit_vendor_id" name="vendor_id" class="form-select">
                         <option value="">Choose Vendor</option>
-                        <!-- Vendors will be loaded dynamically -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="edit_status" class="form-label">Status</label>
-                    <select id="edit_status" name="status" class="form-select">
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
                     </select>
                 </div>
             </div>
@@ -355,21 +379,97 @@ ob_start();
 </div>
 
 <script>
-console.log('Users page script loaded');
-console.log('BASE_URL:', '<?php echo BASE_URL; ?>');
+// Export users data to CSV
+function exportUsersData() {
+    const searchInput = document.getElementById('searchInput');
+    const roleFilter = document.getElementById('roleFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    
+    const params = new URLSearchParams();
+    if (searchInput && searchInput.value) params.append('search', searchInput.value);
+    if (roleFilter && roleFilter.value) params.append('role', roleFilter.value);
+    if (statusFilter && statusFilter.value) params.append('status', statusFilter.value);
+    
+    const exportUrl = `export-users.php?${params.toString()}`;
+    window.open(exportUrl, '_blank');
+}
 
-// Search functionality
-document.getElementById('searchInput').addEventListener('keyup', debounce(function() {
-    const searchTerm = this.value;
-    const url = new URL(window.location);
-    if (searchTerm) {
-        url.searchParams.set('search', searchTerm);
-    } else {
-        url.searchParams.delete('search');
+// Real-time table filtering (client-side)
+function filterUsersTable() {
+    const searchInput = document.getElementById('searchInput');
+    const roleFilter = document.getElementById('roleFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    const roleValue = roleFilter ? roleFilter.value.toLowerCase() : '';
+    const statusValue = statusFilter ? statusFilter.value.toLowerCase() : '';
+    
+    const tableBody = document.getElementById('usersTableBody');
+    if (!tableBody) return;
+    
+    const rows = tableBody.getElementsByTagName('tr');
+    
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const cells = row.getElementsByTagName('td');
+        let shouldShow = true;
+        
+        // Search filter
+        if (searchTerm) {
+            let found = false;
+            for (let j = 0; j < cells.length - 1; j++) { // -1 to exclude action column
+                const cellText = cells[j].textContent.toLowerCase();
+                if (cellText.includes(searchTerm)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) shouldShow = false;
+        }
+        
+        // Role filter
+        if (roleValue && shouldShow) {
+            const roleCell = row.querySelector('.badge');
+            if (roleCell) {
+                const roleText = roleCell.textContent.toLowerCase();
+                if (!roleText.includes(roleValue)) {
+                    shouldShow = false;
+                }
+            }
+        }
+        
+        // Status filter
+        if (statusValue && shouldShow) {
+            const statusCell = row.querySelector('.badge');
+            if (statusCell) {
+                const statusText = statusCell.textContent.toLowerCase();
+                if (!statusText.includes(statusValue)) {
+                    shouldShow = false;
+                }
+            }
+        }
+        
+        row.style.display = shouldShow ? '' : 'none';
     }
-    url.searchParams.delete('page');
-    window.location.href = url.toString();
-}, 500));
+}
+
+
+
+// Reset create user form when modal opens
+function resetCreateUserForm() {
+    const form = document.getElementById('createUserForm');
+    form.reset();
+    
+    // Reset vendor field visibility
+    const vendorField = document.getElementById('vendor_field');
+    const vendorSelect = document.getElementById('vendor_id');
+    vendorField.style.display = 'none';
+    vendorSelect.required = false;
+    vendorSelect.value = '';
+    
+    // Reset role selection
+    document.getElementById('role').value = '';
+}
 
 // Create user form submission
 document.getElementById('createUserForm').addEventListener('submit', function(e) {
@@ -421,7 +521,6 @@ function viewUser(id) {
             }
         })
         .catch(error => {
-            console.error('Error:', error);
             showAlert('Failed to load user data', 'error');
         });
 }
@@ -455,7 +554,6 @@ function editUser(id) {
             }
         })
         .catch(error => {
-            console.error('Error:', error);
             showAlert('Failed to load user data', 'error');
         });
 }
@@ -488,7 +586,6 @@ function deleteUser(id) {
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
                 showAlert('Failed to delete user', 'error');
             });
     });
@@ -552,8 +649,6 @@ function loadVendors(selectId) {
             }
         })
         .catch(error => {
-            console.error('Error loading vendors:', error);
-            // Fallback: try direct vendor API
             fetch('../vendors/get-vendor.php?action=list')
                 .then(response => response.json())
                 .then(data => {
@@ -567,7 +662,6 @@ function loadVendors(selectId) {
                     }
                 })
                 .catch(err => {
-                    console.error('Fallback vendor loading failed:', err);
                     vendorSelect.innerHTML = '<option value="">Error loading vendors</option>';
                 });
         });
@@ -598,18 +692,6 @@ function confirmAction(message, callback) {
     }
 }
 
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
 function submitForm(formId, callback) {
     const form = document.getElementById(formId);
     const formData = new FormData(form);
@@ -628,7 +710,6 @@ function submitForm(formId, callback) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
         showAlert('An error occurred', 'error');
     });
 }

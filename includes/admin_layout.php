@@ -13,6 +13,9 @@ $currentUser = Auth::getCurrentUser();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $title ?? 'Admin Panel'; ?> - <?php echo APP_NAME; ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/custom.css">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/admin.css">
     <!-- Fallback CSS for subdirectories -->
@@ -62,7 +65,7 @@ $currentUser = Auth::getCurrentUser();
         .card-body {
             padding: 1.5rem;
         }
-        .form-input, .form-select {
+        .form-input, .form-select,.form-textarea {
             display: block;
             width: 100%;
             padding: 0.5rem 0.75rem;
@@ -272,25 +275,149 @@ $currentUser = Auth::getCurrentUser();
     <style>
         /* Clean Modern Sidebar Styling */
         .admin-sidebar {
-            background: #ffffff;
-            border-right: 1px solid #f1f5f9;
-            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.04);
+            background: #1f2937;
+            border-right: 1px solid #374151;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.2);
             position: fixed;
             top: 0;
             left: 0;
             z-index: 50;
             height: 100vh;
+            width: 256px;
             transform: translateX(-100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .admin-sidebar.show {
             transform: translateX(0);
         }
         
+        /* Collapsed sidebar state */
+        .admin-sidebar.collapsed {
+            width: 80px;
+        }
+        
+        .admin-sidebar.collapsed .sidebar-text {
+            opacity: 0;
+            visibility: hidden;
+            width: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-text {
+            transition: all 0.3s ease;
+        }
+        
+        .admin-sidebar.collapsed .datetime-display {
+            display: none;
+        }
+        
+        .admin-sidebar.collapsed #clock {
+            display: none;
+        }
+        
+        .admin-sidebar.collapsed .nav-link {
+            display: none;
+        }
+        
+        .admin-sidebar.collapsed .menu-section-header {
+            display: none;
+        }
+        
+        .admin-sidebar.collapsed .sidebar-item {
+            justify-content: center;
+            padding: 8px;
+            margin: 1px 4px;
+            position: relative;
+            overflow: visible;
+        }
+        
+        /* Simple tooltip implementation */
+        .admin-sidebar.collapsed .sidebar-item[data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: calc(100% + 15px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            border: 1px solid #374151;
+            pointer-events: none;
+        }
+        
+        .admin-sidebar.collapsed .sidebar-item[data-tooltip]:hover::before {
+            content: '';
+            position: absolute;
+            left: calc(100% + 9px);
+            top: 50%;
+            transform: translateY(-50%);
+            border: 6px solid transparent;
+            border-right-color: #1f2937;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        
+        .admin-sidebar.collapsed button.sidebar-item[data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: calc(100% + 15px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            border: 1px solid #374151;
+            pointer-events: none;
+        }
+        
+        .admin-sidebar.collapsed button.sidebar-item[data-tooltip]:hover::before {
+            content: '';
+            position: absolute;
+            left: calc(100% + 9px);
+            top: 50%;
+            transform: translateY(-50%);
+            border: 6px solid transparent;
+            border-right-color: #1f2937;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        
+        .admin-sidebar.collapsed .sidebar-item svg {
+            margin-right: 0;
+        }
+        
+        .admin-sidebar.collapsed .sidebar-subitem {
+            display: none;
+        }
+        
+        .admin-sidebar.collapsed [id$="-submenu"] {
+            display: none;
+        }
+        
         @media (min-width: 1024px) {
             .admin-sidebar {
                 transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 256px;
+                transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            .main-content.sidebar-collapsed {
+                margin-left: 80px;
             }
         }
         
@@ -302,27 +429,29 @@ $currentUser = Auth::getCurrentUser();
         .sidebar-item {
             display: flex;
             align-items: center;
-            padding: 12px 20px;
-            margin: 2px 12px;
-            border-radius: 12px;
+            padding: 8px 16px;
+            margin: 1px 8px;
+            border-radius: 8px;
             transition: all 0.2s ease;
             text-decoration: none;
-            min-height: 48px;
-            color: #4b5563 !important;
+            min-height: 40px;
+            color: #e5e7eb !important;
             font-weight: 500;
             font-size: 0.9rem;
         }
         
         .sidebar-item:hover {
-            background-color: #f8fafc;
-            color: #1f2937 !important;
+            background-color: #374151;
+            color: #f9fafb !important;
             transform: translateX(2px);
         }
         
         .sidebar-item.active {
-            background-color: #6366f1;
-            color: #ffffff !important;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            background-color: transparent;
+            color: #6366f1 !important;
+            font-weight: 600;
+            border-left: 3px solid #6366f1;
+            padding-left: 13px;
         }
         
         .sidebar-item svg {
@@ -336,27 +465,27 @@ $currentUser = Auth::getCurrentUser();
         .sidebar-subitem {
             display: flex;
             align-items: center;
-            padding: 8px 12px;
-            margin: 2px 16px;
+            padding: 6px 10px;
+            margin: 1px 12px;
             text-decoration: none;
             border-radius: 6px;
             font-size: 0.8rem;
             transition: all 0.2s;
-            min-height: 36px;
-            color: #6b7280 !important;
+            min-height: 32px;
+            color: #d1d5db !important;
             font-weight: 400;
         }
         
         .sidebar-subitem:hover {
-            background-color: #f1f5f9;
-            color: #374151 !important;
+            background-color: #4b5563;
+            color: #e5e7eb !important;
             transform: translateX(2px);
         }
         
         .sidebar-subitem.active {
-            background-color: #e0e7ff;
+            background-color: transparent;
             color: #6366f1 !important;
-            font-weight: 500;
+            font-weight: 600;
         }
         
         .sidebar-subitem svg {
@@ -368,38 +497,39 @@ $currentUser = Auth::getCurrentUser();
         }
         
         /* Override any conflicting text colors */
-        .admin-sidebar .sidebar-item,
+        /* .admin-sidebar .sidebar-item, */
         .admin-sidebar .sidebar-item span,
         .admin-sidebar .sidebar-subitem,
-        .admin-sidebar .sidebar-subitem span {
+        /* .admin-sidebar .sidebar-subitem span  */
+         {
             color: inherit !important;
         }
         
         /* Ensure button text is visible */
         .admin-sidebar button.sidebar-item {
-            color: #4b5563 !important;
+            color: #e5e7eb !important;
         }
         
         .admin-sidebar button.sidebar-item:hover {
-            color: #1f2937 !important;
+            color: #f9fafb !important;
         }
         
         /* Large device improvements */
         @media (min-width: 1024px) {
             .sidebar-item {
-                margin: 2px 12px;
-                padding: 12px 20px;
+                margin: 1px 8px;
+                padding: 8px 16px;
                 font-size: 0.9rem;
             }
             
             [id$="-submenu"] {
-                margin: 8px 12px;
-                padding: 8px 0;
+                margin: 4px 8px;
+                padding: 4px 0;
             }
             
             [id$="-submenu"] .sidebar-subitem {
-                margin: 2px 16px;
-                padding: 8px 12px;
+                margin: 1px 12px;
+                padding: 6px 10px;
                 font-size: 0.8rem;
             }
         }
@@ -407,24 +537,24 @@ $currentUser = Auth::getCurrentUser();
         /* Responsive styles */
         @media (max-width: 1023px) {
             .admin-sidebar {
-                background: #ffffff;
+                background: #1f2937;
                 z-index: 50;
             }
             
             .sidebar-item {
-                padding: 12px 16px;
+                padding: 8px 12px;
                 font-size: 0.9rem;
-                margin: 2px 8px;
+                margin: 1px 6px;
             }
             
             [id$="-submenu"] {
-                margin: 6px 8px;
-                padding: 6px 0;
+                margin: 3px 6px;
+                padding: 3px 0;
             }
             
             [id$="-submenu"] .sidebar-subitem {
-                margin: 1px 12px;
-                padding: 6px 8px;
+                margin: 1px 10px;
+                padding: 4px 6px;
                 font-size: 0.75rem;
             }
             
@@ -764,16 +894,16 @@ $currentUser = Auth::getCurrentUser();
         
         /* Submenu container styling */
         [id$="-submenu"] {
-            background: #f8fafc;
+            background: #374151;
             border-radius: 8px;
-            margin: 8px 12px;
-            padding: 8px 0;
-            border-left: 3px solid #e2e8f0;
+            margin: 4px 8px;
+            padding: 4px 0;
+            border-left: 3px solid #6366f1;
         }
         
         [id$="-submenu"] .sidebar-subitem {
-            margin: 2px 16px;
-            padding: 8px 12px;
+            margin: 1px 12px;
+            padding: 6px 10px;
             font-size: 0.8rem;
         }
         
@@ -790,12 +920,12 @@ $currentUser = Auth::getCurrentUser();
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            padding: 16px 20px 8px 20px;
-            margin-top: 24px;
+            padding: 12px 16px 6px 16px;
+            margin-top: 16px;
         }
         
         .menu-section-header:first-child {
-            margin-top: 8px;
+            margin-top: 6px;
         }
         .form-input, .form-select {
             background-color: #f9fafb;
@@ -844,48 +974,85 @@ $currentUser = Auth::getCurrentUser();
         }
         
         /* Smooth scrolling for sidebar */
-        nav {
+        .admin-sidebar nav {
             scrollbar-width: thin;
-            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
         }
         
-        nav::-webkit-scrollbar {
+        .admin-sidebar nav::-webkit-scrollbar {
             width: 6px;
         }
         
-        nav::-webkit-scrollbar-track {
+        .admin-sidebar nav::-webkit-scrollbar-track {
             background: transparent;
         }
         
-        nav::-webkit-scrollbar-thumb {
-            background-color: rgba(255, 255, 255, 0.3);
+        .admin-sidebar nav::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
             border-radius: 3px;
         }
         
-        nav::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(255, 255, 255, 0.5);
+        .admin-sidebar nav::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(156, 163, 175, 0.7);
         }
         
+        /* Karvy Brand Styling */
+        .karvy-brand {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #ffffff; /* Fallback color */
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.3px;
+            line-height: 1.2;
+            margin-bottom: 2px;
+        }
+        
+        /* Fallback for browsers that don't support background-clip */
+        @supports not (-webkit-background-clip: text) {
+            .karvy-brand {
+                color: #ffffff;
+                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            }
+        }
+        
+        .karvy-subtitle {
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            color: #9ca3af;
+        }
+        
+        .admin-sidebar.collapsed .karvy-brand,
+        .admin-sidebar.collapsed .karvy-subtitle {
+            display: none;
+        }
+
         /* Real-time datetime display */
         .datetime-display {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 16px;
-            margin: 16px 12px;
+            background: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            padding: 8px;
+            margin: 8px 6px;
             text-align: center;
         }
         
         .datetime-display .date {
-            font-size: 0.875rem;
+            font-size: 0.7rem;
             font-weight: 600;
-            color: #374151;
-            margin-bottom: 4px;
+            color: #f9fafb;
+            margin-bottom: 2px;
         }
         
         .datetime-display .time {
-            font-size: 0.75rem;
-            color: #6b7280;
+            font-size: 0.65rem;
+            color: #d1d5db;
             font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
             font-weight: 500;
         }
@@ -893,16 +1060,16 @@ $currentUser = Auth::getCurrentUser();
         /* Responsive datetime display */
         @media (max-width: 1023px) {
             .datetime-display {
-                margin: 12px 8px;
-                padding: 12px;
+                margin: 6px 4px;
+                padding: 6px;
             }
             
             .datetime-display .date {
-                font-size: 0.8rem;
+                font-size: 0.65rem;
             }
             
             .datetime-display .time {
-                font-size: 0.7rem;
+                font-size: 0.6rem;
             }
         }
     </style>
@@ -914,28 +1081,33 @@ $currentUser = Auth::getCurrentUser();
     <div class="admin-sidebar w-64 shadow-lg">
         <div class="flex flex-col h-full">
             <!-- Logo -->
-            <div class="flex items-center px-6 py-6 border-b border-gray-100">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
-                        </svg>
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-600">
+                <a href="<?php echo BASE_URL; ?>/admin/dashboard.php" class="flex items-center hover:opacity-80 transition-opacity">
+                    <div class="sidebar-text">
+                        <h1 class="text-lg font-bold text-white karvy-brand">Karvy Technologies</h1>
+                        <p class="text-xs text-gray-300 karvy-subtitle">Pvt Ltd</p>
                     </div>
-                    <div class="ml-3">
-                        <h1 class="text-lg font-bold text-gray-900">Admin</h1>
-                        <p class="text-xs text-gray-500">Control Panel</p>
-                    </div>
-                </div>
+                </a>
+                <!-- Hamburger menu for large devices -->
+                <button id="sidebarToggle" class="hidden lg:block p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
             </div>
             
             <!-- Real-time Date/Time Display -->
-            <div class="datetime-display">
+              <a class="nav-link" href="#" style="color:white;text-align: center;margin: 5px;">
+                    <span class="menu-title" id="clock" class="clock"></span>
+                </a>
+
+            <!-- <div class="datetime-display">
                 <div class="date" id="current-date"></div>
                 <div class="time" id="current-time"></div>
-            </div>
+            </div> -->
 
             <!-- Navigation -->
-            <nav class="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
+            <nav class="flex-1 px-2 py-2 space-y-1 overflow-y-auto">
                 <?php 
                 try {
                     require_once __DIR__ . '/dynamic_sidebar.php';
@@ -950,25 +1122,25 @@ $currentUser = Auth::getCurrentUser();
             </nav>
 
             <!-- User Menu -->
-            <div class="px-4 py-4 border-t border-gray-100 mt-auto">
-                <a href="<?php echo BASE_URL; ?>/admin/profile.php" class="sidebar-item">
+            <div class="px-2 py-2 border-t border-gray-600 mt-auto">
+                <a href="<?php echo BASE_URL; ?>/admin/profile.php" class="sidebar-item" data-tooltip="Profile">
                     <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                     </svg>
-                    Profile
+                    <span class="sidebar-text">Profile</span>
                 </a>
-                <a href="<?php echo BASE_URL; ?>/auth/logout.php" class="sidebar-item text-red-500 hover:bg-red-50 hover:text-red-600">
+                <a href="<?php echo BASE_URL; ?>/auth/logout.php" class="sidebar-item text-red-400 hover:bg-red-900 hover:text-red-300" data-tooltip="Logout">
                     <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path>
                     </svg>
-                    Logout
+                    <span class="sidebar-text">Logout</span>
                 </a>
             </div>
         </div>
     </div>
 
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-hidden lg:ml-64 bg-gray-50">
+        <div class="main-content flex-1 flex flex-col overflow-hidden bg-gray-50">
             <!-- Top Header -->
             <header class="admin-header">
                 <div class="flex items-center justify-between px-6 py-4">
@@ -979,7 +1151,7 @@ $currentUser = Auth::getCurrentUser();
                             </svg>
                         </button>
                         <div class="ml-2">
-                            <h1 class="text-xl font-semibold text-gray-900"><?php echo $title ?? 'Admin Panel'; ?></h1>
+                            <h1 class="text-xl font-semibold text-gray-900">Admin Panel</h1>
                             <p class="text-sm text-gray-500">System Administration</p>
                         </div>
                     </div>
@@ -1022,7 +1194,117 @@ $currentUser = Auth::getCurrentUser();
     <script src="<?php echo BASE_URL; ?>/assets/js/admin.js"></script>
     <script src="<?php echo BASE_URL; ?>/assets/js/masters-api.js"></script>
     <script>
-        // Mobile sidebar toggle is handled in admin.js
+        // Sidebar toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const mainContent = document.querySelector('.main-content');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const mobileSidebarToggle = document.getElementById('toggleSidebar');
+            
+            // Desktop sidebar toggle (collapse/expand)
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                    mainContent.classList.toggle('sidebar-collapsed');
+                    
+                    // Store preference in localStorage
+                    const isCollapsed = sidebar.classList.contains('collapsed');
+                    localStorage.setItem('sidebarCollapsed', isCollapsed);
+                });
+            }
+            
+            // Mobile sidebar toggle (show/hide)
+            if (mobileSidebarToggle) {
+                mobileSidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                    const overlay = document.getElementById('sidebar-overlay');
+                    if (overlay) {
+                        overlay.classList.toggle('hidden');
+                    }
+                });
+            }
+            
+            // Restore sidebar state from localStorage
+            const savedState = localStorage.getItem('sidebarCollapsed');
+            if (savedState === 'true') {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('sidebar-collapsed');
+            }
+            
+            // Enhanced tooltip system for collapsed sidebar
+            function initTooltips() {
+                const sidebarItems = document.querySelectorAll('.admin-sidebar .sidebar-item[data-tooltip]');
+                
+                sidebarItems.forEach(item => {
+                    let tooltip = null;
+                    
+                    item.addEventListener('mouseenter', function() {
+                        if (!sidebar.classList.contains('collapsed')) return;
+                        
+                        const tooltipText = this.getAttribute('data-tooltip');
+                        if (!tooltipText) return;
+                        
+                        console.log('Showing tooltip:', tooltipText);
+                        
+                        // Create tooltip element
+                        tooltip = document.createElement('div');
+                        tooltip.className = 'sidebar-tooltip';
+                        tooltip.textContent = tooltipText;
+                        tooltip.style.cssText = `
+                            position: fixed;
+                            background: #1f2937;
+                            color: white;
+                            padding: 8px 12px;
+                            border-radius: 6px;
+                            font-size: 0.875rem;
+                            white-space: nowrap;
+                            z-index: 9999;
+                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+                            border: 1px solid #374151;
+                            pointer-events: none;
+                            opacity: 0;
+                            transition: opacity 0.2s ease;
+                        `;
+                        
+                        document.body.appendChild(tooltip);
+                        
+                        // Position tooltip
+                        const rect = this.getBoundingClientRect();
+                        tooltip.style.left = (rect.right + 15) + 'px';
+                        tooltip.style.top = (rect.top + rect.height / 2 - tooltip.offsetHeight / 2) + 'px';
+                        
+                        // Show tooltip
+                        setTimeout(() => {
+                            if (tooltip) tooltip.style.opacity = '1';
+                        }, 100);
+                    });
+                    
+                    item.addEventListener('mouseleave', function() {
+                        if (tooltip) {
+                            tooltip.style.opacity = '0';
+                            setTimeout(() => {
+                                if (tooltip && tooltip.parentNode) {
+                                    tooltip.parentNode.removeChild(tooltip);
+                                }
+                                tooltip = null;
+                            }, 200);
+                        }
+                    });
+                });
+            }
+            
+            // Initialize tooltips
+            initTooltips();
+            
+            // Close mobile sidebar when clicking overlay
+            const overlay = document.getElementById('sidebar-overlay');
+            if (overlay) {
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('show');
+                    overlay.classList.add('hidden');
+                });
+            }
+        });
 
         // User dropdown toggle
         document.getElementById('user-menu-button')?.addEventListener('click', function() {
@@ -1161,18 +1443,19 @@ $currentUser = Auth::getCurrentUser();
         function updateDateTime() {
             const now = new Date();
             
-            // Format date as DD - Month - YYYY
+            // Format date as DD MMM YYYY (more compact)
             const dateOptions = { 
                 day: '2-digit', 
-                month: 'long', 
+                month: 'short', 
                 year: 'numeric' 
             };
-            const formattedDate = now.toLocaleDateString('en-US', dateOptions).replace(/,/g, ' -');
+            const formattedDate = now.toLocaleDateString('en-US', dateOptions);
             
-            // Format time as HH:MM (24-hour format)
+            // Format time as HH:MM:SS (24-hour format with seconds)
             const timeOptions = { 
                 hour: '2-digit', 
                 minute: '2-digit',
+                second: '2-digit',
                 hour12: false
             };
             const formattedTime = now.toLocaleTimeString('en-US', timeOptions);
@@ -1272,6 +1555,22 @@ $currentUser = Auth::getCurrentUser();
                 });
             }
         });
+    function updateClock() {
+    var now = new Date();
+    var date = now.toDateString();
+    var time = now.toLocaleTimeString();
+
+    var clockElement = document.getElementById('clock');
+    clockElement.textContent = date + ' ' + time;
+  }
+
+  // Update the clock every second
+  setInterval(updateClock, 1000);
+
+  // Initial call to display the clock immediately
+  updateClock();
+
     </script>
+    
 </body>
 </html>
