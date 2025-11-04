@@ -269,5 +269,37 @@ class Installation {
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([$updatedBy, $installationId]);
     }
+    
+    public function getAllWithDetails() {
+        $sql = "SELECT id.*, 
+                       s.site_id, s.location,
+                       v.name as vendor_name,
+                       id.status,
+                       COALESCE(
+                           (SELECT AVG(progress_percentage) 
+                            FROM installation_progress ip 
+                            WHERE ip.installation_id = id.id), 0
+                       ) as progress_percentage,
+                       id.expected_start_date as start_date,
+                       id.expected_completion_date,
+                       id.actual_completion_date,
+                       id.notes,
+                       id.special_instructions as material_usage,
+                       COALESCE(
+                           (SELECT COUNT(*) 
+                            FROM installation_progress ip 
+                            WHERE ip.installation_id = id.id AND ip.photos IS NOT NULL), 0
+                       ) as files,
+                       id.created_at,
+                       id.updated_at
+                FROM installation_delegations id
+                LEFT JOIN sites s ON id.site_id = s.id
+                LEFT JOIN vendors v ON id.vendor_id = v.id
+                ORDER BY id.created_at DESC";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>

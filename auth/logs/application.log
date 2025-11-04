@@ -19,3 +19,6 @@
 {"timestamp":"2025-11-04 06:14:10","level":"INFO","message":"User login successful","user_id":4,"ip_address":"::1","context":{"username":"contact@techinstall.com","success":true}}
 {"timestamp":"2025-11-04 07:18:47","level":"INFO","message":"User login successful","user_id":4,"ip_address":"::1","context":{"username":"contact@techinstall.com","success":true}}
 {"timestamp":"2025-11-04 08:12:01","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-04 09:27:48","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"::1","context":{"username":"reporting","success":false}}
+{"timestamp":"2025-11-04 09:27:50","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"::1","context":{"username":"reporting","success":false}}
+{"timestamp":"2025-11-04 09:28:06","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}

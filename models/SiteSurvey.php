@@ -262,5 +262,32 @@ class SiteSurvey {
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([$id]);
     }
+    
+    public function getAllWithDetails() {
+        $sql = "SELECT ss.*, 
+                       s.site_id, s.location,
+                       v.name as vendor_name,
+                       u.username as approved_by_name,
+                       ss.technical_remarks as notes,
+                       ss.submitted_date,
+                       ss.approved_date,
+                       ss.survey_status,
+                       CONCAT(
+                           'Store Model: ', COALESCE(ss.store_model, 'N/A'), '; ',
+                           'Floor Height: ', COALESCE(ss.floor_height, 'N/A'), '; ',
+                           'Ceiling Type: ', COALESCE(ss.ceiling_type, 'N/A'), '; ',
+                           'Total Cameras: ', COALESCE(ss.total_cameras, 'N/A'), '; ',
+                           'Analytic Cameras: ', COALESCE(ss.analytic_cameras, 'N/A')
+                       ) as survey_data
+                FROM site_surveys ss
+                LEFT JOIN sites s ON ss.site_id = s.id
+                LEFT JOIN vendors v ON ss.vendor_id = v.id
+                LEFT JOIN users u ON ss.approved_by = u.id
+                ORDER BY ss.created_at DESC";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>
