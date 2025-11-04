@@ -1,5 +1,22 @@
 <?php
 require_once 'config/constants.php';
+require_once 'config/auth.php';
+
+// Check if user is already logged in and redirect to appropriate dashboard
+if (Auth::isLoggedIn()) {
+    $user = Auth::getCurrentUser();
+    if ($user['role'] === ADMIN_ROLE) {
+        header('Location: admin/dashboard.php');
+        exit();
+    } elseif ($user['role'] === VENDOR_ROLE) {
+        header('Location: vendor/');
+        exit();
+    }
+}
+
+// If no session found, redirect to login
+header('Location: auth/login.php');
+exit();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -67,7 +84,7 @@ require_once 'config/constants.php';
                             Comprehensive Reports
                         </li>
                     </ul>
-                    <a href="admin/" class="block w-full bg-blue-600 text-white text-center py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
+                    <a href="auth/login.php" class="block w-full bg-blue-600 text-white text-center py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
                         Access Admin Panel
                     </a>
                 </div>
@@ -115,7 +132,7 @@ require_once 'config/constants.php';
                             Mobile-Friendly Interface
                         </li>
                     </ul>
-                    <a href="vendor/" class="block w-full bg-green-600 text-white text-center py-3 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium">
+                    <a href="auth/login.php" class="block w-full bg-green-600 text-white text-center py-3 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium">
                         Access Vendor Portal
                     </a>
                 </div>
@@ -123,7 +140,7 @@ require_once 'config/constants.php';
         </div>
 
         <!-- System Status -->
-        <div class="mt-12 max-w-2xl mx-auto">
+        <!-- <div class="mt-12 max-w-2xl mx-auto">
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4 text-center">System Status</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
@@ -149,10 +166,10 @@ require_once 'config/constants.php';
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <!-- Test Credentials -->
-        <div class="mt-8 max-w-lg mx-auto">
+        <!-- <div class="mt-8 max-w-lg mx-auto">
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h3 class="text-sm font-medium text-blue-800 mb-3 text-center">Test Credentials</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-blue-600">
@@ -168,7 +185,7 @@ require_once 'config/constants.php';
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <!-- Footer -->
         <div class="mt-12 text-center text-gray-500 text-sm">

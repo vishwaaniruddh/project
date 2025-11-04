@@ -52,10 +52,7 @@ class ErrorHandler {
             E_USER_DEPRECATED => 'USER DEPRECATED'
         ];
         
-        // Add E_STRICT only if it exists (for PHP < 8.4 compatibility)
-        if (defined('E_STRICT')) {
-            $errorTypes[E_STRICT] = 'STRICT NOTICE';
-        }
+        // E_STRICT is deprecated in PHP 8.4+, so we no longer include it
         
         $errorType = $errorTypes[$severity] ?? 'UNKNOWN ERROR';
         
