@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test File Upload</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 15px; }
+        button { padding: 10px 20px; background: #007cba; color: white; border: none; cursor: pointer; }
+        .result { margin-top: 20px; padding: 10px; background: #f5f5f5; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>Test File Upload</h1>
+    
+    <form id="testForm" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="excel_file">Select File:</label><br>
+            <input type="file" id="excel_file" name="excel_file" accept=".csv,.xlsx,.xls">
+        </div>
+        <button type="submit">Upload Test</button>
+    </form>
+    
+    <div id="result" class="result" style="display: none;"></div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('excel_file');
+            const resultDiv = document.getElementById('result');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Please select a file');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            console.log('Selected file:', file);
+            
+            // Test 1: Using FormData with form
+            console.log('Test 1: FormData from form');
+            const formData1 = new FormData(this);
+            
+            // Test 2: Manual FormData
+            console.log('Test 2: Manual FormData');
+            const formData2 = new FormData();
+            formData2.append('excel_file', file);
+            
+            // Log both FormData objects
+            console.log('FormData1 entries:');
+            for (let pair of formData1.entries()) {
+                console.log(pair[0] + ':', pair[1]);
+            }
+            
+            console.log('FormData2 entries:');
+            for (let pair of formData2.entries()) {
+                console.log(pair[0] + ':', pair[1]);
+            }
+            
+            // Send test request
+            fetch('test_file_upload.php', {
+                method: 'POST',
+                body: formData2,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '<h3>Upload Test Result:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            })
+            .catch(error => {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '<h3>Error:</h3><p>' + error.message + '</p>';
+            });
+        });
+    </script>
+</body>
+</html>

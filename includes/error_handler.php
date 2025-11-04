@@ -47,11 +47,15 @@ class ErrorHandler {
             E_USER_ERROR => 'USER ERROR',
             E_USER_WARNING => 'USER WARNING',
             E_USER_NOTICE => 'USER NOTICE',
-            E_STRICT => 'STRICT NOTICE',
             E_RECOVERABLE_ERROR => 'RECOVERABLE ERROR',
             E_DEPRECATED => 'DEPRECATED',
             E_USER_DEPRECATED => 'USER DEPRECATED'
         ];
+        
+        // Add E_STRICT only if it exists (for PHP < 8.4 compatibility)
+        if (defined('E_STRICT')) {
+            $errorTypes[E_STRICT] = 'STRICT NOTICE';
+        }
         
         $errorType = $errorTypes[$severity] ?? 'UNKNOWN ERROR';
         

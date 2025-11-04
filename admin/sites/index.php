@@ -120,38 +120,38 @@ ob_start();
                     <tr>
                         <td>
                             <div>
-                                <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($site['site_id']); ?></div>
+                                <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($site['site_id'] ?? ''); ?></div>
                                 <?php if ($site['store_id']): ?>
-                                    <div class="text-sm text-gray-500">Store: <?php echo htmlspecialchars($site['store_id']); ?></div>
+                                    <div class="text-sm text-gray-500">Store: <?php echo htmlspecialchars($site['store_id'] ?? ''); ?></div>
                                 <?php endif; ?>
                                 <?php if ($site['po_number']): ?>
-                                    <div class="text-sm text-gray-500">PO: <?php echo htmlspecialchars($site['po_number']); ?></div>
+                                    <div class="text-sm text-gray-500">PO: <?php echo htmlspecialchars($site['po_number'] ?? ''); ?></div>
                                 <?php endif; ?>
                             </div>
                         </td>
                         <td>
-                            <div class="text-sm text-gray-900"><?php echo htmlspecialchars($site['city']); ?>, <?php echo htmlspecialchars($site['state']); ?></div>
-                            <div class="text-sm text-gray-500"><?php echo htmlspecialchars($site['country']); ?></div>
+                            <div class="text-sm text-gray-900"><?php echo htmlspecialchars($site['city'] ?? ''); ?>, <?php echo htmlspecialchars($site['state'] ?? ''); ?></div>
+                            <div class="text-sm text-gray-500"><?php echo htmlspecialchars($site['country'] ?? ''); ?></div>
                             <?php if ($site['branch']): ?>
-                                <div class="text-sm text-gray-500">Branch: <?php echo htmlspecialchars($site['branch']); ?></div>
+                                <div class="text-sm text-gray-500">Branch: <?php echo htmlspecialchars($site['branch'] ?? ''); ?></div>
                             <?php endif; ?>
                         </td>
                         <td>
                             <?php if ($site['customer']): ?>
-                                <div class="text-sm text-gray-900"><?php echo htmlspecialchars($site['customer']); ?></div>
+                                <div class="text-sm text-gray-900"><?php echo htmlspecialchars($site['customer'] ?? ''); ?></div>
                             <?php endif; ?>
                             <?php if ($site['bank']): ?>
-                                <div class="text-sm text-gray-500"><?php echo htmlspecialchars($site['bank']); ?></div>
+                                <div class="text-sm text-gray-500"><?php echo htmlspecialchars($site['bank'] ?? ''); ?></div>
                             <?php endif; ?>
                         </td>
                         <td>
                             <?php if ($site['vendor']): ?>
-                                <div class="text-sm text-gray-900"><?php echo htmlspecialchars($site['vendor']); ?></div>
+                                <div class="text-sm text-gray-900"><?php echo htmlspecialchars($site['vendor'] ?? ''); ?></div>
                             <?php endif; ?>
                             <?php if ($site['delegation_status'] === 'active' && $site['delegated_vendor_name']): ?>
                                 <div class="flex items-center space-x-2">
                                     <span class="badge badge-warning">Delegated</span>
-                                    <span class="text-sm text-orange-600"><?php echo htmlspecialchars($site['delegated_vendor_name']); ?></span>
+                                    <span class="text-sm text-orange-600"><?php echo htmlspecialchars($site['delegated_vendor_name'] ?? ''); ?></span>
                                 </div>
                                 <div class="text-xs text-gray-500 mt-1">
                                     Since: <?php echo date('M d, Y', strtotime($site['delegation_date'])); ?>
@@ -162,7 +162,7 @@ ob_start();
                         </td>
                         <td>
                             <?php if ($site['activity_status']): ?>
-                                <span class="badge badge-info"><?php echo htmlspecialchars($site['activity_status']); ?></span>
+                                <span class="badge badge-info"><?php echo htmlspecialchars($site['activity_status'] ?? ''); ?></span>
                             <?php else: ?>
                                 <span class="badge badge-secondary">No Status</span>
                             <?php endif; ?>
@@ -910,43 +910,68 @@ async function loadBanksForSite(targetSelectId = 'bank_id') {
     }
 }
 
-// Search functionality
-document.getElementById('searchInput').addEventListener('keyup', debounce(function() {
-    applyFilters();
-}, 500));
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', debounce(function() {
+            applyFilters();
+        }, 500));
+    }
 
-// Filter functionality
-document.getElementById('cityFilter').addEventListener('change', applyFilters);
-document.getElementById('stateFilter').addEventListener('change', applyFilters);
-document.getElementById('statusFilter').addEventListener('change', applyFilters);
-document.getElementById('surveyStatusFilter').addEventListener('change', applyFilters);
+    // Filter functionality
+    const cityFilter = document.getElementById('cityFilter');
+    const stateFilter = document.getElementById('stateFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const surveyStatusFilter = document.getElementById('surveyStatusFilter');
+    
+    if (cityFilter) cityFilter.addEventListener('change', applyFilters);
+    if (stateFilter) stateFilter.addEventListener('change', applyFilters);
+    if (statusFilter) statusFilter.addEventListener('change', applyFilters);
+    if (surveyStatusFilter) surveyStatusFilter.addEventListener('change', applyFilters);
+});
 
 function applyFilters() {
-    const searchTerm = document.getElementById('searchInput').value;
-    const city = document.getElementById('cityFilter').value;
-    const state = document.getElementById('stateFilter').value;
-    const status = document.getElementById('statusFilter').value;
-    const surveyStatus = document.getElementById('surveyStatusFilter').value;
-    
-    const url = new URL(window.location);
-    
-    if (searchTerm) url.searchParams.set('search', searchTerm);
-    else url.searchParams.delete('search');
-    
-    if (city) url.searchParams.set('city', city);
-    else url.searchParams.delete('city');
-    
-    if (state) url.searchParams.set('state', state);
-    else url.searchParams.delete('state');
-    
-    if (status) url.searchParams.set('activity_status', status);
-    else url.searchParams.delete('activity_status');
-    
-    if (surveyStatus) url.searchParams.set('survey_status', surveyStatus);
-    else url.searchParams.delete('survey_status');
-    
-    url.searchParams.delete('page');
-    window.location.href = url.toString();
+    try {
+        const searchInput = document.getElementById('searchInput');
+        const cityFilter = document.getElementById('cityFilter');
+        const stateFilter = document.getElementById('stateFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        const surveyStatusFilter = document.getElementById('surveyStatusFilter');
+        
+        const searchTerm = searchInput ? searchInput.value : '';
+        const city = cityFilter ? cityFilter.value : '';
+        const state = stateFilter ? stateFilter.value : '';
+        const status = statusFilter ? statusFilter.value : '';
+        const surveyStatus = surveyStatusFilter ? surveyStatusFilter.value : '';
+        
+        console.log('Applying filters:', { searchTerm, city, state, status, surveyStatus });
+        
+        const url = new URL(window.location);
+        
+        if (searchTerm) url.searchParams.set('search', searchTerm);
+        else url.searchParams.delete('search');
+        
+        if (city) url.searchParams.set('city', city);
+        else url.searchParams.delete('city');
+        
+        if (state) url.searchParams.set('state', state);
+        else url.searchParams.delete('state');
+        
+        if (status) url.searchParams.set('activity_status', status);
+        else url.searchParams.delete('activity_status');
+        
+        if (surveyStatus) url.searchParams.set('survey_status', surveyStatus);
+        else url.searchParams.delete('survey_status');
+        
+        url.searchParams.delete('page');
+        
+        console.log('Redirecting to:', url.toString());
+        window.location.href = url.toString();
+    } catch (error) {
+        console.error('Error in applyFilters:', error);
+    }
 }
 
 // Create site form submission

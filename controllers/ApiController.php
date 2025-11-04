@@ -69,7 +69,14 @@ class ApiController extends BaseController {
             $search = $_GET['search'] ?? '';
             $status = $_GET['status'] ?? '';
             
-            $result = $model->getAllWithPagination($page, $limit, $search, $status);
+            // Handle filtering for states by country
+            if ($type === 'states' && !empty($_GET['country_id'])) {
+                $countryId = (int)$_GET['country_id'];
+                $filters = ['country_id' => $countryId];
+                $result = $model->getAllWithPagination($page, $limit, $search, $status, $filters);
+            } else {
+                $result = $model->getAllWithPagination($page, $limit, $search, $status);
+            }
             
             $this->sendResponse(true, [
                 'records' => $result['records'],

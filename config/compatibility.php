@@ -52,7 +52,7 @@ function exportArrayToCSV($data, $filename, $headers = null) {
 /**
  * Simple Excel-like CSV Reader (fallback for PHPSpreadsheet)
  */
-function readCSVFile($filepath, $hasHeaders = true) {
+function readCSVFileCompat($filepath, $hasHeaders = true) {
     if (!file_exists($filepath)) {
         throw new Exception("File not found: $filepath");
     }

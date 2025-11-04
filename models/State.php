@@ -8,7 +8,7 @@ class State extends BaseMaster {
         parent::__construct();
     }
     
-    public function getAllWithRelations($page = 1, $limit = 20, $search = '', $status = '') {
+    public function getAllWithPagination($page = 1, $limit = 20, $search = '', $status = '', $filters = []) {
         $offset = ($page - 1) * $limit;
         
         $whereClause = '';
@@ -26,6 +26,12 @@ class State extends BaseMaster {
         if (!empty($status)) {
             $conditions[] = "s.status = ?";
             $params[] = $status;
+        }
+        
+        // Filter by country_id
+        if (!empty($filters['country_id'])) {
+            $conditions[] = "s.country_id = ?";
+            $params[] = $filters['country_id'];
         }
         
         if (!empty($conditions)) {
@@ -60,6 +66,10 @@ class State extends BaseMaster {
             'limit' => $limit,
             'pages' => ceil($total / $limit)
         ];
+    }
+    
+    public function getAllWithRelations($page = 1, $limit = 20, $search = '', $status = '') {
+        return $this->getAllWithPagination($page, $limit, $search, $status);
     }
     
     public function getByCountry($countryId) {

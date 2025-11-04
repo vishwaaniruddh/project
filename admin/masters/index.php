@@ -138,6 +138,7 @@ ob_start();
                         <?php endif; ?>
                         <?php if ($masterType === 'cities'): ?>
                         <th>State</th>
+                        <th>Zone</th>
                         <th>Country</th>
                         <?php endif; ?>
                         <th>Status</th>
@@ -171,6 +172,9 @@ ob_start();
                         <?php if ($masterType === 'cities'): ?>
                         <td class="text-sm text-gray-500">
                             <?php echo htmlspecialchars($record['state_name'] ?? 'N/A'); ?>
+                        </td>
+                        <td class="text-sm text-gray-500">
+                            <?php echo htmlspecialchars($record['zone_name'] ?? 'N/A'); ?>
                         </td>
                         <td class="text-sm text-gray-500">
                             <?php echo htmlspecialchars($record['country_name'] ?? 'N/A'); ?>
@@ -294,8 +298,14 @@ ob_start();
                     </select>
                 </div>
                 <div class="form-group">
+                    <label for="zone_id" class="form-label">Zone</label>
+                    <select id="zone_id" name="zone_id" class="form-select" readonly>
+                        <option value="">Auto-selected based on state</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="state_id" class="form-label">State *</label>
-                    <select id="state_id" name="state_id" class="form-select" required>
+                    <select id="state_id" name="state_id" class="form-select" required onchange="loadZoneForState(this.value)">
                         <option value="">Select State</option>
                     </select>
                 </div>
@@ -522,7 +532,7 @@ function loadCountries() {
     const countrySelect = document.getElementById('country_id');
     if (!countrySelect) return;
     
-    fetch('../api/masters.php?path=countries')
+    fetch('../../api/masters.php?path=countries')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -535,12 +545,33 @@ function loadCountries() {
         .catch(error => console.error('Error loading countries:', error));
 }
 
+// Load zones for dropdown
+function loadZones() {
+    const zoneSelect = document.getElementById('zone_id');
+    if (!zoneSelect) return;
+    
+    fetch('../../api/masters.php?path=zones')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Keep the zones data for later use
+                window.zonesData = data.data.records;
+            }
+        })
+        .catch(error => console.error('Error loading zones:', error));
+}
+
 // Load states when country is selected
 function loadStates(countryId) {
     const stateSelect = document.getElementById('state_id');
+    const zoneSelect = document.getElementById('zone_id');
+    
     if (!stateSelect) return;
     
     stateSelect.innerHTML = '<option value="">Select State</option>';
+    if (zoneSelect) {
+        zoneSelect.innerHTML = '<option value="">Auto-selected based on state</option>';
+    }
     
     if (!countryId) return;
     
@@ -550,7 +581,7 @@ function loadStates(countryId) {
             if (data.success) {
                 data.data.records.forEach(state => {
                     if (state.country_id == countryId) {
-                        stateSelect.innerHTML += `<option value="${state.id}">${state.name}</option>`;
+                        stateSelect.innerHTML += `<option value="${state.id}" data-zone-id="${state.zone_id}">${state.name}</option>`;
                     }
                 });
             }
@@ -558,10 +589,65 @@ function loadStates(countryId) {
         .catch(error => console.error('Error loading states:', error));
 }
 
+// Load zone when state is selected
+function loadZoneForState(stateId) {
+    const stateSelect = document.getElementById('state_id');
+    const zoneSelect = document.getElementById('zone_id');
+    
+    if (!stateSelect || !zoneSelect || !stateId) {
+        if (zoneSelect) {
+            zoneSelect.innerHTML = '<option value="">Auto-selected based on state</option>';
+        }
+        return;
+    }
+    
+    // Get the selected state option
+    const selectedOption = stateSelect.options[stateSelect.selectedIndex];
+    const zoneId = selectedOption.getAttribute('data-zone-id');
+    
+    if (zoneId && window.zonesData) {
+        // Find the zone name
+        const zone = window.zonesData.find(z => z.id == zoneId);
+        if (zone) {
+            zoneSelect.innerHTML = `<option value="${zone.id}" selected>${zone.name}</option>`;
+        } else {
+            zoneSelect.innerHTML = '<option value="">Zone not found</option>';
+        }
+    } else {
+        // Fetch zone info from API if not available
+        fetch(`../../api/masters.php?path=states/${stateId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data.record.zone_id) {
+                    const zoneId = data.data.record.zone_id;
+                    // Fetch zone details
+                    fetch(`../../api/masters.php?path=zones/${zoneId}`)
+                        .then(response => response.json())
+                        .then(zoneData => {
+                            if (zoneData.success) {
+                                const zone = zoneData.data.record;
+                                zoneSelect.innerHTML = `<option value="${zone.id}" selected>${zone.name}</option>`;
+                            }
+                        });
+                } else {
+                    zoneSelect.innerHTML = '<option value="">No zone assigned</option>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading zone for state:', error);
+                zoneSelect.innerHTML = '<option value="">Error loading zone</option>';
+            });
+    }
+}
+
 function openCreateModal() {
     // Load countries for states and cities
     if (currentMasterType === 'states' || currentMasterType === 'cities') {
         loadCountries();
+    }
+    // Load zones for cities
+    if (currentMasterType === 'cities') {
+        loadZones();
     }
     openModal('createMasterModal');
 }

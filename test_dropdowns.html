@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Dropdowns</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        select { width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Test City Form Dropdowns</h1>
+    
+    <div class="form-group">
+        <label for="country_id">Country *</label>
+        <select id="country_id" name="country_id" onchange="loadStates(this.value)">
+            <option value="">Select Country</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label for="zone_id">Zone (Auto-selected)</label>
+        <select id="zone_id" name="zone_id" readonly style="background-color: #f5f5f5;">
+            <option value="">Auto-selected based on state</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label for="state_id">State *</label>
+        <select id="state_id" name="state_id" onchange="loadZoneForState(this.value)">
+            <option value="">Select State</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label for="city_name">City Name *</label>
+        <input type="text" id="city_name" name="city_name" style="width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Enter city name">
+    </div>
+    
+    <div id="status" style="margin-top: 20px;"></div>
+
+    <script>
+        let zonesData = [];
+        
+        // Load countries on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCountries();
+            loadZones();
+        });
+        
+        function showStatus(message, isError = false) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="${isError ? 'error' : 'success'}">${message}</div>`;
+        }
+        
+        function loadCountries() {
+            showStatus('Loading countries...');
+            
+            fetch('api/masters.php?path=countries')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const countrySelect = document.getElementById('country_id');
+                        countrySelect.innerHTML = '<option value="">Select Country</option>';
+                        
+                        data.data.records.forEach(country => {
+                            countrySelect.innerHTML += `<option value="${country.id}">${country.name}</option>`;
+                        });
+                        
+                        showStatus(`✅ Loaded ${data.data.records.length} countries`);
+                    } else {
+                        showStatus('❌ Failed to load countries', true);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading countries:', error);
+                    showStatus('❌ Error loading countries: ' + error.message, true);
+                });
+        }
+        
+        function loadZones() {
+            fetch('api/masters.php?path=zones')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        zonesData = data.data.records;
+                        console.log('Loaded zones:', zonesData);
+                    }
+                })
+                .catch(error => console.error('Error loading zones:', error));
+        }
+        
+        function loadStates(countryId) {
+            const stateSelect = document.getElementById('state_id');
+            const zoneSelect = document.getElementById('zone_id');
+            
+            stateSelect.innerHTML = '<option value="">Select State</option>';
+            zoneSelect.innerHTML = '<option value="">Auto-selected based on state</option>';
+            
+            if (!countryId) {
+                showStatus('Please select a country first');
+                return;
+            }
+            
+            showStatus('Loading states...');
+            
+            fetch(`api/masters.php?path=states&country_id=${countryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        data.data.records.forEach(state => {
+                            if (state.country_id == countryId) {
+                                stateSelect.innerHTML += `<option value="${state.id}" data-zone-id="${state.zone_id}">${state.name}</option>`;
+                            }
+                        });
+                        
+                        showStatus(`✅ Loaded ${data.data.records.length} states`);
+                    } else {
+                        showStatus('❌ Failed to load states', true);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading states:', error);
+                    showStatus('❌ Error loading states: ' + error.message, true);
+                });
+        }
+        
+        function loadZoneForState(stateId) {
+            const stateSelect = document.getElementById('state_id');
+            const zoneSelect = document.getElementById('zone_id');
+            
+            if (!stateId) {
+                zoneSelect.innerHTML = '<option value="">Auto-selected based on state</option>';
+                return;
+            }
+            
+            showStatus('Loading zone for selected state...');
+            
+            // Get the selected state option
+            const selectedOption = stateSelect.options[stateSelect.selectedIndex];
+            const zoneId = selectedOption.getAttribute('data-zone-id');
+            
+            if (zoneId && zonesData.length > 0) {
+                // Find the zone name
+                const zone = zonesData.find(z => z.id == zoneId);
+                if (zone) {
+                    zoneSelect.innerHTML = `<option value="${zone.id}" selected>${zone.name}</option>`;
+                    showStatus(`✅ Auto-selected zone: ${zone.name}`);
+                } else {
+                    zoneSelect.innerHTML = '<option value="">Zone not found</option>';
+                    showStatus('❌ Zone not found for selected state', true);
+                }
+            } else {
+                // Fetch zone info from API if not available
+                fetch(`api/masters.php?path=states/${stateId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.data.record.zone_id) {
+                            const zoneId = data.data.record.zone_id;
+                            // Fetch zone details
+                            fetch(`api/masters.php?path=zones/${zoneId}`)
+                                .then(response => response.json())
+                                .then(zoneData => {
+                                    if (zoneData.success) {
+                                        const zone = zoneData.data.record;
+                                        zoneSelect.innerHTML = `<option value="${zone.id}" selected>${zone.name}</option>`;
+                                        showStatus(`✅ Auto-selected zone: ${zone.name}`);
+                                    }
+                                });
+                        } else {
+                            zoneSelect.innerHTML = '<option value="">No zone assigned</option>';
+                            showStatus('ℹ️ No zone assigned to selected state');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading zone for state:', error);
+                        zoneSelect.innerHTML = '<option value="">Error loading zone</option>';
+                        showStatus('❌ Error loading zone for state', true);
+                    });
+            }
+        }
+    </script>
+</body>
+</html>

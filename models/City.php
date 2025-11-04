@@ -116,16 +116,18 @@ class City extends BaseMaster {
         $countSql = "SELECT COUNT(*) FROM {$this->table} c 
                      LEFT JOIN states s ON c.state_id = s.id 
                      LEFT JOIN countries co ON c.country_id = co.id 
+                     LEFT JOIN zones z ON s.zone_id = z.id 
                      $whereClause";
         $stmt = $this->db->prepare($countSql);
         $stmt->execute($params);
         $total = $stmt->fetchColumn();
         
         // Get paginated results with relations
-        $sql = "SELECT c.*, s.name as state_name, co.name as country_name 
+        $sql = "SELECT c.*, s.name as state_name, co.name as country_name, z.name as zone_name 
                 FROM {$this->table} c 
                 LEFT JOIN states s ON c.state_id = s.id 
                 LEFT JOIN countries co ON c.country_id = co.id 
+                LEFT JOIN zones z ON s.zone_id = z.id 
                 $whereClause 
                 ORDER BY c.name ASC 
                 LIMIT $limit OFFSET $offset";
