@@ -2,9 +2,9 @@
 require_once '../config/auth.php';
 require_once '../config/constants.php';
 
-// If already logged in and is admin, redirect to dashboard
-if (Auth::isLoggedIn() && Auth::isAdmin()) {
-    header('Location: dashboard.php');
+// If already logged in and is vendor, redirect to dashboard
+if (Auth::isLoggedIn() && Auth::isVendor()) {
+    header('Location: index.php');
     exit();
 }
 ?>
@@ -13,14 +13,14 @@ if (Auth::isLoggedIn() && Auth::isAdmin()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - <?php echo APP_NAME; ?></title>
+    <title>Vendor Login - <?php echo APP_NAME; ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
     <div class="max-w-md w-full space-y-8">
         <div>
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Admin Login
+                Vendor Login
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600">
                 <?php echo APP_NAME; ?>
@@ -41,20 +41,20 @@ if (Auth::isLoggedIn() && Auth::isAdmin()) {
                 <div>
                     <label for="username" class="sr-only">Username</label>
                     <input id="username" name="username" type="text" required 
-                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
+                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" 
                            placeholder="Username">
                 </div>
                 <div>
                     <label for="password" class="sr-only">Password</label>
                     <input id="password" name="password" type="password" required 
-                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
+                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" 
                            placeholder="Password">
                 </div>
             </div>
 
             <div>
                 <button type="submit" id="loginBtn"
-                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50">
+                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50">
                     <span id="loginBtnText">Sign in</span>
                     <span id="loginSpinner" class="hidden ml-2">
                         <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -74,12 +74,25 @@ if (Auth::isLoggedIn() && Auth::isAdmin()) {
         </form>
         
         <div class="mt-6 text-center">
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="text-sm font-medium text-blue-800 mb-2">Test Credentials:</h3>
-                <div class="text-xs text-blue-600 space-y-1">
-                    <div><strong>Admin:</strong> admin_test / admin123</div>
-                    <div><strong>Vendor:</strong> vendor_test1 / vendor123</div>
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h3 class="text-sm font-medium text-green-800 mb-2">Test Credentials:</h3>
+                <div class="text-xs text-green-600 space-y-1 cursor-pointer">
+                    <div class="hover:bg-green-100 p-1 rounded" onclick="fillCredentials('vendor_test1', 'vendor123')">
+                        <strong>Vendor 1:</strong> vendor_test1 / vendor123
+                    </div>
+                    <div class="hover:bg-green-100 p-1 rounded" onclick="fillCredentials('vendor_test2', 'vendor123')">
+                        <strong>Vendor 2:</strong> vendor_test2 / vendor123
+                    </div>
+                    <div class="hover:bg-green-100 p-1 rounded" onclick="fillCredentials('vendor_test3', 'vendor123')">
+                        <strong>Vendor 3:</strong> vendor_test3 / vendor123
+                    </div>
                 </div>
+            </div>
+            
+            <div class="mt-4">
+                <a href="../admin/login.php" class="text-sm text-indigo-600 hover:text-indigo-500">
+                    Admin Login →
+                </a>
             </div>
         </div>
     </div>
@@ -101,6 +114,12 @@ if (Auth::isLoggedIn() && Auth::isAdmin()) {
                 toggleBtn.textContent = 'Show Debug Info';
             }
         });
+        
+        // Fill credentials function
+        function fillCredentials(username, password) {
+            document.getElementById('username').value = username;
+            document.getElementById('password').value = password;
+        }
         
         // Login form handler
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
@@ -129,7 +148,7 @@ if (Auth::isLoggedIn() && Auth::isAdmin()) {
                     body: JSON.stringify({
                         username: username,
                         password: password,
-                        required_role: 'admin'
+                        required_role: 'vendor'
                     })
                 });
                 
@@ -148,7 +167,7 @@ if (Auth::isLoggedIn() && Auth::isAdmin()) {
                     
                     // Redirect after short delay
                     setTimeout(() => {
-                        window.location.href = data.redirect;
+                        window.location.href = 'index.php';
                     }, 1000);
                 } else {
                     messageDiv.classList.add('bg-red-100', 'border', 'border-red-400', 'text-red-700');
@@ -182,17 +201,6 @@ if (Auth::isLoggedIn() && Auth::isAdmin()) {
                 loginBtn.disabled = false;
                 loginBtnText.textContent = 'Sign in';
                 loginSpinner.classList.add('hidden');
-            }
-        });
-        
-        // Auto-fill test credentials when clicking on them
-        document.addEventListener('click', function(e) {
-            if (e.target.textContent.includes('admin_test')) {
-                document.getElementById('username').value = 'admin_test';
-                document.getElementById('password').value = 'admin123';
-            } else if (e.target.textContent.includes('vendor_test1')) {
-                document.getElementById('username').value = 'vendor_test1';
-                document.getElementById('password').value = 'vendor123';
             }
         });
     </script>
