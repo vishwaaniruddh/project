@@ -292,6 +292,28 @@ $currentUser = Auth::getCurrentUser();
             transform: translateX(0);
         }
         
+        /* Ensure sidebar is visible on mobile when show class is added */
+        @media (max-width: 1023px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                top: 0;
+                left: 0;
+                z-index: 50;
+                height: 100vh;
+                width: 256px;
+            }
+            
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+            
+            /* Ensure main content doesn't have left margin on mobile */
+            .main-content {
+                margin-left: 0 !important;
+            }
+        }
+        
         /* Collapsed sidebar state */
         .admin-sidebar.collapsed {
             width: 80px;
@@ -419,6 +441,20 @@ $currentUser = Auth::getCurrentUser();
             .main-content.sidebar-collapsed {
                 margin-left: 80px;
             }
+            
+            /* Hide hamburger menu on desktop */
+            #toggleSidebar {
+                display: none;
+            }
+        }
+        
+        /* Ensure hamburger menu is visible on mobile */
+        @media (max-width: 1023px) {
+            #toggleSidebar {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+            }
         }
         
         .admin-badge {
@@ -497,13 +533,10 @@ $currentUser = Auth::getCurrentUser();
         }
         
         /* Override any conflicting text colors */
-        /* .admin-sidebar .sidebar-item, */
-        .admin-sidebar .sidebar-item span,
-        .admin-sidebar .sidebar-subitem,
-        /* .admin-sidebar .sidebar-subitem span  */
-         {
+        /* .admin-sidebar .sidebar-item span,
+        .admin-sidebar .sidebar-subitem {
             color: inherit !important;
-        }
+        } */
         
         /* Ensure button text is visible */
         .admin-sidebar button.sidebar-item {
@@ -534,11 +567,31 @@ $currentUser = Auth::getCurrentUser();
             }
         }
         
+        /* Mobile sidebar overlay */
+        #sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+            transition: opacity 0.3s ease;
+        }
+        
+        #sidebar-overlay.hidden {
+            display: none;
+        }
+        
         /* Responsive styles */
         @media (max-width: 1023px) {
             .admin-sidebar {
                 background: #1f2937;
                 z-index: 50;
+            }
+            
+            .main-content {
+                margin-left: 0;
             }
             
             .sidebar-item {
@@ -685,6 +738,7 @@ $currentUser = Auth::getCurrentUser();
         .data-table td {
             padding: 1rem 1.5rem;
             white-space: nowrap;
+            /* white-space: nowrap; */
         }
         .data-table tbody tr {
             background-color: white;
@@ -706,6 +760,7 @@ $currentUser = Auth::getCurrentUser();
             .data-table td {
                 white-space: normal;
                 word-break: break-word;
+                white-space: nowrap;
             }
         }
         .modal {
@@ -927,7 +982,7 @@ $currentUser = Auth::getCurrentUser();
         .menu-section-header:first-child {
             margin-top: 6px;
         }
-        .form-input, .form-select {
+        .form-input, .form-select,.form-textarea,.search-input {
             background-color: #f9fafb;
             border: 1px solid #d1d5db;
             color: #111827;
@@ -1145,12 +1200,12 @@ $currentUser = Auth::getCurrentUser();
             <header class="admin-header">
                 <div class="flex items-center justify-between px-6 py-4">
                     <div class="flex items-center">
-                        <button id="toggleSidebar" class="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors">
+                        <button id="toggleSidebar" class="lg:hidden p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 mr-2">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                             </svg>
                         </button>
-                        <div class="ml-2">
+                        <div>
                             <h1 class="text-xl font-semibold text-gray-900">Admin Panel</h1>
                             <p class="text-sm text-gray-500">System Administration</p>
                         </div>
@@ -1200,10 +1255,18 @@ $currentUser = Auth::getCurrentUser();
             const mainContent = document.querySelector('.main-content');
             const sidebarToggle = document.getElementById('sidebarToggle');
             const mobileSidebarToggle = document.getElementById('toggleSidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            console.log('Sidebar elements found:', {
+                sidebar: !!sidebar,
+                mobileSidebarToggle: !!mobileSidebarToggle,
+                overlay: !!overlay
+            });
             
             // Desktop sidebar toggle (collapse/expand)
             if (sidebarToggle) {
                 sidebarToggle.addEventListener('click', function() {
+                    console.log('Desktop sidebar toggle clicked');
                     sidebar.classList.toggle('collapsed');
                     mainContent.classList.toggle('sidebar-collapsed');
                     
@@ -1213,16 +1276,8 @@ $currentUser = Auth::getCurrentUser();
                 });
             }
             
-            // Mobile sidebar toggle (show/hide)
-            if (mobileSidebarToggle) {
-                mobileSidebarToggle.addEventListener('click', function() {
-                    sidebar.classList.toggle('show');
-                    const overlay = document.getElementById('sidebar-overlay');
-                    if (overlay) {
-                        overlay.classList.toggle('hidden');
-                    }
-                });
-            }
+            // Mobile sidebar toggle is handled by admin.js
+            // Removed duplicate event listener to prevent conflicts
             
             // Restore sidebar state from localStorage
             const savedState = localStorage.getItem('sidebarCollapsed');
@@ -1296,14 +1351,7 @@ $currentUser = Auth::getCurrentUser();
             // Initialize tooltips
             initTooltips();
             
-            // Close mobile sidebar when clicking overlay
-            const overlay = document.getElementById('sidebar-overlay');
-            if (overlay) {
-                overlay.addEventListener('click', function() {
-                    sidebar.classList.remove('show');
-                    overlay.classList.add('hidden');
-                });
-            }
+            // Overlay click handler is managed by admin.js
         });
 
         // User dropdown toggle

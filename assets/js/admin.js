@@ -2,32 +2,57 @@
 console.log('Admin JS loaded');
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded');
+    console.log('Admin.js DOM loaded');
     // Sidebar toggle functionality - Updated to work with admin layout
     const toggleSidebar = document.getElementById('toggleSidebar');
     const sidebar = document.querySelector('.admin-sidebar');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
     
+    console.log('Admin.js elements found:', {
+        toggleSidebar: !!toggleSidebar,
+        sidebar: !!sidebar,
+        sidebarOverlay: !!sidebarOverlay
+    });
+    
     if (toggleSidebar && sidebar) {
-        toggleSidebar.addEventListener('click', function() {
-            sidebar.classList.toggle('show');
-            if (sidebarOverlay) {
-                sidebarOverlay.classList.toggle('hidden');
+        console.log('Adding click listener to hamburger menu');
+        toggleSidebar.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Hamburger menu clicked in admin.js');
+            
+            const isShown = sidebar.classList.contains('show');
+            console.log('Sidebar currently shown:', isShown);
+            
+            if (isShown) {
+                // Close sidebar
+                sidebar.classList.remove('show');
+                if (sidebarOverlay) {
+                    sidebarOverlay.classList.add('hidden');
+                }
+                console.log('Closing sidebar');
+            } else {
+                // Open sidebar
+                sidebar.classList.add('show');
+                if (sidebarOverlay) {
+                    sidebarOverlay.classList.remove('hidden');
+                }
+                console.log('Opening sidebar');
             }
         });
+    } else {
+        console.error('Hamburger menu or sidebar not found in admin.js');
     }
     
-    // Close sidebar when clicking overlay (but not sidebar content)
+    // Close sidebar when clicking overlay
     if (sidebarOverlay && sidebar) {
         sidebarOverlay.addEventListener('click', function(e) {
-            // Only close if clicking the overlay itself, not sidebar content
-            if (e.target === this) {
-                sidebar.classList.remove('show');
-                sidebarOverlay.classList.add('hidden');
-            }
+            console.log('Overlay clicked - closing sidebar');
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.add('hidden');
         });
         
-        // Prevent sidebar from closing when clicking inside sidebar
+        // Prevent sidebar content clicks from closing the sidebar
         sidebar.addEventListener('click', function(e) {
             e.stopPropagation();
         });
