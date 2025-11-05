@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/auth.php';
-require_once __DIR__ . '/../config/constants.php';
+// constants.php is already included by auth.php
 
 // Require admin authentication
 Auth::requireRole(ADMIN_ROLE);

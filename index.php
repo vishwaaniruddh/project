@@ -1,6 +1,6 @@
 <?php
-require_once 'config/constants.php';
 require_once 'config/auth.php';
+// constants.php is already included by auth.php
 
 // Check if user is already logged in and redirect to appropriate dashboard
 if (Auth::isLoggedIn()) {

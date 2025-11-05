@@ -1,6 +1,6 @@
 <?php
 // Redirect to the main vendor dashboard
-require_once '../config/constants.php';
+require_once '../config/auth.php'; // This includes constants.php
 header('Location: ' . BASE_URL . '/vendor/');
 exit;
 ?>

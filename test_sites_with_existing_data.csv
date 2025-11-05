@@ -1,4 +1,0 @@
-Site ID,Store ID,Location,Country,State,City,Branch,Customer,Bank,PO Number,PO Date,Remarks
-SITE001,STORE001,Nicobar Branch Location,India,Andaman and Nicobar Islands,Nicobar,Main Branch,,,PO2024001,2024-01-15,Test site 1
-SITE002,STORE002,South Andaman Location,India,Andaman and Nicobar Islands,South Andaman,Secondary Branch,,,PO2024002,2024-01-20,Test site 2
-SITE003,STORE003,Simple Test Location,India,Bihar,,,Test Branch,,,PO2024003,2024-01-21,Test site 3

@@ -2,12 +2,19 @@
 // Authentication configuration
 session_start();
 
+// Define auth-specific constants first (before including constants.php)
+if (!defined('SESSION_TIMEOUT')) {
+    define('SESSION_TIMEOUT', 3600); // 1 hour in seconds
+}
+if (!defined('ADMIN_ROLE')) {
+    define('ADMIN_ROLE', 'admin');
+}
+if (!defined('VENDOR_ROLE')) {
+    define('VENDOR_ROLE', 'vendor');
+}
+
 // Include constants for BASE_URL (used by other parts of the application)
 require_once __DIR__ . '/constants.php';
-
-define('SESSION_TIMEOUT', 3600); // 1 hour in seconds
-define('ADMIN_ROLE', 'admin');
-define('VENDOR_ROLE', 'vendor');
 
 class Auth {
     public static function login($user) {
@@ -176,7 +183,7 @@ class Auth {
         } elseif (strpos($currentPath, '/vendor/') !== false) {
             return '../auth/login.php';
         } else {
-            return '/auth/login.php';
+            return '../auth/login.php';
         }
     }
     

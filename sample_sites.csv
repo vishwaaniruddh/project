@@ -1,6 +1,0 @@
-Site ID,Location,City,State,Country,Customer,Bank,Address,Remarks
-SITE001,Mumbai Store 1,Mumbai,Maharashtra,India,Reliance Retail,HDFC Bank,123 Main Street Mumbai,Test site 1
-SITE002,Delhi Store 1,Delhi,Delhi,India,Future Group,ICICI Bank,456 Central Avenue Delhi,Test site 2
-SITE003,Bangalore Store 1,Bangalore,Karnataka,India,Aditya Birla,SBI,789 Tech Park Bangalore,Test site 3
-,Empty Location Test,,,,,,,This row should fail validation
-SITE005,Chennai Store 1,Chennai,Tamil Nadu,India,Tata Group,Axis Bank,321 Beach Road Chennai,Test site 5

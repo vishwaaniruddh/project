@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/auth.php';
-require_once __DIR__ . '/../config/constants.php';
+// constants.php is already included by auth.php
 require_once __DIR__ . '/../models/Installation.php';
 
 // Require vendor authentication

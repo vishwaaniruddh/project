@@ -1,7 +1,0 @@
-Site ID,Store ID,Location,Country,State,City,Branch,Customer,Bank,PO Number,PO Date,Remarks
-SITE001,STORE001,Mumbai Andheri Location,India,Maharashtra,Mumbai,Andheri Branch,Customer A,Axis Bank,PO2024001,2024-01-15,High priority installation
-SITE002,STORE002,Bangalore Whitefield Location,India,Karnataka,Bangalore,Whitefield Branch,Customer A,Axis Bank,PO2024002,2024-01-20,Standard installation
-SITE003,STORE003,Bangalore Electronic City Location,India,Karnataka,Bangalore,Electronic City Branch,Customer A,Axis Bank,PO2024003,2024-01-21,Regular installation
-SITE004,STORE004,Mumbai Bandra Location,India,Maharashtra,Mumbai,Bandra Branch,Customer A,Axis Bank,PO2024004,2024-01-22,Express installation
-SITE005,STORE005,Bangalore Koramangala Location,India,Karnataka,Bangalore,Koramangala Branch,Customer A,Axis Bank,PO2024005,2024-01-23,Standard installation
-SITE006,STORE006,Mumbai Powai Location,India,Maharashtra,Mumbai,Powai Branch,Customer A,Axis Bank,PO2024006,2024-01-24,Priority installation

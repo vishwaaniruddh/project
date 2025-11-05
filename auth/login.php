@@ -1,7 +1,7 @@
 <?php
 require_once '../config/database.php';
 require_once '../config/auth.php';
-require_once '../config/constants.php';
+// constants.php is already included by auth.php
 require_once '../includes/error_handler.php';
 require_once '../includes/logger.php';
 
