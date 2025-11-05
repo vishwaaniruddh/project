@@ -16,8 +16,8 @@ $currentUser = Auth::getCurrentUser();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/custom.css">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/admin.css">
+    <link rel="stylesheet" href="<?php echo url('/assets/css/custom.css'); ?>">
+    <link rel="stylesheet" href="<?php echo url('/assets/css/admin.css'); ?>">
     <!-- Fallback CSS for subdirectories -->
     <style>
         .btn {
@@ -1137,7 +1137,7 @@ $currentUser = Auth::getCurrentUser();
         <div class="flex flex-col h-full">
             <!-- Logo -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-600">
-                <a href="<?php echo BASE_URL; ?>/admin/dashboard.php" class="flex items-center hover:opacity-80 transition-opacity">
+                <a href="<?php echo url('/admin/dashboard.php'); ?>" class="flex items-center hover:opacity-80 transition-opacity">
                     <div class="sidebar-text">
                         <h1 class="text-lg font-bold text-white karvy-brand">Karvy Technologies</h1>
                         <p class="text-xs text-gray-300 karvy-subtitle">Pvt Ltd</p>
@@ -1178,13 +1178,13 @@ $currentUser = Auth::getCurrentUser();
 
             <!-- User Menu -->
             <div class="px-2 py-2 border-t border-gray-600 mt-auto">
-                <a href="<?php echo BASE_URL; ?>/admin/profile.php" class="sidebar-item" data-tooltip="Profile">
+                <a href="<?php echo url('/admin/profile.php'); ?>" class="sidebar-item" data-tooltip="Profile">
                     <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                     </svg>
                     <span class="sidebar-text">Profile</span>
                 </a>
-                <a href="<?php echo BASE_URL; ?>/auth/logout.php" class="sidebar-item text-red-400 hover:bg-red-900 hover:text-red-300" data-tooltip="Logout">
+                <a href="<?php echo url('/auth/logout.php'); ?>" class="sidebar-item text-red-400 hover:bg-red-900 hover:text-red-300" data-tooltip="Logout">
                     <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path>
                     </svg>
@@ -1242,9 +1242,9 @@ $currentUser = Auth::getCurrentUser();
                                 </svg>
                             </button>
                             <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                <a href="<?php echo BASE_URL; ?>/admin/profile.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                                <a href="<?php echo BASE_URL; ?>/admin/settings.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
-                                <a href="<?php echo BASE_URL; ?>/auth/logout.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
+                                <a href="<?php echo url('/admin/profile.php'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                <a href="<?php echo url('/admin/settings.php'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                                <a href="<?php echo url('/auth/logout.php'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
                             </div>
                         </div>
                     </div>
@@ -1264,9 +1264,9 @@ $currentUser = Auth::getCurrentUser();
     <div id="sidebar-overlay" class="fixed inset-0 bg-gray-600 bg-opacity-50 z-40 lg:hidden hidden"></div>
 
     <!-- Scripts -->
-    <script src="<?php echo BASE_URL; ?>/assets/js/app.js"></script>
-    <script src="<?php echo BASE_URL; ?>/assets/js/admin.js"></script>
-    <script src="<?php echo BASE_URL; ?>/assets/js/masters-api.js"></script>
+    <script src="<?php echo url('/assets/js/app.js'); ?>"></script>
+    <script src="<?php echo url('/assets/js/admin.js'); ?>"></script>
+    <script src="<?php echo url('/assets/js/masters-api.js'); ?>"></script>
     <script>
         // Sidebar toggle functionality
         document.addEventListener('DOMContentLoaded', function() {

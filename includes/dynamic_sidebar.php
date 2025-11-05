@@ -83,7 +83,7 @@ function renderMenuItem($item, $currentUrl, $level = 0) {
         $itemClass = $level > 0 ? 'sidebar-subitem' : 'sidebar-item';
         
         if ($item['url']) {
-            echo '<a href="' . BASE_URL . $item['url'] . '" class="' . $itemClass . ' ' . $activeClass . '" data-tooltip="' . htmlspecialchars($item['title']) . '">';
+            echo '<a href="' . url($item['url']) . '" class="' . $itemClass . ' ' . $activeClass . '" data-tooltip="' . htmlspecialchars($item['title']) . '">';
         } else {
             echo '<div class="' . $itemClass . ' ' . $activeClass . '" data-tooltip="' . htmlspecialchars($item['title']) . '">';
         }

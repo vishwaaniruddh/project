@@ -10,7 +10,7 @@ $vendorPermissions = $permissionModel->getVendorPermissions(Auth::getVendorId())
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $title ?? 'Vendor Portal'; ?> - Site Installation Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/admin.css">
+    <link rel="stylesheet" href="<?php echo url('/assets/css/admin.css'); ?>">
     <style>
         .vendor-sidebar {
             background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
@@ -319,7 +319,7 @@ $vendorPermissions = $permissionModel->getVendorPermissions(Auth::getVendorId())
 
                 <!-- Navigation -->
                 <nav class="flex-1 px-4 py-4 space-y-2">
-                    <a href="<?php echo BASE_URL; ?>/vendor/" class="sidebar-item text-white hover:bg-blue-800">
+                    <a href="<?php echo url('/vendor/'); ?>" class="sidebar-item text-white hover:bg-blue-800">
                         <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
                         </svg>
@@ -327,19 +327,19 @@ $vendorPermissions = $permissionModel->getVendorPermissions(Auth::getVendorId())
                     </a>
                     
                     <?php if ($vendorPermissions['view_sites'] ?? false): ?>
-                    <a href="<?php echo BASE_URL; ?>/vendor/sites/" class="sidebar-item text-white hover:bg-blue-800">
+                    <a href="<?php echo url('/vendor/sites/'); ?>" class="sidebar-item text-white hover:bg-blue-800">
                         <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z" clip-rule="evenodd"></path>
                         </svg>
                         My Sites
                     </a>
-                    <a href="<?php echo BASE_URL; ?>/vendor/surveys.php" class="sidebar-item text-white hover:bg-blue-800">
+                    <a href="<?php echo url('/vendor/surveys.php'); ?>" class="sidebar-item text-white hover:bg-blue-800">
                         <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
                         </svg>
                         Site Surveys
                     </a>
-                    <a href="<?php echo BASE_URL; ?>/vendor/installations.php" class="sidebar-item text-white hover:bg-blue-800">
+                    <a href="<?php echo url('/vendor/installations.php'); ?>" class="sidebar-item text-white hover:bg-blue-800">
                         <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M9.504 1.132a1 1 0 01.992 0l1.75 1a1 1 0 11-.992 1.736L10 3.152l-1.254.716a1 1 0 11-.992-1.736l1.75-1zM5.618 4.504a1 1 0 01-.372 1.364L5.016 6l.23.132a1 1 0 11-.992 1.736L3 7.723V8a1 1 0 01-2 0V6a.996.996 0 01.52-.878l1.734-.99a1 1 0 011.364.372zm8.764 0a1 1 0 011.364-.372l1.734.99A.996.996 0 0118 6v2a1 1 0 11-2 0v-.277l-1.254.145a1 1 0 11-.992-1.736L14.984 6l-.23-.132a1 1 0 01-.372-1.364zm-7 4a1 1 0 011.364-.372L10 8.848l1.254-.716a1 1 0 11.992 1.736L11 10.723V12a1 1 0 11-2 0v-1.277l-1.246-.855a1 1 0 01-.372-1.364zM3 11a1 1 0 011 1v1.277l1.246.855a1 1 0 11-.992 1.736l-1.75-1A1 1 0 012 14v-2a1 1 0 011-1zm14 0a1 1 0 011 1v2a1 1 0 01-.504.868l-1.75 1a1 1 0 11-.992-1.736L16 13.277V12a1 1 0 011-1zm-9.618 5.504a1 1 0 011.364-.372l.254.145V16a1 1 0 112 0v.277l.254-.145a1 1 0 11.992 1.736l-1.75 1a.996.996 0 01-.992 0l-1.75-1a1 1 0 01-.372-1.364z" clip-rule="evenodd"></path>
                         </svg>
@@ -348,7 +348,7 @@ $vendorPermissions = $permissionModel->getVendorPermissions(Auth::getVendorId())
                     <?php endif; ?>
                     
                     <?php if ($vendorPermissions['view_masters'] ?? false): ?>
-                    <a href="<?php echo BASE_URL; ?>/vendor/masters/" class="sidebar-item text-white hover:bg-blue-800">
+                    <a href="<?php echo url('/vendor/masters/'); ?>" class="sidebar-item text-white hover:bg-blue-800">
                         <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
                         </svg>
@@ -373,28 +373,28 @@ $vendorPermissions = $permissionModel->getVendorPermissions(Auth::getVendorId())
                         
                         <!-- Inventory Submenu -->
                         <div id="inventory-submenu" class="hidden ml-8 mt-2 space-y-1">
-                            <a href="<?php echo BASE_URL; ?>/vendor/inventory/" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
+                            <a href="<?php echo url('/vendor/inventory/'); ?>" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
                                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
                                 </svg>
                                 Inventory Overview
                             </a>
                             
-                            <a href="<?php echo BASE_URL; ?>/vendor/material-requests-list.php" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
+                            <a href="<?php echo url('/vendor/material-requests-list.php'); ?>" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
                                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
                                 </svg>
                                 Material Requests
                             </a>
                             
-                            <a href="<?php echo BASE_URL; ?>/vendor/material-received.php" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
+                            <a href="<?php echo url('/vendor/material-received.php'); ?>" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
                                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                                 </svg>
                                 Material Received
                             </a>
                             
-                            <a href="<?php echo BASE_URL; ?>/vendor/material-dispatches.php" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
+                            <a href="<?php echo url('/vendor/material-dispatches.php'); ?>" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
                                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                 </svg>
@@ -405,7 +405,7 @@ $vendorPermissions = $permissionModel->getVendorPermissions(Auth::getVendorId())
                     <?php // End of temporarily removed permission check ?>
                     
                     <?php if ($vendorPermissions['view_reports'] ?? false): ?>
-                    <a href="<?php echo BASE_URL; ?>/vendor/reports/" class="sidebar-item text-white hover:bg-blue-800">
+                    <a href="<?php echo url('/vendor/reports/'); ?>" class="sidebar-item text-white hover:bg-blue-800">
                         <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                         </svg>
@@ -416,13 +416,13 @@ $vendorPermissions = $permissionModel->getVendorPermissions(Auth::getVendorId())
 
                 <!-- User Menu -->
                 <div class="px-4 py-4 border-t border-blue-800">
-                    <a href="<?php echo BASE_URL; ?>/vendor/profile.php" class="sidebar-item text-white hover:bg-blue-800">
+                    <a href="<?php echo url('/vendor/profile.php'); ?>" class="sidebar-item text-white hover:bg-blue-800">
                         <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                         </svg>
                         Profile
                     </a>
-                    <a href="<?php echo BASE_URL; ?>/auth/logout.php" class="sidebar-item text-white hover:bg-red-600">
+                    <a href="<?php echo url('/auth/logout.php'); ?>" class="sidebar-item text-white hover:bg-red-600">
                         <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path>
                         </svg>
@@ -480,8 +480,8 @@ $vendorPermissions = $permissionModel->getVendorPermissions(Auth::getVendorId())
                                 </svg>
                             </button>
                             <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                <a href="<?php echo BASE_URL; ?>/vendor/profile.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                                <a href="<?php echo BASE_URL; ?>/auth/logout.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+                                <a href="<?php echo url('/vendor/profile.php'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                <a href="<?php echo url('/auth/logout.php'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
                             </div>
                         </div>
                     </div>
@@ -501,7 +501,7 @@ $vendorPermissions = $permissionModel->getVendorPermissions(Auth::getVendorId())
     <div id="sidebar-overlay" class="fixed inset-0 bg-gray-600 bg-opacity-50 z-40 lg:hidden hidden"></div>
 
     <!-- Scripts -->
-    <script src="<?php echo BASE_URL; ?>/assets/js/admin.js"></script>
+    <script src="<?php echo url('/assets/js/admin.js'); ?>"></script>
     <script>
         // Mobile sidebar toggle
         document.getElementById('toggleSidebar')?.addEventListener('click', function() {
