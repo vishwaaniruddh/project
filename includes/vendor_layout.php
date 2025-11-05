@@ -2,6 +2,15 @@
 require_once __DIR__ . '/../models/VendorPermission.php';
 $permissionModel = new VendorPermission();
 $vendorPermissions = $permissionModel->getVendorPermissions(Auth::getVendorId());
+
+// Ensure url() function is available (fallback)
+if (!function_exists('url')) {
+    function url($path = '') {
+        $baseUrl = defined('BASE_URL') ? rtrim(BASE_URL, '/') : '';
+        $path = ltrim($path, '/');
+        return $path ? $baseUrl . '/' . $path : $baseUrl;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

@@ -2,6 +2,15 @@
 require_once __DIR__ . '/../config/auth.php';
 // constants.php is already included by auth.php
 
+// Ensure url() function is available (fallback)
+if (!function_exists('url')) {
+    function url($path = '') {
+        $baseUrl = defined('BASE_URL') ? rtrim(BASE_URL, '/') : '';
+        $path = ltrim($path, '/');
+        return $path ? $baseUrl . '/' . $path : $baseUrl;
+    }
+}
+
 // Require admin authentication
 Auth::requireRole(ADMIN_ROLE);
 $currentUser = Auth::getCurrentUser();

@@ -1,6 +1,15 @@
 <?php
 require_once __DIR__ . '/../models/Menu.php';
 
+// Ensure url() function is available (fallback)
+if (!function_exists('url')) {
+    function url($path = '') {
+        $baseUrl = defined('BASE_URL') ? rtrim(BASE_URL, '/') : '';
+        $path = ltrim($path, '/');
+        return $path ? $baseUrl . '/' . $path : $baseUrl;
+    }
+}
+
 function renderDynamicSidebar($currentUser) {
     $menuModel = new Menu();
     $menuItems = $menuModel->getMenuForUser($currentUser['id'], $currentUser['role']);
