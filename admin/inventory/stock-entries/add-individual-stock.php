@@ -253,22 +253,36 @@ document.getElementById('stockForm').addEventListener('submit', function(e) {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showAlert('Stock items added successfully!', 'success');
-            setTimeout(() => {
-                window.location.href = '../index.php';
-            }, 1500);
-        } else {
-            showAlert('Error: ' + data.message, 'error');
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.text();
+    })
+    .then(text => {
+        try {
+            const data = JSON.parse(text);
+            if (data.success) {
+                showAlert(`Success: ${data.message}`, 'success');
+                setTimeout(() => {
+                    window.location.href = '../index.php';
+                }, 1500);
+            } else {
+                showAlert('Error: ' + data.message, 'error');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        } catch (parseError) {
+            console.error('JSON Parse Error:', parseError);
+            console.error('Response text:', text);
+            showAlert('Invalid response format. Check console for details.', 'error');
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        showAlert('An error occurred while adding stock items.', 'error');
+        console.error('Fetch Error:', error);
+        showAlert('Network error occurred while adding stock items.', 'error');
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     });

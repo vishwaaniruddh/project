@@ -269,29 +269,49 @@ function viewSiteDetails(id, siteId) {
     
     // Fetch site details using the database ID
     fetch(`get-site-details.php?id=${encodeURIComponent(id)}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                displaySiteDetails(data.site);
-            } else {
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                if (data.success) {
+                    displaySiteDetails(data.site);
+                } else {
+                    modalContent.innerHTML = `
+                        <div class="text-center py-8">
+                            <svg class="w-12 h-12 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p class="text-red-600">${data.message || 'Failed to load site details'}</p>
+                        </div>
+                    `;
+                }
+            } catch (parseError) {
+                console.error('JSON Parse Error:', parseError);
+                console.error('Response text:', text);
                 modalContent.innerHTML = `
                     <div class="text-center py-8">
                         <svg class="w-12 h-12 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        <p class="text-red-600">${data.message || 'Failed to load site details'}</p>
+                        <p class="text-red-600">Invalid response format</p>
+                        <p class="text-xs text-gray-500 mt-2">Check console for details</p>
                     </div>
                 `;
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Fetch Error:', error);
             modalContent.innerHTML = `
                 <div class="text-center py-8">
                     <svg class="w-12 h-12 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    <p class="text-red-600">Error loading site details</p>
+                    <p class="text-red-600">Network error loading site details</p>
                 </div>
             `;
         });
