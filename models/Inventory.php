@@ -42,7 +42,7 @@ class Inventory {
     public function getAvailableStock($boqItemId, $requiredQuantity = null) {
         $sql = "SELECT ist.*, bi.item_name, bi.item_code, bi.unit
                 FROM inventory_stock ist
-                JOIN boq_items bi ON ist.boq_item_id = bi.id
+                JOIN boq_items bi ON CAST(ist.boq_item_id AS CHAR) = CAST(bi.id AS CHAR)
                 WHERE ist.boq_item_id = ? 
                 AND ist.item_status = 'available'
                 AND ist.quality_status = 'good'
@@ -67,7 +67,7 @@ class Inventory {
         $placeholders = str_repeat('?,', count($serialNumbers) - 1) . '?';
         $sql = "SELECT ist.*, bi.item_name, bi.item_code, bi.unit
                 FROM inventory_stock ist
-                JOIN boq_items bi ON ist.boq_item_id = bi.id
+                JOIN boq_items bi ON CAST(ist.boq_item_id AS CHAR) = CAST(bi.id AS CHAR)
                 WHERE ist.serial_number IN ($placeholders)
                 AND ist.item_status = 'available'
                 ORDER BY ist.id ASC";
@@ -104,7 +104,7 @@ class Inventory {
         
         $sql = "SELECT ist.*, bi.item_name, bi.item_code, bi.unit, bi.category, bi.icon_class
                 FROM inventory_stock ist
-                JOIN boq_items bi ON ist.boq_item_id = bi.id
+                JOIN boq_items bi ON CAST(ist.boq_item_id AS CHAR) = CAST(bi.id AS CHAR)
                 $whereClause
                 ORDER BY bi.item_name, ist.batch_number, ist.serial_number";
         
@@ -116,7 +116,7 @@ class Inventory {
     public function getStockByItem($boqItemId) {
         $sql = "SELECT ist.*, bi.item_name, bi.item_code, bi.unit, bi.category
                 FROM inventory_stock ist
-                JOIN boq_items bi ON ist.boq_item_id = bi.id
+                JOIN boq_items bi ON CAST(ist.boq_item_id AS CHAR) = CAST(bi.id AS CHAR)
                 WHERE ist.boq_item_id = ?";
         
         $stmt = $this->db->prepare($sql);
@@ -420,7 +420,7 @@ class Inventory {
             // Get receipt items
             $itemsSql = "SELECT iii.*, bi.item_name, bi.item_code, bi.unit, bi.category
                          FROM inventory_inward_items iii
-                         JOIN boq_items bi ON iii.boq_item_id = bi.id
+                         JOIN boq_items bi ON CAST(iii.boq_item_id AS CHAR) = CAST(bi.id AS CHAR)
                          WHERE iii.inward_id = ?
                          ORDER BY bi.item_name";
             
@@ -676,7 +676,7 @@ class Inventory {
                        s.site_id as site_code, v.name as vendor_name,
                        id.dispatch_number, id.dispatch_date
                 FROM inventory_tracking it
-                JOIN boq_items bi ON it.boq_item_id = bi.id
+                JOIN boq_items bi ON CAST(it.boq_item_id AS CHAR) = CAST(bi.id AS CHAR)
                 LEFT JOIN sites s ON it.site_id = s.id
                 LEFT JOIN vendors v ON it.vendor_id = v.id
                 LEFT JOIN inventory_dispatches id ON it.dispatch_id = id.id
@@ -721,7 +721,7 @@ class Inventory {
         // Total individual entries
         $sql = "SELECT COUNT(*) as total_entries
                 FROM inventory_stock ist
-                JOIN boq_items bi ON ist.boq_item_id = bi.id
+                JOIN boq_items bi ON CAST(ist.boq_item_id AS CHAR) = CAST(bi.id AS CHAR)
                 WHERE bi.status = 'active'";
         
         $stmt = $this->db->query($sql);
@@ -908,7 +908,7 @@ class Inventory {
                        bi.item_name, bi.item_code, bi.unit, bi.icon_class
                 FROM inventory_dispatch_items idi
                 LEFT JOIN inventory_stock ist ON idi.inventory_stock_id = ist.id
-                LEFT JOIN boq_items bi ON idi.boq_item_id = bi.id
+                LEFT JOIN boq_items bi ON CAST(idi.boq_item_id AS CHAR) = CAST(bi.id AS CHAR)
                 WHERE idi.dispatch_id = ?
                 ORDER BY bi.item_name, ist.serial_number";
         
@@ -925,7 +925,7 @@ class Inventory {
                        GROUP_CONCAT(ist.serial_number ORDER BY ist.serial_number) as serial_numbers
                 FROM inventory_dispatch_items idi
                 LEFT JOIN inventory_stock ist ON idi.inventory_stock_id = ist.id
-                LEFT JOIN boq_items bi ON idi.boq_item_id = bi.id
+                LEFT JOIN boq_items bi ON CAST(idi.boq_item_id AS CHAR) = CAST(bi.id AS CHAR)
                 WHERE idi.dispatch_id = ?
                 GROUP BY bi.id, bi.item_name, bi.item_code, bi.unit, bi.icon_class
                 ORDER BY bi.item_name";
