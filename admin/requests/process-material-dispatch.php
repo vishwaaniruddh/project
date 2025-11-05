@@ -1,77 +1,154 @@
 <?php
-// Suppress warnings to ensure clean JSON output
-error_reporting(E_ERROR | E_PARSE);
+// Enable full error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../../logs/dispatch_debug.log');
+
+// Create logs directory if it doesn't exist
+$logDir = __DIR__ . '/../../logs';
+if (!is_dir($logDir)) {
+    mkdir($logDir, 0755, true);
+}
+
+// Debug logging function
+function debugLog($message, $data = null) {
+    $logFile = __DIR__ . '/../../logs/dispatch_debug.log';
+    $timestamp = date('Y-m-d H:i:s');
+    $logMessage = "[$timestamp] $message";
+    if ($data !== null) {
+        $logMessage .= " | Data: " . json_encode($data);
+    }
+    $logMessage .= "\n";
+    file_put_contents($logFile, $logMessage, FILE_APPEND | LOCK_EX);
+}
+
+debugLog("=== DISPATCH PROCESS STARTED ===");
+debugLog("Request Method", $_SERVER['REQUEST_METHOD']);
+debugLog("POST Data", $_POST);
 
 require_once __DIR__ . '/../../config/auth.php';
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../models/MaterialRequest.php';
 require_once __DIR__ . '/../../models/Inventory.php';
 
+debugLog("Required files loaded successfully");
+
 // Require admin authentication
-Auth::requireRole(ADMIN_ROLE);
+try {
+    Auth::requireRole(ADMIN_ROLE);
+    debugLog("Authentication successful");
+} catch (Exception $e) {
+    debugLog("Authentication failed", $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Authentication failed: ' . $e->getMessage()]);
+    exit;
+}
 
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    debugLog("Invalid request method", $_SERVER['REQUEST_METHOD']);
     echo json_encode(['success' => false, 'message' => 'Invalid request method']);
     exit;
 }
 
 try {
+    debugLog("Initializing models");
     $materialRequestModel = new MaterialRequest();
+    debugLog("MaterialRequest model created");
+    
     $inventoryModel = new Inventory();
+    debugLog("Inventory model created");
+    
     $currentUser = Auth::getCurrentUser();
+    debugLog("Current user retrieved", ['user_id' => $currentUser['id'], 'username' => $currentUser['username']]);
     
     // Validate required fields
+    debugLog("Validating required fields");
     $requiredFields = ['material_request_id', 'contact_person_name', 'contact_person_phone', 'dispatch_date', 'delivery_address'];
     foreach ($requiredFields as $field) {
         if (empty($_POST[$field])) {
+            debugLog("Missing required field", $field);
             throw new Exception("Field '$field' is required");
         }
     }
+    debugLog("All required fields present");
     
     $materialRequestId = intval($_POST['material_request_id']);
+    debugLog("Material Request ID", $materialRequestId);
     
     // Get material request details
+    debugLog("Fetching material request details");
     try {
         $materialRequest = $materialRequestModel->findWithDetails($materialRequestId);
+        debugLog("Material request fetched", ['found' => !empty($materialRequest), 'status' => $materialRequest['status'] ?? 'N/A']);
+        
         if (!$materialRequest || $materialRequest['status'] !== 'approved') {
+            debugLog("Material request validation failed", [
+                'exists' => !empty($materialRequest),
+                'status' => $materialRequest['status'] ?? 'N/A',
+                'expected' => 'approved'
+            ]);
             throw new Exception('Material request not found or not approved');
         }
+        debugLog("Material request validation passed");
     } catch (Exception $e) {
-        error_log('Material request fetch error: ' . $e->getMessage());
+        debugLog('Material request fetch error', $e->getMessage());
         throw new Exception('Error fetching material request: ' . $e->getMessage());
     }
     
     // Validate items
+    debugLog("Validating dispatch items");
     if (empty($_POST['items']) || !is_array($_POST['items'])) {
+        debugLog("Items validation failed", ['items_empty' => empty($_POST['items']), 'is_array' => is_array($_POST['items'] ?? null)]);
         throw new Exception('No items to dispatch');
     }
+    debugLog("Items validation passed", ['item_count' => count($_POST['items'])]);
     
     // Parse requested items from material request to validate stock
+    debugLog("Parsing requested items from material request");
     $requestedItems = json_decode($materialRequest['items'], true) ?: [];
+    debugLog("Requested items parsed", ['count' => count($requestedItems), 'items' => $requestedItems]);
     
+    debugLog("Checking stock availability");
     try {
         $stockAvailability = $inventoryModel->checkStockAvailabilityForItems($requestedItems);
+        debugLog("Stock availability checked successfully", ['availability_count' => count($stockAvailability)]);
     } catch (Exception $e) {
-        error_log('Stock availability check error: ' . $e->getMessage());
+        debugLog('Stock availability check error', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
         throw new Exception('Error checking stock availability: ' . $e->getMessage());
     }
     
     // Check if any items are out of stock
+    debugLog("Checking for stock issues");
     $stockIssues = [];
     foreach ($stockAvailability as $boqItemId => $stock) {
+        debugLog("Checking stock for item", ['boq_item_id' => $boqItemId, 'is_sufficient' => $stock['is_sufficient']]);
         if (!$stock['is_sufficient']) {
-            $stockIssues[] = $stock['item_name'] . ' (Available: ' . $stock['available_quantity'] . ', Required: ' . $stock['requested_quantity'] . ')';
+            $issue = $stock['item_name'] . ' (Available: ' . $stock['available_quantity'] . ', Required: ' . $stock['requested_quantity'] . ')';
+            $stockIssues[] = $issue;
+            debugLog("Stock issue found", $issue);
         }
     }
     
     if (!empty($stockIssues)) {
+        debugLog("Stock issues prevent dispatch", $stockIssues);
         throw new Exception('Insufficient stock for items: ' . implode(', ', $stockIssues));
     }
+    debugLog("No stock issues found");
     
     // Generate dispatch number
-    $dispatchNumber = $inventoryModel->generateDispatchNumber();
+    debugLog("Generating dispatch number");
+    try {
+        $dispatchNumber = $inventoryModel->generateDispatchNumber();
+        debugLog("Dispatch number generated", $dispatchNumber);
+    } catch (Exception $e) {
+        debugLog("Error generating dispatch number", $e->getMessage());
+        throw new Exception('Error generating dispatch number: ' . $e->getMessage());
+    }
     
     // Prepare dispatch data
     $dispatchData = [
@@ -117,17 +194,30 @@ try {
         }
         
         // Get unit cost from inventory stock (average cost)
+        debugLog("Getting unit cost for item", $boqItemId);
         try {
             $stockInfo = $inventoryModel->getStockOverview('', '', false);
+            debugLog("Stock overview retrieved", ['stock_count' => count($stockInfo)]);
+            
             $unitCost = 0;
             foreach ($stockInfo as $stock) {
                 if ($stock['boq_item_id'] == $boqItemId) {
                     $unitCost = $stock['unit_cost'] ?? 0;
+                    debugLog("Unit cost found for item", ['boq_item_id' => $boqItemId, 'unit_cost' => $unitCost]);
                     break;
                 }
             }
+            
+            if ($unitCost == 0) {
+                debugLog("No unit cost found for item, using default", $boqItemId);
+                $unitCost = 100; // Default fallback cost
+            }
         } catch (Exception $e) {
-            error_log('Stock overview error: ' . $e->getMessage());
+            debugLog('Stock overview error', [
+                'error' => $e->getMessage(),
+                'boq_item_id' => $boqItemId,
+                'trace' => $e->getTraceAsString()
+            ]);
             // Use a default unit cost if stock overview fails
             $unitCost = 100; // Default fallback cost
         }
@@ -216,6 +306,11 @@ try {
         }
     }
     
+    debugLog("=== DISPATCH PROCESS COMPLETED SUCCESSFULLY ===", [
+        'dispatch_id' => $dispatchId,
+        'dispatch_number' => $dispatchNumber
+    ]);
+    
     echo json_encode([
         'success' => true,
         'message' => 'Material dispatch processed successfully',
@@ -224,10 +319,21 @@ try {
     ]);
     
 } catch (Exception $e) {
-    error_log('Material dispatch processing error: ' . $e->getMessage());
+    debugLog('FATAL ERROR - Material dispatch processing failed', [
+        'error' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'trace' => $e->getTraceAsString()
+    ]);
+    
     echo json_encode([
         'success' => false,
-        'message' => $e->getMessage()
+        'message' => $e->getMessage(),
+        'debug_info' => [
+            'file' => basename($e->getFile()),
+            'line' => $e->getLine(),
+            'error' => $e->getMessage()
+        ]
     ]);
 }
 

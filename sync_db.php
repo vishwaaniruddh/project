@@ -3,8 +3,6 @@
 $localConn = new mysqli('localhost', 'reporting', 'reporting', 'site_installation_management');
 $serverConn = new mysqli('193.203.184.112', 'u444388293_karvy_project', 'AVav@@2025', 'u444388293_karvy_project');
 
-
-
 // Fetch table lists
 $localTables = getTables($localConn);
 $serverTables = getTables($serverConn);
@@ -24,9 +22,12 @@ function getTables($conn) {
 
 function getColumns($conn, $table) {
     $columns = [];
-    $result = $conn->query("SHOW COLUMNS FROM `$table`");
+    $result = $conn->query("SHOW FULL COLUMNS FROM `$table`");
     while ($row = $result->fetch_assoc()) {
-        $columns[$row['Field']] = $row['Type'];
+        $columns[$row['Field']] = [
+            'Type' => $row['Type'],
+            'Collation' => $row['Collation'] ?? 'NULL'
+        ];
     }
     return $columns;
 }
@@ -35,12 +36,31 @@ function compareColumns($table, $localConn, $serverConn) {
     $cols1 = getColumns($localConn, $table);
     $cols2 = getColumns($serverConn, $table);
 
+    $typeMismatch = [];
+    $collationMismatch = [];
+
+    foreach ($cols1 as $col => $attr1) {
+        if (isset($cols2[$col])) {
+            if ($attr1['Type'] !== $cols2[$col]['Type']) {
+                $typeMismatch[$col] = [
+                    'Local' => $attr1['Type'], 
+                    'Server' => $cols2[$col]['Type']
+                ];
+            }
+            if ($attr1['Collation'] !== $cols2[$col]['Collation']) {
+                $collationMismatch[$col] = [
+                    'Local' => $attr1['Collation'], 
+                    'Server' => $cols2[$col]['Collation']
+                ];
+            }
+        }
+    }
+
     return [
         'onlyLocal' => array_diff_key($cols1, $cols2),
         'onlyServer' => array_diff_key($cols2, $cols1),
-        'typeMismatch' => array_filter($cols1, function($type, $col) use ($cols2) {
-            return isset($cols2[$col]) && $cols2[$col] !== $type;
-        }, ARRAY_FILTER_USE_BOTH)
+        'typeMismatch' => $typeMismatch,
+        'collationMismatch' => $collationMismatch,
     ];
 }
 ?>
@@ -51,7 +71,7 @@ function compareColumns($table, $localConn, $serverConn) {
 <title>DB Difference Viewer</title>
 <style>
     body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
-    h2 { color: #333; margin-top: 40px; }
+    h1, h2 { color: #333; }
     table { width: 100%; border-collapse: collapse; margin-bottom: 30px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
     th, td { padding: 10px 15px; border-bottom: 1px solid #ddd; text-align: left; }
     th { background: #343a40; color: white; }
@@ -89,12 +109,12 @@ function compareColumns($table, $localConn, $serverConn) {
         <th>Columns Only in Local</th>
         <th>Columns Only in Server</th>
         <th>Column Type Mismatches</th>
+        <th>Collation Mismatches</th>
     </tr>
     <?php foreach ($matchingTables as $table): ?>
         <?php
         $colDiff = compareColumns($table, $localConn, $serverConn);
-        // Only show rows with real differences
-        if (empty($colDiff['onlyLocal']) && empty($colDiff['onlyServer']) && empty($colDiff['typeMismatch'])) {
+        if (empty($colDiff['onlyLocal']) && empty($colDiff['onlyServer']) && empty($colDiff['typeMismatch']) && empty($colDiff['collationMismatch'])) {
             continue;
         }
         ?>
@@ -109,8 +129,19 @@ function compareColumns($table, $localConn, $serverConn) {
             <td class="cell-warning">
                 <?php 
                 if (!empty($colDiff['typeMismatch'])) {
-                    foreach ($colDiff['typeMismatch'] as $col => $type) {
-                        echo "$col (Local: $type, Server: {$colDiff['typeMismatch'][$col]})<br>";
+                    foreach ($colDiff['typeMismatch'] as $col => $types) {
+                        echo "$col (Local: {$types['Local']}, Server: {$types['Server']})<br>";
+                    }
+                } else {
+                    echo "None";
+                }
+                ?>
+            </td>
+            <td class="cell-warning">
+                <?php 
+                if (!empty($colDiff['collationMismatch'])) {
+                    foreach ($colDiff['collationMismatch'] as $col => $collations) {
+                        echo "$col (Local: {$collations['Local']}, Server: {$collations['Server']})<br>";
                     }
                 } else {
                     echo "None";
