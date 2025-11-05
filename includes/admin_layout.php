@@ -1229,7 +1229,8 @@ $currentUser = Auth::getCurrentUser();
                             require_once __DIR__ . '/../config/constants.php';
                         }
                         
-                        $env = function_exists('getEnvironment') ? getEnvironment() : (defined('APP_ENV') ? APP_ENV : 'unknown');
+                        $env = '';
+                        // function_exists('getEnvironment') ? getEnvironment() : (defined('APP_ENV') ? APP_ENV : 'unknown');
                         $envColors = [
                             'development' => 'bg-green-500 text-white',
                             'testing' => 'bg-yellow-500 text-black',
