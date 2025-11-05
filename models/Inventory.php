@@ -986,5 +986,65 @@ class Inventory {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function getStockDetailsByItem($boqItemId) {
+        $sql = "SELECT inv.*, 
+                       inv.item_status as status
+                FROM inventory_stock inv
+                WHERE inv.boq_item_id = ?
+                ORDER BY inv.created_at DESC";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$boqItemId]);
+        return $stmt->fetchAll();
+    }
+
+    public function getStockSummaryByItem($boqItemId) {
+        $sql = "SELECT 
+                    COUNT(*) as total_stock,
+                    SUM(CASE WHEN item_status = 'available' THEN 1 ELSE 0 END) as available_stock,
+                    SUM(CASE WHEN item_status = 'dispatched' THEN 1 ELSE 0 END) as dispatched_stock,
+                    AVG(unit_cost) as avg_unit_cost,
+                    SUM(unit_cost) as total_value
+                FROM inventory_stock 
+                WHERE boq_item_id = ?";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$boqItemId]);
+        return $stmt->fetch();
+    }
+
+    public function getStockHistoryByItem($boqItemId, $limit = 50) {
+        $sql = "SELECT 
+                    'inward' as transaction_type,
+                    1 as quantity,
+                    inv.created_at,
+                    inv.purchase_order_number as reference_number,
+                    u.username as user_name,
+                    inv.notes
+                FROM inventory_stock inv
+                LEFT JOIN users u ON inv.created_by = u.id
+                WHERE inv.boq_item_id = ?
+                
+                UNION ALL
+                
+                SELECT 
+                    'dispatch' as transaction_type,
+                    1 as quantity,
+                    inv2.updated_at as created_at,
+                    '' as reference_number,
+                    u2.username as user_name,
+                    'Item dispatched' as notes
+                FROM inventory_stock inv2
+                LEFT JOIN users u2 ON inv2.updated_by = u2.id
+                WHERE inv2.boq_item_id = ? AND inv2.item_status = 'dispatched'
+                
+                ORDER BY created_at DESC
+                LIMIT ?";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$boqItemId, $boqItemId, $limit]);
+        return $stmt->fetchAll();
+    }
+
 }
 ?>
