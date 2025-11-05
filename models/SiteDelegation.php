@@ -15,7 +15,6 @@ class SiteDelegation extends BaseModel {
         if ($existing) {
             throw new Exception('Site is already delegated to another vendor');
         }
-        
         $data = [
             'site_id' => $siteId,
             'vendor_id' => $vendorId,

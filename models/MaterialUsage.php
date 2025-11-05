@@ -183,5 +183,36 @@ class MaterialUsage {
         $stmt->execute([$installationId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    // Get daily material usage for a specific day
+    public function getDailyMaterialUsage($installationId, $dayNumber) {
+        $sql = "SELECT dmu.*, im.material_name, im.material_unit
+                FROM daily_material_usage dmu
+                JOIN installation_materials im ON dmu.material_id = im.id
+                WHERE dmu.installation_id = ? AND dmu.day_number = ? AND dmu.quantity_used > 0
+                ORDER BY im.material_name";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$installationId, $dayNumber]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    // Get daily work photos for a specific day
+    public function getDailyWorkPhotos($installationId, $dayNumber) {
+        $sql = "SELECT * FROM daily_work_photos 
+                WHERE installation_id = ? AND day_number = ?
+                ORDER BY uploaded_at";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$installationId, $dayNumber]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    // Save daily work photo
+    public function saveDailyWorkPhoto($installationId, $dayNumber, $fileName, $filePath, $fileType, $fileSize) {
+        $sql = "INSERT INTO daily_work_photos 
+                (installation_id, day_number, file_name, file_path, file_type, file_size) 
+                VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$installationId, $dayNumber, $fileName, $filePath, $fileType, $fileSize]);
+    }
 }
 ?>
