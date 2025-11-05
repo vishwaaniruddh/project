@@ -241,3 +241,6 @@
 {"timestamp":"2025-11-01 19:58:52","type":"WARNING","message":"Undefined array key \"id\"","file":"C:\\xampp\\htdocs\\project\\admin\\masters\\index.php","line":176,"ip_address":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36","request_uri":"\/project\/admin\/masters\/?type=boq"}
 [01-Nov-2025 19:58:52 UTC] PHP Deprecated:  Constant E_STRICT is deprecated in C:\xampp\htdocs\project\includes\error_handler.php on line 50
 {"timestamp":"2025-11-01 19:58:52","type":"WARNING","message":"Undefined array key \"id\"","file":"C:\\xampp\\htdocs\\project\\admin\\masters\\index.php","line":187,"ip_address":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36","request_uri":"\/project\/admin\/masters\/?type=boq"}
+[05-Nov-2025 17:38:45 UTC] Database connected successfully to: site_installation_management on localhost
+[05-Nov-2025 17:40:16 UTC] Database connected successfully to: site_installation_management on localhost
+[05-Nov-2025 17:40:20 UTC] Database connected successfully to: site_installation_management on localhost

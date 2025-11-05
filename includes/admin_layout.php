@@ -30,6 +30,7 @@ $currentUser = Auth::getCurrentUser();
     <!-- Fallback CSS for subdirectories -->
     <style>
         .btn {
+            white-space: nowrap;
             display: inline-flex;
             align-items: center;
             padding: 0.5rem 1rem;

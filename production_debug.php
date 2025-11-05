@@ -16,7 +16,9 @@ echo "2. File Existence Check:\n";
 $files = [
     'config/constants.php',
     'config/auth.php',
-    'includes/admin_layout.php'
+    'config/env.php',
+    'includes/admin_layout.php',
+    '.env'
 ];
 
 foreach ($files as $file) {
