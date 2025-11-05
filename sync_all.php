@@ -66,7 +66,7 @@ foreach ($commonTables as $table) {
         }
         $valList = implode(", ", $vals);
 
-        $insertSQL = "INSERT INTO `$table` ($colList) VALUES ($valList)";
+        echo $insertSQL = "INSERT INTO `$table` ($colList) VALUES ($valList)";
         if (!$localConn->query($insertSQL)) {
             echo "<span style='color:orange;'>⚠️ Failed to insert row in '$table': " . $localConn->error . "</span><br>";
         } else {

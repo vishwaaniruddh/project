@@ -3,9 +3,9 @@ console.log('Admin JS loaded');
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Admin.js DOM loaded');
-    // Sidebar toggle functionality - Updated to work with admin layout
+    // Sidebar toggle functionality - Updated to work with admin and vendor layouts
     const toggleSidebar = document.getElementById('toggleSidebar');
-    const sidebar = document.querySelector('.admin-sidebar');
+    const sidebar = document.querySelector('.admin-sidebar') || document.querySelector('.vendor-sidebar');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
     
     console.log('Admin.js elements found:', {

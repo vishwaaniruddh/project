@@ -153,7 +153,7 @@ ob_start();
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center space-x-2">
-                                    <button onclick="viewSiteDetails(<?php echo $site['site_id']; ?>)" class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" title="View Details">
+                                    <button onclick="viewSiteDetails('<?php echo htmlspecialchars($site['id']); ?>')" class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" title="View Details">
                                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
                                             <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
@@ -190,6 +190,41 @@ ob_start();
     </div>
 </div>
 
+<!-- Site Details Modal -->
+<div id="siteDetailsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-4 border-b">
+                <h3 class="text-lg font-semibold text-gray-900" id="modalSiteId">Site Details</h3>
+                <button onclick="closeSiteModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div id="modalContent" class="mt-4">
+                <div class="flex justify-center items-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <span class="ml-2 text-gray-600">Loading site details...</span>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="flex justify-end pt-4 border-t mt-6 space-x-2">
+                <button onclick="closeSiteModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                    Close
+                </button>
+                <button id="modalActionButton" onclick="" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors hidden">
+                    Take Action
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 // Tab filtering
 function filterSites(status) {
@@ -212,23 +247,194 @@ function filterSites(status) {
 }
 
 // Navigation functions
+const BASE_URL = '<?php echo BASE_URL; ?>';
+
 function viewSiteDetails(siteId) {
-    window.location.href = `../site-details.php?id=${siteId}`;
+    // Show modal and load site details
+    const modal = document.getElementById('siteDetailsModal');
+    const modalContent = document.getElementById('modalContent');
+    const modalSiteId = document.getElementById('modalSiteId');
+    
+    // Show modal
+    modal.classList.remove('hidden');
+    modalSiteId.textContent = `Site Details - ${siteId}`;
+    
+    // Show loading state
+    modalContent.innerHTML = `
+        <div class="flex justify-center items-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span class="ml-2 text-gray-600">Loading site details...</span>
+        </div>
+    `;
+    
+    // Fetch site details
+    fetch(`get-site-details.php?site_id=${encodeURIComponent(siteId)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displaySiteDetails(data.site);
+            } else {
+                modalContent.innerHTML = `
+                    <div class="text-center py-8">
+                        <svg class="w-12 h-12 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="text-red-600">${data.message || 'Failed to load site details'}</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            modalContent.innerHTML = `
+                <div class="text-center py-8">
+                    <svg class="w-12 h-12 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p class="text-red-600">Error loading site details</p>
+                </div>
+            `;
+        });
+}
+
+function displaySiteDetails(site) {
+    const modalContent = document.getElementById('modalContent');
+    const actionButton = document.getElementById('modalActionButton');
+    
+    modalContent.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Basic Information -->
+            <div class="space-y-4">
+                <h4 class="font-semibold text-gray-900 border-b pb-2">Basic Information</h4>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Site ID</label>
+                        <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded">${site.site_id || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Store ID</label>
+                        <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded">${site.store_id || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Location</label>
+                        <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded">${site.location || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Branch</label>
+                        <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded">${site.branch || 'N/A'}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Location Details -->
+            <div class="space-y-4">
+                <h4 class="font-semibold text-gray-900 border-b pb-2">Location Details</h4>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">City</label>
+                        <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded">${site.city || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">State</label>
+                        <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded">${site.state || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Country</label>
+                        <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded">${site.country || 'N/A'}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Client Information -->
+            <div class="space-y-4">
+                <h4 class="font-semibold text-gray-900 border-b pb-2">Client Information</h4>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Customer</label>
+                        <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded">${site.customer || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Bank</label>
+                        <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded">${site.bank || 'N/A'}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Progress Status -->
+            <div class="space-y-4">
+                <h4 class="font-semibold text-gray-900 border-b pb-2">Progress Status</h4>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Survey Status</label>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${site.survey_status ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                            ${site.survey_status ? 'Completed' : 'Pending'}
+                        </span>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Installation Status</label>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${site.installation_status ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                            ${site.installation_status ? 'Completed' : 'Pending'}
+                        </span>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Delegation Date</label>
+                        <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded">${site.delegation_date ? new Date(site.delegation_date).toLocaleDateString() : 'N/A'}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        ${site.notes ? `
+        <div class="mt-6 pt-4 border-t">
+            <h4 class="font-semibold text-gray-900 mb-2">Special Instructions</h4>
+            <div class="text-sm text-gray-900 bg-blue-50 p-3 rounded border-l-4 border-blue-400">
+                ${site.notes}
+            </div>
+        </div>
+        ` : ''}
+        
+        ${site.remarks ? `
+        <div class="mt-4">
+            <h4 class="font-semibold text-gray-900 mb-2">Remarks</h4>
+            <div class="text-sm text-gray-900 bg-gray-50 p-3 rounded">
+                ${site.remarks}
+            </div>
+        </div>
+        ` : ''}
+    `;
+    
+    // Show action button if needed
+    if (site.delegation_status === 'active') {
+        actionButton.classList.remove('hidden');
+        if (!site.survey_status) {
+            actionButton.textContent = 'Conduct Survey';
+            actionButton.onclick = () => conductSurvey(site.delegation_id);
+        } else {
+            actionButton.textContent = 'Update Progress';
+            actionButton.onclick = () => updateProgress(site.delegation_id);
+        }
+    } else {
+        actionButton.classList.add('hidden');
+    }
+}
+
+function closeSiteModal() {
+    document.getElementById('siteDetailsModal').classList.add('hidden');
 }
 
 function updateProgress(delegationId) {
-    window.location.href = `../update-progress.php?id=${delegationId}`;
+    window.location.href = `${BASE_URL}/vendor/update-progress.php?id=${delegationId}`;
 }
 
 function conductSurvey(delegationId) {
-    window.location.href = `../site-survey.php?delegation_id=${delegationId}`;
+    window.location.href = `${BASE_URL}/vendor/site-survey.php?delegation_id=${delegationId}`;
 }
 
 function generateMaterialRequest(siteId) {
-    window.location.href = `material-request.php?site_id=${siteId}`;
+    window.location.href = `${BASE_URL}/vendor/material-request.php?site_id=${siteId}`;
 }
 
-// Add CSS for tabs
+// Add CSS for tabs and modal
 const style = document.createElement('style');
 style.textContent = `
     .tab-button {
@@ -237,8 +443,65 @@ style.textContent = `
     .tab-button.active {
         @apply border-blue-500 text-blue-600;
     }
+    
+    /* Modal animations */
+    #siteDetailsModal {
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    #siteDetailsModal > div {
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideIn {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    /* Badge styles */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .badge-warning {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+    
+    .badge-success {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
 `;
 document.head.appendChild(style);
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('siteDetailsModal');
+    if (event.target === modal) {
+        closeSiteModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const modal = document.getElementById('siteDetailsModal');
+        if (!modal.classList.contains('hidden')) {
+            closeSiteModal();
+        }
+    }
+});
 </script>
 
 <?php
