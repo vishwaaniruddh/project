@@ -14,6 +14,7 @@ if (Auth::isLoggedIn()) {
     }
 }
 
+
 // If no session found, redirect to login
 header('Location: auth/login.php');
 exit();
