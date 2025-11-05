@@ -447,8 +447,159 @@ $materialSummary = $materialUsageModel->getMaterialUsageSummary($installationId)
 </div>
 <?php endif; ?>
 
-<!-- Progress History -->
-<?php if (!empty($progress)): ?>
+<!-- Progress History with Attachments -->
+<?php 
+// Get progress with attachments
+$progressWithAttachments = $installationModel->getInstallationProgressWithAttachments($installationId);
+?>
+<?php if (!empty($progressWithAttachments)): ?>
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Progress History & Attachments</h3>
+    <div class="space-y-6">
+        <?php foreach ($progressWithAttachments as $entry): ?>
+            <div class="border border-gray-200 rounded-lg p-4">
+                <!-- Progress Header -->
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-3 mb-2">
+                            <div class="font-medium text-gray-900 text-lg">
+                                Progress: <?php echo $entry['progress_percentage']; ?>%
+                            </div>
+                            <div class="w-32 bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: <?php echo $entry['progress_percentage']; ?>%"></div>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-600 mb-2">
+                            <?php echo htmlspecialchars($entry['work_description'] ?? 'No description'); ?>
+                        </div>
+                        <?php if ($entry['issues_faced']): ?>
+                            <div class="text-sm text-red-600 mb-2">
+                                <strong>Issues:</strong> <?php echo htmlspecialchars($entry['issues_faced']); ?>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($entry['next_steps']): ?>
+                            <div class="text-sm text-blue-600 mb-2">
+                                <strong>Next Steps:</strong> <?php echo htmlspecialchars($entry['next_steps']); ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="text-right text-sm text-gray-500">
+                        <div class="font-medium"><?php echo date('M j, Y', strtotime($entry['progress_date'])); ?></div>
+                        <div><?php echo date('g:i A', strtotime($entry['progress_date'])); ?></div>
+                        <div>by <?php echo htmlspecialchars($entry['updated_by_name'] ?? 'Unknown'); ?></div>
+                        <?php if ($entry['total_attachments'] > 0): ?>
+                            <div class="mt-2">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8 4a3 3 0 00-6 0v4a5 5 0 0010 0V4a3 3 0 00-6 0v4a1 1 0 102 0V4a1 1 0 10-2 0v4a3 3 0 01-6 0V4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <?php echo $entry['total_attachments']; ?> files
+                                </span>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Attachments -->
+                <?php if (!empty($entry['attachments'])): ?>
+                    <div class="border-t border-gray-200 pt-4">
+                        <h5 class="text-sm font-medium text-gray-900 mb-3">Attachments</h5>
+                        
+                        <?php 
+                        // Group attachments by type
+                        $attachmentsByType = [];
+                        foreach ($entry['attachments'] as $attachment) {
+                            $attachmentsByType[$attachment['attachment_type']][] = $attachment;
+                        }
+                        ?>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <?php foreach ($attachmentsByType as $type => $attachments): ?>
+                                <div class="bg-gray-50 rounded-lg p-3">
+                                    <h6 class="text-xs font-medium text-gray-700 mb-2 uppercase tracking-wide">
+                                        <?php 
+                                        $typeLabels = [
+                                            'final_report' => 'Final Report',
+                                            'site_snaps' => 'Site Snaps',
+                                            'excel_sheet' => 'Excel/Data Files',
+                                            'drawing_attachment' => 'Drawings'
+                                        ];
+                                        echo $typeLabels[$type] ?? ucfirst(str_replace('_', ' ', $type));
+                                        ?>
+                                        <span class="ml-1 text-gray-500">(<?php echo count($attachments); ?>)</span>
+                                    </h6>
+                                    
+                                    <div class="space-y-2">
+                                        <?php foreach ($attachments as $attachment): ?>
+                                            <div class="flex items-center space-x-2 p-2 bg-white rounded border">
+                                                <?php if (strpos($attachment['mime_type'], 'image') === 0): ?>
+                                                    <img src="<?php echo htmlspecialchars($attachment['file_path']); ?>" 
+                                                         alt="<?php echo htmlspecialchars($attachment['original_name']); ?>"
+                                                         class="w-8 h-8 object-cover rounded cursor-pointer"
+                                                         onclick="openImageModal('<?php echo htmlspecialchars($attachment['file_path']); ?>', '<?php echo htmlspecialchars($attachment['original_name']); ?>')">
+                                                <?php else: ?>
+                                                    <div class="w-8 h-8 bg-gray-200 rounded flex items-center justify-center">
+                                                        <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v12h8V6H8a2 2 0 01-2-2z" clip-rule="evenodd"></path>
+                                                        </svg>
+                                                    </div>
+                                                <?php endif; ?>
+                                                
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="text-xs font-medium text-gray-900 truncate" title="<?php echo htmlspecialchars($attachment['original_name']); ?>">
+                                                        <?php echo htmlspecialchars($attachment['original_name']); ?>
+                                                    </p>
+                                                    <p class="text-xs text-gray-500">
+                                                        <?php echo formatFileSize($attachment['file_size']); ?>
+                                                    </p>
+                                                </div>
+                                                
+                                                <a href="<?php echo htmlspecialchars($attachment['file_path']); ?>" 
+                                                   download="<?php echo htmlspecialchars($attachment['original_name']); ?>"
+                                                   class="text-blue-600 hover:text-blue-800"
+                                                   title="Download">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                </a>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        
+                        <?php if (!empty($entry['attachment_description'])): ?>
+                            <div class="mt-3 p-3 bg-blue-50 rounded-md">
+                                <p class="text-sm text-blue-800">
+                                    <strong>Description:</strong> <?php echo htmlspecialchars($entry['attachment_description']); ?>
+                                </p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<?php
+// Helper function for file size formatting
+function formatFileSize($bytes) {
+    if ($bytes >= 1073741824) {
+        return number_format($bytes / 1073741824, 2) . ' GB';
+    } elseif ($bytes >= 1048576) {
+        return number_format($bytes / 1048576, 2) . ' MB';
+    } elseif ($bytes >= 1024) {
+        return number_format($bytes / 1024, 2) . ' KB';
+    } else {
+        return $bytes . ' bytes';
+    }
+}
+?>
+
+<?php elseif (!empty($progress)): ?>
+<!-- Fallback to regular progress if no attachments -->
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
     <h3 class="text-lg font-semibold text-gray-900 mb-4">Progress History</h3>
     <div class="space-y-4">

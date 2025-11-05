@@ -301,5 +301,75 @@ class Installation {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    public function getInstallationProgressWithAttachments($installationId) {
+        // Get progress entries
+        $sql = "SELECT ip.*, u.username as updated_by_name,
+                       COALESCE(ipa_count.total_attachments, 0) as total_attachments,
+                       COALESCE(ipa_count.has_final_report, 0) as has_final_report,
+                       COALESCE(ipa_count.has_site_snaps, 0) as has_site_snaps,
+                       COALESCE(ipa_count.has_excel_sheet, 0) as has_excel_sheet,
+                       COALESCE(ipa_count.has_drawing_attachment, 0) as has_drawing_attachment
+                FROM installation_progress ip
+                LEFT JOIN users u ON ip.updated_by = u.id
+                LEFT JOIN (
+                    SELECT progress_id, 
+                           COUNT(*) as total_attachments,
+                           MAX(CASE WHEN attachment_type = 'final_report' THEN 1 ELSE 0 END) as has_final_report,
+                           MAX(CASE WHEN attachment_type = 'site_snaps' THEN 1 ELSE 0 END) as has_site_snaps,
+                           MAX(CASE WHEN attachment_type = 'excel_sheet' THEN 1 ELSE 0 END) as has_excel_sheet,
+                           MAX(CASE WHEN attachment_type = 'drawing_attachment' THEN 1 ELSE 0 END) as has_drawing_attachment
+                    FROM installation_progress_attachments 
+                    GROUP BY progress_id
+                ) ipa_count ON ip.id = ipa_count.progress_id
+                WHERE ip.installation_id = ?
+                ORDER BY ip.progress_date DESC, ip.created_at DESC";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$installationId]);
+        $progressEntries = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Get attachments for each progress entry
+        foreach ($progressEntries as &$entry) {
+            $attachmentSql = "SELECT ipa.*, u.username as uploaded_by_name
+                              FROM installation_progress_attachments ipa
+                              LEFT JOIN users u ON ipa.uploaded_by = u.id
+                              WHERE ipa.progress_id = ?
+                              ORDER BY ipa.attachment_type, ipa.uploaded_at";
+            
+            $attachmentStmt = $this->db->prepare($attachmentSql);
+            $attachmentStmt->execute([$entry['id']]);
+            $entry['attachments'] = $attachmentStmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Get attachment description from the first attachment (they all have the same description)
+            if (!empty($entry['attachments'])) {
+                $entry['attachment_description'] = $entry['attachments'][0]['description'];
+            }
+        }
+        
+        return $progressEntries;
+    }
+    
+    public function addInstallationProgressUpdateWithId($progressData) {
+        $sql = "INSERT INTO installation_progress 
+                (installation_id, progress_date, progress_percentage, work_description, 
+                 issues_faced, next_steps, updated_by, created_at)
+                VALUES (?, CURDATE(), ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
+        
+        $stmt = $this->db->prepare($sql);
+        $result = $stmt->execute([
+            $progressData['installation_id'],
+            $progressData['progress_percentage'],
+            $progressData['work_description'],
+            $progressData['issues_faced'],
+            $progressData['next_steps'],
+            $progressData['updated_by']
+        ]);
+        
+        if ($result) {
+            return $this->db->lastInsertId();
+        }
+        return false;
+    }
 }
 ?>

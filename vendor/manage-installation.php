@@ -232,60 +232,172 @@ ob_start();
 
 <!-- Progress Update Modal -->
 <div id="progressModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 shadow-lg rounded-md bg-white">
+    <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
         <div class="mt-3">
             <h3 class="text-lg font-medium text-gray-900 mb-4">Update Installation Progress</h3>
-            <form id="progressForm">
-                <div class="space-y-4">
-                    <div>
-                        <label for="progress_percentage" class="block text-sm font-medium text-gray-700">
-                            Progress Percentage
-                        </label>
-                        <input type="number" 
-                               id="progress_percentage" 
-                               name="progress_percentage"
-                               min="0" 
-                               max="100" 
-                               step="5"
-                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            <form id="progressForm" enctype="multipart/form-data">
+                <div class="space-y-6">
+                    <!-- Progress Information -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="text-md font-medium text-gray-900 mb-3">Progress Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="progress_percentage" class="block text-sm font-medium text-gray-700">
+                                    Progress Percentage <span class="text-red-500">*</span>
+                                </label>
+                                <input type="number" 
+                                       id="progress_percentage" 
+                                       name="progress_percentage"
+                                       min="0" 
+                                       max="100" 
+                                       step="5"
+                                       required
+                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            </div>
+                            <div>
+                                <label for="work_description" class="block text-sm font-medium text-gray-700">
+                                    Work Description <span class="text-red-500">*</span>
+                                </label>
+                                <textarea id="work_description" 
+                                          name="work_description"
+                                          rows="3"
+                                          required
+                                          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                          placeholder="Describe the work completed..."></textarea>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label for="issues_faced" class="block text-sm font-medium text-gray-700">
+                                    Issues Faced (if any)
+                                </label>
+                                <textarea id="issues_faced" 
+                                          name="issues_faced"
+                                          rows="2"
+                                          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                          placeholder="Any issues or challenges..."></textarea>
+                            </div>
+                            <div>
+                                <label for="next_steps" class="block text-sm font-medium text-gray-700">
+                                    Next Steps
+                                </label>
+                                <textarea id="next_steps" 
+                                          name="next_steps"
+                                          rows="2"
+                                          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                          placeholder="What needs to be done next..."></textarea>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label for="work_description" class="block text-sm font-medium text-gray-700">
-                            Work Description
-                        </label>
-                        <textarea id="work_description" 
-                                  name="work_description"
-                                  rows="3"
-                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                  placeholder="Describe the work completed..."></textarea>
+
+                    <!-- Attachments Section -->
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h4 class="text-md font-medium text-gray-900 mb-3">Progress Attachments</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Final Report -->
+                            <div>
+                                <label for="final_report" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v12h8V6H8a2 2 0 01-2-2z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Final Report (Multiple Images)
+                                </label>
+                                <input type="file" 
+                                       id="final_report" 
+                                       name="final_report[]"
+                                       multiple
+                                       accept="image/*,application/pdf,.doc,.docx,.txt"
+                                       class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                <p class="text-xs text-gray-500 mt-1">Images, PDF, DOC, TXT files</p>
+                                <div id="final_report_preview" class="mt-2 grid grid-cols-3 gap-2"></div>
+                            </div>
+
+                            <!-- Site Snaps -->
+                            <div>
+                                <label for="site_snaps" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Site Snaps (Multiple Images)
+                                </label>
+                                <input type="file" 
+                                       id="site_snaps" 
+                                       name="site_snaps[]"
+                                       multiple
+                                       accept="image/*,video/*"
+                                       class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                                <p class="text-xs text-gray-500 mt-1">Images and videos</p>
+                                <div id="site_snaps_preview" class="mt-2 grid grid-cols-3 gap-2"></div>
+                            </div>
+
+                            <!-- Excel Sheet -->
+                            <div>
+                                <label for="excel_sheet" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Excel Sheet / Data Files
+                                </label>
+                                <input type="file" 
+                                       id="excel_sheet" 
+                                       name="excel_sheet[]"
+                                       multiple
+                                       accept=".xlsx,.xls,.csv,.txt,.pdf,image/*"
+                                       class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100">
+                                <p class="text-xs text-gray-500 mt-1">Excel, CSV, TXT, PDF, Images</p>
+                                <div id="excel_sheet_preview" class="mt-2 grid grid-cols-2 gap-2"></div>
+                            </div>
+
+                            <!-- Drawing Attachments -->
+                            <div>
+                                <label for="drawing_attachment" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Drawing Attachments
+                                </label>
+                                <input type="file" 
+                                       id="drawing_attachment" 
+                                       name="drawing_attachment[]"
+                                       multiple
+                                       accept=".dwg,.dxf,.pdf,image/*,.xlsx,.xls,.csv,.txt"
+                                       class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                                <p class="text-xs text-gray-500 mt-1">DWG, DXF, PDF, Images, Excel</p>
+                                <div id="drawing_attachment_preview" class="mt-2 grid grid-cols-2 gap-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- Attachment Description -->
+                        <div class="mt-4">
+                            <label for="attachment_description" class="block text-sm font-medium text-gray-700">
+                                Attachment Description (Optional)
+                            </label>
+                            <textarea id="attachment_description" 
+                                      name="attachment_description"
+                                      rows="2"
+                                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                      placeholder="Describe the attachments and their purpose..."></textarea>
+                        </div>
                     </div>
-                    <div>
-                        <label for="issues_faced" class="block text-sm font-medium text-gray-700">
-                            Issues Faced (if any)
-                        </label>
-                        <textarea id="issues_faced" 
-                                  name="issues_faced"
-                                  rows="2"
-                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                  placeholder="Any issues or challenges..."></textarea>
-                    </div>
-                    <div>
-                        <label for="next_steps" class="block text-sm font-medium text-gray-700">
-                            Next Steps
-                        </label>
-                        <textarea id="next_steps" 
-                                  name="next_steps"
-                                  rows="2"
-                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                  placeholder="What needs to be done next..."></textarea>
+
+                    <!-- Upload Progress -->
+                    <div id="upload_progress" class="hidden">
+                        <div class="bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div id="progress_bar" class="bg-blue-600 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <p id="progress_text" class="text-sm text-gray-600 mt-2 text-center">Uploading files...</p>
                     </div>
                 </div>
-                <div class="flex justify-end space-x-3 mt-6">
+
+                <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
                     <button type="button" onclick="closeProgressModal()" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                         Cancel
                     </button>
-                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Save Progress
+                    <button type="submit" id="progress_submit_btn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        Save Progress & Attachments
                     </button>
                 </div>
             </form>
@@ -471,40 +583,124 @@ function displayProgress(progressData) {
     container.innerHTML = html;
 }
 
-// Progress form submission
+// File preview functionality
+document.addEventListener('change', function(e) {
+    if (e.target.type === 'file') {
+        const previewId = e.target.id + '_preview';
+        const previewContainer = document.getElementById(previewId);
+        
+        if (previewContainer) {
+            previewContainer.innerHTML = '';
+            
+            Array.from(e.target.files).forEach(file => {
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'relative bg-gray-100 rounded p-2';
+                
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    img.className = 'w-full h-16 object-cover rounded';
+                    fileDiv.appendChild(img);
+                } else {
+                    const icon = document.createElement('div');
+                    icon.className = 'w-full h-16 flex items-center justify-center bg-gray-200 rounded';
+                    icon.innerHTML = `
+                        <svg class="w-8 h-8 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v12h8V6H8a2 2 0 01-2-2z" clip-rule="evenodd"></path>
+                        </svg>
+                    `;
+                    fileDiv.appendChild(icon);
+                }
+                
+                const fileName = document.createElement('p');
+                fileName.className = 'text-xs text-gray-600 mt-1 truncate';
+                fileName.textContent = file.name;
+                fileName.title = file.name;
+                fileDiv.appendChild(fileName);
+                
+                previewContainer.appendChild(fileDiv);
+            });
+        }
+    }
+});
+
+// Progress form submission with file uploads
 document.getElementById('progressForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
-    const formData = new FormData(this);
-    const data = {
-        action: 'add_progress',
-        installation_id: <?php echo $installationId; ?>,
-        progress_percentage: formData.get('progress_percentage'),
-        work_description: formData.get('work_description'),
-        issues_faced: formData.get('issues_faced'),
-        next_steps: formData.get('next_steps')
-    };
+    const submitBtn = document.getElementById('progress_submit_btn');
+    const progressDiv = document.getElementById('upload_progress');
+    const progressBar = document.getElementById('progress_bar');
+    const progressText = document.getElementById('progress_text');
     
-    fetch('process-installation-action.php', {
+    // Show progress
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner mr-2"></span>Uploading...';
+    progressDiv.classList.remove('hidden');
+    
+    // Create FormData with all form fields and files
+    const formData = new FormData(this);
+    formData.append('action', 'add_progress_with_attachments');
+    formData.append('installation_id', <?php echo $installationId; ?>);
+    
+    // Simulate progress (since we can't track real progress easily with FormData)
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress > 90) progress = 90;
+        progressBar.style.width = progress + '%';
+        progressText.textContent = `Uploading files... ${Math.round(progress)}%`;
+    }, 200);
+    
+    fetch('process-installation-progress-with-attachments.php', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
+        body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Progress updated successfully!');
-            closeProgressModal();
-            loadProgress();
-        } else {
-            alert('Error: ' + data.message);
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+        return response.json();
+    })
+    .then(data => {
+        clearInterval(progressInterval);
+        progressBar.style.width = '100%';
+        progressText.textContent = 'Upload complete!';
+        
+        setTimeout(() => {
+            if (data.success) {
+                alert('Progress and attachments uploaded successfully!');
+                closeProgressModal();
+                loadProgress();
+            } else {
+                alert('Error: ' + data.message);
+            }
+            
+            // Reset form
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                Save Progress & Attachments
+            `;
+            progressDiv.classList.add('hidden');
+        }, 500);
     })
     .catch(error => {
+        clearInterval(progressInterval);
         console.error('Error:', error);
-        alert('An error occurred while updating progress.');
+        alert('An error occurred while uploading progress and attachments.');
+        
+        // Reset form
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            Save Progress & Attachments
+        `;
+        progressDiv.classList.add('hidden');
     });
 });
 </script>
