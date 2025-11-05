@@ -75,6 +75,31 @@ if (function_exists('getEnvironment')) {
     echo "   ✗ getEnvironment() function not available\n";
 }
 
+// Test 7: Database Configuration
+echo "7. Database Configuration Test:\n";
+try {
+    if (function_exists('getDatabaseConfig')) {
+        $dbConfig = getDatabaseConfig();
+        echo "   Environment: " . getEnvironment() . "\n";
+        echo "   Database Host: " . $dbConfig['host'] . "\n";
+        echo "   Database Name: " . $dbConfig['name'] . "\n";
+        echo "   Database User: " . $dbConfig['user'] . "\n";
+        echo "   Password Length: " . strlen($dbConfig['pass']) . " characters\n";
+        
+        // Test database connection
+        $db = Database::getInstance();
+        if ($db->testConnection()) {
+            echo "   ✓ Database connection successful\n";
+        } else {
+            echo "   ✗ Database connection failed\n";
+        }
+    } else {
+        echo "   ✗ getDatabaseConfig() function not available\n";
+    }
+} catch (Exception $e) {
+    echo "   ✗ Database test error: " . $e->getMessage() . "\n";
+}
+
 echo "\n=== DEBUG COMPLETE ===\n";
 echo "Upload this file to your production server and run it to see what's happening.\n";
 ?>
