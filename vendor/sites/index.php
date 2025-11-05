@@ -29,35 +29,72 @@ $title = 'My Sites';
 ob_start();
 ?>
 
-<div class="flex justify-between items-center mb-6">
-    <div>
-        <h1 class="text-2xl font-semibold text-gray-900">My Sites</h1>
-        <p class="mt-2 text-sm text-gray-700">Sites delegated to you for installation</p>
-    </div>
-    <div class="flex space-x-2">
-        <div class="flex items-center space-x-2">
-            <span class="badge badge-warning"><?php echo count($delegatedSites); ?> Active</span>
-            <span class="badge badge-success"><?php echo count($completedSites); ?> Completed</span>
+<!-- Enhanced Header -->
+<div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg p-6 mb-8">
+    <div class="flex justify-between items-center">
+        <div class="text-white">
+            <h1 class="text-3xl font-bold">My Sites</h1>
+            <p class="mt-2 text-blue-100">Professional Site Management Dashboard</p>
+            <p class="text-sm text-blue-200 mt-1">Manage your delegated installation projects efficiently</p>
+        </div>
+        <div class="flex items-center space-x-4">
+            <!-- Stats Cards -->
+            <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4 text-center min-w-24">
+                <div class="text-2xl font-bold text-white"><?php echo count($delegatedSites); ?></div>
+                <div class="text-xs text-blue-100 uppercase tracking-wide">Active</div>
+            </div>
+            <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4 text-center min-w-24">
+                <div class="text-2xl font-bold text-white"><?php echo count($completedSites); ?></div>
+                <div class="text-xs text-blue-100 uppercase tracking-wide">Completed</div>
+            </div>
+            <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4 text-center min-w-24">
+                <div class="text-2xl font-bold text-white"><?php echo count($sites); ?></div>
+                <div class="text-xs text-blue-100 uppercase tracking-wide">Total</div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Filter Tabs -->
-<div class="card mb-6">
-    <div class="card-body">
-        <div class="border-b border-gray-200">
-            <nav class="-mb-px flex space-x-8">
-                <button onclick="filterSites('all')" id="tab-all" class="tab-button active">
-                    All Sites (<?php echo count($sites); ?>)
-                </button>
-                <button onclick="filterSites('active')" id="tab-active" class="tab-button">
-                    Active (<?php echo count($delegatedSites); ?>)
-                </button>
-                <button onclick="filterSites('completed')" id="tab-completed" class="tab-button">
-                    Completed (<?php echo count($completedSites); ?>)
-                </button>
-            </nav>
-        </div>
+<!-- Enhanced Filter Tabs -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 overflow-hidden">
+    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"></path>
+            </svg>
+            Filter Sites
+        </h3>
+    </div>
+    <div class="p-6">
+        <nav class="flex space-x-1 bg-gray-100 rounded-lg p-1">
+            <button onclick="filterSites('all')" id="tab-all" class="tab-button active flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200">
+                <div class="flex items-center justify-center space-x-2">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>All Sites</span>
+                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full"><?php echo count($sites); ?></span>
+                </div>
+            </button>
+            <button onclick="filterSites('active')" id="tab-active" class="tab-button flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200">
+                <div class="flex items-center justify-center space-x-2">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>Active</span>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 rounded-full"><?php echo count($delegatedSites); ?></span>
+                </div>
+            </button>
+            <button onclick="filterSites('completed')" id="tab-completed" class="tab-button flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200">
+                <div class="flex items-center justify-center space-x-2">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>Completed</span>
+                    <span class="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full"><?php echo count($completedSites); ?></span>
+                </div>
+            </button>
+        </nav>
     </div>
 </div>
 
@@ -85,7 +122,7 @@ ob_start();
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Site Details</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer/Bank</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progress</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -94,90 +131,200 @@ ob_start();
                     <tbody class="bg-white divide-y divide-gray-200">
                         <?php foreach ($sites as $site): ?>
                         <tr class="site-row hover:bg-gray-50 transition-colors" data-status="<?php echo $site['delegation_status']; ?>">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10">
-                                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                            <svg class="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            <td class="px-6 py-4">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-12 w-12">
+                                        <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+                                            <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z" clip-rule="evenodd"></path>
                                             </svg>
                                         </div>
                                     </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($site['site_id']); ?></div>
-                                        <div class="text-sm text-gray-500"><?php echo htmlspecialchars($site['location']); ?></div>
+                                    <div class="ml-4 flex-1 min-w-0">
+                                        <div class="flex items-center space-x-2 mb-1">
+                                            <h4 class="text-sm font-semibold text-gray-900"><?php echo htmlspecialchars($site['site_id']); ?></h4>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                Site
+                                            </span>
+                                        </div>
+                                        <div class="text-sm text-gray-600 break-words max-w-xs" title="<?php echo htmlspecialchars($site['location']); ?>">
+                                            <?php 
+                                            $location = $site['location'];
+                                            if (strlen($location) > 60) {
+                                                echo htmlspecialchars(substr($location, 0, 60)) . '...';
+                                            } else {
+                                                echo htmlspecialchars($location);
+                                            }
+                                            ?>
+                                        </div>
                                         <?php if (!empty($site['notes'])): ?>
-                                            <div class="text-xs text-blue-600 mt-1 flex items-center">
-                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <div class="text-xs text-amber-600 mt-2 flex items-center bg-amber-50 px-2 py-1 rounded-md">
+                                                <svg class="w-3 h-3 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                                                 </svg>
-                                                Special instructions
+                                                <span class="truncate">Special instructions</span>
                                             </div>
                                         <?php endif; ?>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900"><?php echo htmlspecialchars($site['city'] . ', ' . $site['state']); ?></div>
-                                <div class="text-sm text-gray-500"><?php echo htmlspecialchars($site['country']); ?></div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900"><?php echo htmlspecialchars($site['customer'] ?? 'N/A'); ?></div>
-                                <div class="text-sm text-gray-500"><?php echo htmlspecialchars($site['bank'] ?? 'N/A'); ?></div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex flex-col space-y-1">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo $site['delegation_status'] === 'active' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'; ?>">
-                                        <?php echo ucfirst($site['delegation_status']); ?>
-                                    </span>
-                                    <div class="text-xs text-gray-500">
-                                        Since: <?php echo date('M d, Y', strtotime($site['delegation_date'])); ?>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center">
+                                            <svg class="h-4 w-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="ml-3">
+                                        <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($site['city'] . ', ' . $site['state']); ?></div>
+                                        <div class="text-xs text-gray-500 flex items-center">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a3 3 0 01-3-3V6z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            <?php echo htmlspecialchars($site['country']); ?>
+                                        </div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-xs text-gray-500">Survey:</span>
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <?php echo ($site['survey_status'] ?? false) ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'; ?>">
-                                            <?php echo ($site['survey_status'] ?? false) ? 'Done' : 'Pending'; ?>
-                                        </span>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                                            <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
                                     </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-xs text-gray-500">Install:</span>
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <?php echo ($site['installation_status'] ?? false) ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'; ?>">
-                                            <?php echo ($site['installation_status'] ?? false) ? 'Done' : 'Pending'; ?>
-                                        </span>
+                                    <div class="ml-3 flex-1 min-w-0">
+                                        <div class="text-sm font-medium text-gray-900 truncate" title="<?php echo htmlspecialchars($site['customer'] ?? 'N/A'); ?>">
+                                            <?php echo htmlspecialchars($site['customer'] ?? 'N/A'); ?>
+                                        </div>
+                                        <div class="text-xs text-gray-500">
+                                            Customer
+                                        </div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex items-center space-x-2">
-                                    <button onclick="viewSiteDetails(<?php echo $site['id']; ?>, '<?php echo htmlspecialchars($site['site_id']); ?>')" class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" title="View Details">
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col space-y-2">
+                                    <div class="flex items-center">
+                                        <?php if ($site['delegation_status'] === 'active'): ?>
+                                            <div class="h-2 w-2 bg-yellow-400 rounded-full mr-2 animate-pulse"></div>
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 border border-yellow-300">
+                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                                </svg>
+                                                Active
+                                            </span>
+                                        <?php else: ?>
+                                            <div class="h-2 w-2 bg-green-400 rounded-full mr-2"></div>
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300">
+                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                </svg>
+                                                Completed
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="text-xs text-gray-500 flex items-center">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Since <?php echo date('M d, Y', strtotime($site['delegation_date'])); ?>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="space-y-3">
+                                    <!-- Survey Progress -->
+                                    <div class="flex items-center space-x-3">
+                                        <div class="flex-shrink-0">
+                                            <?php if ($site['survey_status'] ?? false): ?>
+                                                <div class="h-6 w-6 rounded-full bg-green-500 flex items-center justify-center">
+                                                    <svg class="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                </div>
+                                            <?php else: ?>
+                                                <div class="h-6 w-6 rounded-full bg-yellow-400 flex items-center justify-center">
+                                                    <svg class="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-xs font-medium text-gray-900">Survey</div>
+                                            <div class="text-xs text-gray-500">
+                                                <?php echo ($site['survey_status'] ?? false) ? 'Completed' : 'Pending'; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Installation Progress -->
+                                    <div class="flex items-center space-x-3">
+                                        <div class="flex-shrink-0">
+                                            <?php if ($site['installation_status'] ?? false): ?>
+                                                <div class="h-6 w-6 rounded-full bg-green-500 flex items-center justify-center">
+                                                    <svg class="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                </div>
+                                            <?php else: ?>
+                                                <div class="h-6 w-6 rounded-full bg-gray-300 flex items-center justify-center">
+                                                    <svg class="h-3 w-3 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M9.504 1.132a1 1 0 01.992 0l1.75 1a1 1 0 11-.992 1.736L10 3.152l-1.254.716a1 1 0 11-.992-1.736l1.75-1zM5.618 4.504a1 1 0 01-.372 1.364L5.016 6l.23.132a1 1 0 11-.992 1.736L3 7.723V8a1 1 0 01-2 0V6a.996.996 0 01.52-.878l1.734-.99a1 1 0 011.364.372zm8.764 0a1 1 0 011.364-.372l1.734.99A.996.996 0 0118 6v2a1 1 0 11-2 0v-.277l-1.254.145a1 1 0 11-.992-1.736L14.984 6l-.23-.132a1 1 0 01-.372-1.364zm-7 4a1 1 0 011.364-.372L10 8.848l1.254-.716a1 1 0 11.992 1.736L11 10.723V12a1 1 0 11-2 0v-1.277l-1.246-.855a1 1 0 01-.372-1.364zM3 11a1 1 0 011 1v1.277l1.246.855a1 1 0 11-.992 1.736l-1.75-1A1 1 0 012 14v-2a1 1 0 011-1zm14 0a1 1 0 011 1v2a1 1 0 01-.504.868l-1.75 1a1 1 0 11-.992-1.736L16 13.277V12a1 1 0 011-1zm-9.618 5.504a1 1 0 011.364-.372l.254.145V16a1 1 0 112 0v.277l.254-.145a1 1 0 11.992 1.736l-1.75 1a.996.996 0 01-.992 0l-1.75-1a1 1 0 01-.372-1.364z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-xs font-medium text-gray-900">Installation</div>
+                                            <div class="text-xs text-gray-500">
+                                                <?php echo ($site['installation_status'] ?? false) ? 'Completed' : 'Pending'; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end space-x-2">
+                                    <!-- View Details Button -->
+                                    <button onclick="viewSiteDetails(<?php echo $site['id']; ?>, '<?php echo htmlspecialchars($site['site_id']); ?>')" 
+                                            class="group relative inline-flex items-center justify-center p-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" 
+                                            title="View Details">
                                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
                                             <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
                                         </svg>
                                     </button>
+                                    
                                     <?php if ($site['delegation_status'] === 'active'): ?>
                                         <?php if (!($site['survey_status'] ?? false)): ?>
-                                            <button onclick="conductSurvey(<?php echo $site['id']; ?>)" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" title="Site Survey">
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <!-- Survey Button -->
+                                            <button onclick="conductSurvey(<?php echo $site['id']; ?>)" 
+                                                    class="group relative inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-lg hover:shadow-xl transition-all duration-200" 
+                                                    title="Conduct Site Survey">
+                                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
                                                 </svg>
+                                                Survey
                                             </button>
                                         <?php else: ?>
-                                            <button onclick="generateMaterialRequest(<?php echo $site['id']; ?>)" class="inline-flex items-center px-3 py-1 border border-blue-300 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" title="Generate Material Request">
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <!-- Material Request Button -->
+                                            <button onclick="generateMaterialRequest(<?php echo $site['id']; ?>)" 
+                                                    class="group relative inline-flex items-center justify-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" 
+                                                    title="Generate Material Request">
+                                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zM8 6a2 2 0 114 0v1H8V6zM6 9a1 1 0 012 0v1a1 1 0 11-2 0V9zm8 0a1 1 0 012 0v1a1 1 0 11-2 0V9z" clip-rule="evenodd"></path>
                                                 </svg>
+                                                Materials
                                             </button>
                                         <?php endif; ?>
-                                        <button onclick="updateProgress(<?php echo $site['id']; ?>)" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" title="Update Progress">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
-                                            </svg>
-                                        </button>
+                                        
+
                                     <?php endif; ?>
                                 </div>
                             </td>
@@ -373,10 +520,6 @@ function displaySiteDetails(site) {
                         <label class="block text-sm font-medium text-gray-700">Customer</label>
                         <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded">${site.customer || 'N/A'}</p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Bank</label>
-                        <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded">${site.bank || 'N/A'}</p>
-                    </div>
                 </div>
             </div>
             
@@ -424,15 +567,10 @@ function displaySiteDetails(site) {
     `;
     
     // Show action button if needed
-    if (site.delegation_status === 'active') {
+    if (site.delegation_status === 'active' && !site.survey_status) {
         actionButton.classList.remove('hidden');
-        if (!site.survey_status) {
-            actionButton.textContent = 'Conduct Survey';
-            actionButton.onclick = () => conductSurvey(site.delegation_id);
-        } else {
-            actionButton.textContent = 'Update Progress';
-            actionButton.onclick = () => updateProgress(site.delegation_id);
-        }
+        actionButton.textContent = 'Conduct Survey';
+        actionButton.onclick = () => conductSurvey(site.delegation_id);
     } else {
         actionButton.classList.add('hidden');
     }
@@ -442,9 +580,7 @@ function closeSiteModal() {
     document.getElementById('siteDetailsModal').classList.add('hidden');
 }
 
-function updateProgress(delegationId) {
-    window.location.href = `${BASE_URL}/vendor/update-progress.php?id=${delegationId}`;
-}
+
 
 function conductSurvey(delegationId) {
     window.location.href = `${BASE_URL}/vendor/site-survey.php?delegation_id=${delegationId}`;
@@ -458,10 +594,19 @@ function generateMaterialRequest(siteId) {
 const style = document.createElement('style');
 style.textContent = `
     .tab-button {
-        @apply py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors;
+        color: #6b7280;
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+    }
+    .tab-button:hover {
+        color: #374151;
+        background-color: rgba(255, 255, 255, 0.5);
     }
     .tab-button.active {
-        @apply border-blue-500 text-blue-600;
+        color: #1f2937;
+        background-color: white;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
     }
     
     /* Modal animations */

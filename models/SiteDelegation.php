@@ -131,6 +131,7 @@ class SiteDelegation extends BaseModel {
     public function getVendorDelegations($vendorId, $status = null) {
         $sql = "
             SELECT sd.*, s.site_id, s.location, s.city, s.state, s.country, 
+                   s.customer, s.bank,
                    u.username as delegated_by_name,
                    ct.name as city, st.name as state, co.name as country
             FROM {$this->table} sd

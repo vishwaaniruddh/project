@@ -33,7 +33,8 @@ if (!$site) {
 }
 
 // Check if survey already exists
-$existingSurvey = $surveyModel->findByDelegation($delegationId);
+$existingSurveys = $surveyModel->findByDelegation($delegationId);
+$existingSurvey = !empty($existingSurveys) ? $existingSurveys[0] : null;
 
 $title = 'Site Survey - ' . $site['site_id'];
 ob_start();
@@ -93,17 +94,19 @@ ob_start();
         <div class="flex-1">
             <h4 class="text-lg font-medium text-blue-800">Survey Already Submitted</h4>
             <p class="text-sm text-blue-600 mt-1">
-                You have already submitted a survey for this site on <?php echo date('M d, Y', strtotime($existingSurvey['submitted_date'])); ?>.
-                Status: <span class="font-semibold"><?php echo ucfirst($existingSurvey['survey_status']); ?></span>
+                You have already submitted a survey for this site on <?php echo isset($existingSurvey['submitted_date']) ? date('M d, Y', strtotime($existingSurvey['submitted_date'])) : 'Unknown date'; ?>.
+                Status: <span class="font-semibold"><?php echo isset($existingSurvey['survey_status']) ? ucfirst($existingSurvey['survey_status']) : 'Unknown'; ?></span>
             </p>
             <div class="mt-4">
-                <a href="../shared/view-survey.php?id=<?php echo $existingSurvey['id']; ?>" class="inline-flex items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100">
-                    View Survey Details
-                </a>
-                <?php if ($existingSurvey['survey_status'] === 'pending' || $existingSurvey['survey_status'] === 'rejected'): ?>
-                    <a href="edit-survey.php?id=<?php echo $existingSurvey['id']; ?>" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                        Edit Survey
+                <?php if (isset($existingSurvey['id'])): ?>
+                    <a href="../shared/view-survey.php?id=<?php echo $existingSurvey['id']; ?>" class="inline-flex items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100">
+                        View Survey Details
                     </a>
+                    <?php if (isset($existingSurvey['survey_status']) && ($existingSurvey['survey_status'] === 'pending' || $existingSurvey['survey_status'] === 'rejected')): ?>
+                        <a href="edit-survey.php?id=<?php echo $existingSurvey['id']; ?>" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                            Edit Survey
+                        </a>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>
