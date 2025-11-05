@@ -450,6 +450,20 @@ $vendorPermissions = $permissionModel->getVendorPermissions(Auth::getVendorId())
                     </div>
                     
                     <div class="flex items-center space-x-4">
+                        <!-- Environment Indicator -->
+                        <?php 
+                        $env = getEnvironment();
+                        $envColors = [
+                            'development' => 'bg-green-500 text-white',
+                            'testing' => 'bg-yellow-500 text-black',
+                            'production' => 'bg-red-500 text-white'
+                        ];
+                        $envColor = $envColors[$env] ?? 'bg-gray-500 text-white';
+                        ?>
+                        <span class="<?php echo $envColor; ?> px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-sm">
+                            <?php echo $env; ?>
+                        </span>
+                        
                         <div class="relative" id="user-menu">
                             <button id="user-menu-button" class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 <div class="vendor-badge w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs">

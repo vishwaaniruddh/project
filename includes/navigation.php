@@ -26,7 +26,21 @@ $isVendor = $currentUser && $currentUser['role'] === VENDOR_ROLE;
                 <a href="<?php echo url('vendor/materials/'); ?>" class="text-white hover:text-blue-200">Materials</a>
                 <?php endif; ?>
                 
-                <div class="relative">
+                <div class="relative flex items-center space-x-3">
+                    <!-- Environment Indicator -->
+                    <?php 
+                    $env = getEnvironment();
+                    $envColors = [
+                        'development' => 'bg-green-500 text-white',
+                        'testing' => 'bg-yellow-500 text-black',
+                        'production' => 'bg-red-500 text-white'
+                    ];
+                    $envColor = $envColors[$env] ?? 'bg-gray-500 text-white';
+                    ?>
+                    <span class="<?php echo $envColor; ?> px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                        <?php echo $env; ?>
+                    </span>
+                    
                     <span class="text-white">Welcome, <?php echo htmlspecialchars($currentUser['username']); ?></span>
                     <a href="<?php echo url('auth/logout.php'); ?>" class="ml-4 text-white hover:text-blue-200">Logout</a>
                 </div>
