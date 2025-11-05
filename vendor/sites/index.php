@@ -153,7 +153,7 @@ ob_start();
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center space-x-2">
-                                    <button onclick="viewSiteDetails('<?php echo htmlspecialchars($site['id']); ?>')" class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" title="View Details">
+                                    <button onclick="viewSiteDetails(<?php echo $site['id']; ?>, '<?php echo htmlspecialchars($site['site_id']); ?>')" class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" title="View Details">
                                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
                                             <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
@@ -249,7 +249,7 @@ function filterSites(status) {
 // Navigation functions
 const BASE_URL = '<?php echo BASE_URL; ?>';
 
-function viewSiteDetails(siteId) {
+function viewSiteDetails(id, siteId) {
     // Show modal and load site details
     const modal = document.getElementById('siteDetailsModal');
     const modalContent = document.getElementById('modalContent');
@@ -267,8 +267,8 @@ function viewSiteDetails(siteId) {
         </div>
     `;
     
-    // Fetch site details
-    fetch(`get-site-details.php?site_id=${encodeURIComponent(siteId)}`)
+    // Fetch site details using the database ID
+    fetch(`get-site-details.php?id=${encodeURIComponent(id)}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
