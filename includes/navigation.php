@@ -16,19 +16,19 @@ $isVendor = $currentUser && $currentUser['role'] === VENDOR_ROLE;
             <?php if ($currentUser): ?>
             <div class="flex items-center space-x-4">
                 <?php if ($isAdmin): ?>
-                <a href="<?php echo BASE_URL; ?>/admin/dashboard.php" class="text-white hover:text-blue-200">Dashboard</a>
-                <a href="<?php echo BASE_URL; ?>/admin/sites/" class="text-white hover:text-blue-200">Sites</a>
-                <a href="<?php echo BASE_URL; ?>/admin/inventory/" class="text-white hover:text-blue-200">Inventory</a>
-                <a href="<?php echo BASE_URL; ?>/admin/reports/" class="text-white hover:text-blue-200">Reports</a>
+                <a href="<?php echo url('admin/dashboard.php'); ?>" class="text-white hover:text-blue-200">Dashboard</a>
+                <a href="<?php echo url('admin/sites/'); ?>" class="text-white hover:text-blue-200">Sites</a>
+                <a href="<?php echo url('admin/inventory/'); ?>" class="text-white hover:text-blue-200">Inventory</a>
+                <a href="<?php echo url('admin/reports/'); ?>" class="text-white hover:text-blue-200">Reports</a>
                 <?php elseif ($isVendor): ?>
-                <a href="<?php echo BASE_URL; ?>/vendor/" class="text-white hover:text-blue-200">Dashboard</a>
-                <a href="<?php echo BASE_URL; ?>/vendor/sites/" class="text-white hover:text-blue-200">My Sites</a>
-                <a href="<?php echo BASE_URL; ?>/vendor/materials/" class="text-white hover:text-blue-200">Materials</a>
+                <a href="<?php echo url('vendor/'); ?>" class="text-white hover:text-blue-200">Dashboard</a>
+                <a href="<?php echo url('vendor/sites/'); ?>" class="text-white hover:text-blue-200">My Sites</a>
+                <a href="<?php echo url('vendor/materials/'); ?>" class="text-white hover:text-blue-200">Materials</a>
                 <?php endif; ?>
                 
                 <div class="relative">
                     <span class="text-white">Welcome, <?php echo htmlspecialchars($currentUser['username']); ?></span>
-                    <a href="<?php echo BASE_URL; ?>/auth/logout.php" class="ml-4 text-white hover:text-blue-200">Logout</a>
+                    <a href="<?php echo url('auth/logout.php'); ?>" class="ml-4 text-white hover:text-blue-200">Logout</a>
                 </div>
             </div>
             <?php endif; ?>
