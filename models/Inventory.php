@@ -44,8 +44,8 @@ class Inventory {
                 FROM inventory_stock ist
                 JOIN boq_items bi ON CAST(ist.boq_item_id AS CHAR) = CAST(bi.id AS CHAR)
                 WHERE ist.boq_item_id = ? 
-                AND ist.item_status = 'available'
-                AND ist.quality_status = 'good'
+                AND CAST(ist.item_status AS CHAR) = CAST('available' AS CHAR)
+                AND CAST(ist.quality_status AS CHAR) = CAST('good' AS CHAR)
                 ORDER BY ist.id ASC";
         
         $params = [$boqItemId];
@@ -69,7 +69,7 @@ class Inventory {
                 FROM inventory_stock ist
                 JOIN boq_items bi ON CAST(ist.boq_item_id AS CHAR) = CAST(bi.id AS CHAR)
                 WHERE ist.serial_number IN ($placeholders)
-                AND ist.item_status = 'available'
+                AND CAST(ist.item_status AS CHAR) = CAST('available' AS CHAR)
                 ORDER BY ist.id ASC";
         
         $stmt = $this->db->prepare($sql);
@@ -132,7 +132,7 @@ class Inventory {
         if ($unitCost > 0) {
             $sql = "UPDATE inventory_stock 
                     SET unit_cost = ?, updated_by = ?
-                    WHERE boq_item_id = ? AND item_status = 'available'";
+                    WHERE boq_item_id = ? AND CAST(item_status AS CHAR) = CAST('available' AS CHAR)";
             
             $stmt = $this->db->prepare($sql);
             $result = $stmt->execute([$unitCost, $currentUser['id'], $boqItemId]);
@@ -544,8 +544,8 @@ class Inventory {
         $sql = "UPDATE inventory_stock 
                 SET item_status = ?, 
                     dispatch_id = ?,
-                    dispatched_at = CASE WHEN ? = 'dispatched' THEN NOW() ELSE dispatched_at END,
-                    delivered_at = CASE WHEN ? = 'delivered' THEN NOW() ELSE delivered_at END,
+                    dispatched_at = CASE WHEN CAST(? AS CHAR) = CAST('dispatched' AS CHAR) THEN NOW() ELSE dispatched_at END,
+                    delivered_at = CASE WHEN CAST(? AS CHAR) = CAST('delivered' AS CHAR) THEN NOW() ELSE delivered_at END,
                     updated_by = ?
                 WHERE id = ?";
         
@@ -722,7 +722,7 @@ class Inventory {
         $sql = "SELECT COUNT(*) as total_entries
                 FROM inventory_stock ist
                 JOIN boq_items bi ON CAST(ist.boq_item_id AS CHAR) = CAST(bi.id AS CHAR)
-                WHERE bi.status = 'active'";
+                WHERE CAST(bi.status AS CHAR) = CAST('active' AS CHAR)";
         
         $stmt = $this->db->query($sql);
         $stats['total_entries'] = $stmt->fetchColumn();
@@ -842,7 +842,7 @@ class Inventory {
     
     public function confirmDelivery($dispatchId, $deliveryData) {
         $sql = "UPDATE inventory_dispatches 
-                SET dispatch_status = 'delivered',
+                SET dispatch_status = CAST('delivered' AS CHAR),
                     delivery_date = ?,
                     delivery_time = ?,
                     received_by = ?,
@@ -973,9 +973,9 @@ class Inventory {
     
     public function getStockSummaryForItem($boqItemId) {
         $sql = "SELECT 
-                    COUNT(CASE WHEN item_status = 'available' THEN 1 END) as available_stock,
-                    COUNT(CASE WHEN item_status = 'dispatched' THEN 1 END) as dispatched_stock,
-                    COUNT(CASE WHEN item_status = 'delivered' THEN 1 END) as delivered_stock,
+                    COUNT(CASE WHEN CAST(item_status AS CHAR) = CAST('available' AS CHAR) THEN 1 END) as available_stock,
+                    COUNT(CASE WHEN CAST(item_status AS CHAR) = CAST('dispatched' AS CHAR) THEN 1 END) as dispatched_stock,
+                    COUNT(CASE WHEN CAST(item_status AS CHAR) = CAST('delivered' AS CHAR) THEN 1 END) as delivered_stock,
                     COUNT(*) as total_stock,
                     AVG(unit_cost) as avg_unit_cost
                 FROM inventory_stock 
@@ -1001,8 +1001,8 @@ class Inventory {
     public function getStockSummaryByItem($boqItemId) {
         $sql = "SELECT 
                     COUNT(*) as total_stock,
-                    SUM(CASE WHEN item_status = 'available' THEN 1 ELSE 0 END) as available_stock,
-                    SUM(CASE WHEN item_status = 'dispatched' THEN 1 ELSE 0 END) as dispatched_stock,
+                    SUM(CASE WHEN CAST(item_status AS CHAR) = CAST('available' AS CHAR) THEN 1 ELSE 0 END) as available_stock,
+                    SUM(CASE WHEN CAST(item_status AS CHAR) = CAST('dispatched' AS CHAR) THEN 1 ELSE 0 END) as dispatched_stock,
                     AVG(unit_cost) as avg_unit_cost,
                     SUM(unit_cost) as total_value
                 FROM inventory_stock 
@@ -1036,7 +1036,7 @@ class Inventory {
                     'Item dispatched' as notes
                 FROM inventory_stock inv2
                 LEFT JOIN users u2 ON inv2.updated_by = u2.id
-                WHERE inv2.boq_item_id = ? AND inv2.item_status = 'dispatched'
+                WHERE inv2.boq_item_id = ? AND CAST(inv2.item_status AS CHAR) = CAST('dispatched' AS CHAR)
                 
                 ORDER BY created_at DESC
                 LIMIT ?";
