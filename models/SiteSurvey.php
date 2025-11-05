@@ -17,8 +17,8 @@ class SiteSurvey {
             existing_poe_rack, existing_poe_photos, space_new_rack, space_new_rack_photos,
             new_poe_rack, new_poe_photos, zones_recommended,
             rrl_delivery_status, rrl_photos, kptl_space, kptl_photos,
-            technical_remarks, submitted_date
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+            site_photos, technical_remarks, submitted_date
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
         
         $stmt = $this->db->prepare($sql);
         $result = $stmt->execute([
@@ -49,6 +49,7 @@ class SiteSurvey {
             $data['rrl_photos'] ?? null,
             $data['kptl_space'] ?? null,
             $data['kptl_photos'] ?? null,
+            $data['site_photos'] ?? null,
             $data['remarks'] ?? $data['technical_remarks'] ?? null
         ]);
         

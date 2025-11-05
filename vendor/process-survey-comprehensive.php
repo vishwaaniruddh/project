@@ -41,7 +41,8 @@ try {
         'space_new_rack_photo' => 'space_new_rack_photos',
         'new_poe_photos' => 'new_poe_photos',
         'rrl_photos' => 'rrl_photos',
-        'kptl_photos' => 'kptl_photos'
+        'kptl_photos' => 'kptl_photos',
+        'site_photos' => 'site_photos'
     ];
     
     $uploadedPhotos = [];
