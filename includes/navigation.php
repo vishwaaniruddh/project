@@ -29,7 +29,12 @@ $isVendor = $currentUser && $currentUser['role'] === VENDOR_ROLE;
                 <div class="relative flex items-center space-x-3">
                     <!-- Environment Indicator -->
                     <?php 
-                    $env = getEnvironment();
+                    // Ensure constants are loaded
+                    if (!function_exists('getEnvironment')) {
+                        require_once __DIR__ . '/../config/constants.php';
+                    }
+                    
+                    $env = function_exists('getEnvironment') ? getEnvironment() : (defined('APP_ENV') ? APP_ENV : 'unknown');
                     $envColors = [
                         'development' => 'bg-green-500 text-white',
                         'testing' => 'bg-yellow-500 text-black',
@@ -38,7 +43,7 @@ $isVendor = $currentUser && $currentUser['role'] === VENDOR_ROLE;
                     $envColor = $envColors[$env] ?? 'bg-gray-500 text-white';
                     ?>
                     <span class="<?php echo $envColor; ?> px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-                        <?php echo $env; ?>
+                        <?php echo strtoupper($env); ?>
                     </span>
                     
                     <span class="text-white">Welcome, <?php echo htmlspecialchars($currentUser['username']); ?></span>
