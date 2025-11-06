@@ -658,6 +658,11 @@ $currentUser = Auth::getCurrentUser();
                 padding: 0.375rem 0.5rem;
                 font-size: 0.7rem;
             }
+            
+            /* Hide page header title on mobile */
+            .header-page-title {
+                display: none;
+            }
         }
         
         /* Modal responsive styles */
@@ -1214,7 +1219,7 @@ $currentUser = Auth::getCurrentUser();
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                             </svg>
                         </button>
-                        <div>
+                        <div class="header-page-title">
                             <h1 class="text-xl font-semibold text-gray-900"><?php echo $title ?? 'Admin Panel'; ?></h1>
                         </div>
                     </div>

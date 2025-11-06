@@ -7,18 +7,20 @@ ob_start();
 <div class="flex bg-gray-50">
     <!-- Left Sidebar - Table of Contents -->
     <div class="w-80 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col">
-        <div class="p-6 border-b border-gray-200 flex-shrink-0">
-            <h1 class="text-xl font-bold text-gray-900">Help & Documentation</h1>
-            <p class="text-sm text-gray-600 mt-1">Site Installation Management System</p>
-            <!-- Debug button -->
-            <!-- <button onclick="testScroll()" class="mt-2 px-3 py-1 bg-blue-500 text-white text-xs rounded">Test Scroll</button> -->
+        <div class="p-4 border-b border-gray-200 flex-shrink-0 lg:p-6">
+            <div class="flex items-center justify-between">
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-lg font-bold text-gray-900 truncate lg:text-xl">Help & Documentation</h1>
+                    <p class="text-xs text-gray-600 mt-1 hidden sm:block lg:text-sm">Site Installation Management System</p>
+                </div>
+            </div>
         </div>
         
         <!-- Mobile Navigation Toggle -->
         <button class="mobile-nav-toggle" onclick="toggleMobileNav()">
-            <span class="flex items-center justify-between">
-                <span>Table of Contents</span>
-                <svg id="mobile-nav-arrow" class="w-4 h-4 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+            <span class="flex items-center justify-between w-full">
+                <span class="text-sm font-medium">Table of Contents</span>
+                <svg id="mobile-nav-arrow" class="w-4 h-4 transition-transform flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                 </svg>
             </span>
@@ -708,6 +710,22 @@ ob_start();
         height: 100%;
     }
     
+    /* Prevent header text overflow */
+    .help-container .truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    /* Ensure proper flex behavior */
+    .help-container .min-w-0 {
+        min-width: 0;
+    }
+    
+    .help-container .flex-shrink-0 {
+        flex-shrink: 0;
+    }
+    
     /* Smooth scrolling for anchor links within content area */
     .content-scroll {
         scroll-behavior: smooth;
@@ -968,16 +986,38 @@ ob_start();
             background: #f8fafc;
             border: none;
             border-bottom: 1px solid #e5e7eb;
-            font-weight: 600;
+            font-weight: 500;
             color: #374151;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .mobile-nav-toggle:hover {
+            background: #f1f5f9;
+        }
+        
+        .mobile-nav-toggle:active {
+            background: #e2e8f0;
         }
         
         .mobile-nav-content {
             display: none;
+            animation: slideDown 0.2s ease-out;
         }
         
         .mobile-nav-content.show {
             display: block;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     }
     
@@ -988,6 +1028,23 @@ ob_start();
         
         .mobile-nav-content {
             display: block !important;
+        }
+    }
+    
+    /* Header responsive improvements */
+    @media (max-width: 640px) {
+        .help-container .w-80 .p-4 {
+            padding: 0.75rem;
+        }
+        
+        .help-container .w-80 h1 {
+            font-size: 1rem;
+            line-height: 1.25;
+        }
+        
+        .help-container .w-80 p {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
         }
     }
 </style>
