@@ -11,10 +11,20 @@ ob_start();
             <h1 class="text-xl font-bold text-gray-900">Help & Documentation</h1>
             <p class="text-sm text-gray-600 mt-1">Site Installation Management System</p>
             <!-- Debug button -->
-            <button onclick="testScroll()" class="mt-2 px-3 py-1 bg-blue-500 text-white text-xs rounded">Test Scroll</button>
+            <!-- <button onclick="testScroll()" class="mt-2 px-3 py-1 bg-blue-500 text-white text-xs rounded">Test Scroll</button> -->
         </div>
         
-        <nav class="p-4 overflow-y-auto flex-1">
+        <!-- Mobile Navigation Toggle -->
+        <button class="mobile-nav-toggle" onclick="toggleMobileNav()">
+            <span class="flex items-center justify-between">
+                <span>Table of Contents</span>
+                <svg id="mobile-nav-arrow" class="w-4 h-4 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </span>
+        </button>
+        
+        <nav class="p-4 overflow-y-auto flex-1 mobile-nav-content">
             <ul class="space-y-1">
                 <li>
                     <a href="#getting-started" onclick="scrollToSection('#getting-started'); return false;" class="nav-link flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 transition-colors">
@@ -772,25 +782,212 @@ ob_start();
     }
     
     /* Responsive adjustments */
+    @media (max-width: 1280px) {
+        .help-container .w-80 {
+            width: 18rem;
+        }
+    }
+    
     @media (max-width: 1024px) {
-        .w-80 {
+        .help-container .w-80 {
             width: 16rem;
+        }
+        
+        .help-container .flex-1 .p-8 {
+            padding: 1.5rem;
+        }
+        
+        .help-container .max-w-4xl {
+            max-width: none;
         }
     }
     
     @media (max-width: 768px) {
-        .flex.h-screen {
-            flex-direction: column;
+        .help-container {
+            height: auto;
+            min-height: calc(100vh - 120px);
         }
         
-        .w-80 {
-            width: 100%;
+        .help-container .flex {
+            flex-direction: column;
             height: auto;
+        }
+        
+        .help-container .w-80 {
+            width: 100%;
+            max-height: none;
+            border-right: none;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .help-container .w-80 nav {
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+        
+        .help-container .flex-1 {
+            height: auto;
+            min-height: 60vh;
+        }
+        
+        .help-container .flex-1 .p-8 {
+            padding: 1rem;
+        }
+        
+        /* Mobile navigation improvements */
+        .help-container .nav-link {
+            padding: 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .help-container .nav-sublink {
+            padding: 0.5rem 0.75rem;
+            margin-left: 1rem;
+            font-size: 0.8125rem;
+        }
+        
+        /* Mobile content improvements */
+        .help-container h1 {
+            font-size: 1.25rem;
+        }
+        
+        .help-container h2 {
+            font-size: 1.5rem;
+        }
+        
+        .help-container h3 {
+            font-size: 1.25rem;
+        }
+        
+        /* Hide test button on mobile */
+        .help-container button {
+            display: none;
+        }
+    }
+    
+    @media (max-width: 640px) {
+        .help-container .w-80 {
+            padding: 0;
+        }
+        
+        .help-container .w-80 .p-6 {
+            padding: 1rem;
+        }
+        
+        .help-container .w-80 nav {
+            padding: 0.75rem;
             max-height: 40vh;
         }
         
-        .flex-1 {
-            height: 60vh;
+        .help-container .flex-1 .p-8 {
+            padding: 0.75rem;
+        }
+        
+        /* Compact mobile navigation */
+        .help-container .nav-link {
+            padding: 0.5rem;
+            font-size: 0.8125rem;
+        }
+        
+        .help-container .nav-link svg {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+        }
+        
+        .help-container .nav-sublink {
+            padding: 0.375rem 0.5rem;
+            margin-left: 0.75rem;
+            font-size: 0.75rem;
+        }
+        
+        /* Mobile content spacing */
+        .help-container .mb-12 {
+            margin-bottom: 2rem;
+        }
+        
+        .help-container .mb-8 {
+            margin-bottom: 1.5rem;
+        }
+        
+        .help-container .mb-6 {
+            margin-bottom: 1rem;
+        }
+        
+        .help-container .mb-4 {
+            margin-bottom: 0.75rem;
+        }
+        
+        /* Mobile typography */
+        .help-container h1 {
+            font-size: 1.125rem;
+            line-height: 1.4;
+        }
+        
+        .help-container h2 {
+            font-size: 1.25rem;
+            line-height: 1.4;
+        }
+        
+        .help-container h3 {
+            font-size: 1.125rem;
+            line-height: 1.4;
+        }
+        
+        .help-container p, .help-container li {
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        
+        /* Mobile card improvements */
+        .help-container .bg-gray-50,
+        .help-container .bg-blue-50,
+        .help-container .bg-green-50,
+        .help-container .bg-orange-50,
+        .help-container .bg-teal-50,
+        .help-container .bg-cyan-50,
+        .help-container .bg-yellow-50 {
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        /* Mobile grid adjustments */
+        .help-container .grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+    }
+    
+    /* Collapsible navigation for mobile */
+    @media (max-width: 768px) {
+        .mobile-nav-toggle {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            background: #f8fafc;
+            border: none;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .mobile-nav-content {
+            display: none;
+        }
+        
+        .mobile-nav-content.show {
+            display: block;
+        }
+    }
+    
+    @media (min-width: 769px) {
+        .mobile-nav-toggle {
+            display: none;
+        }
+        
+        .mobile-nav-content {
+            display: block !important;
         }
     }
 </style>
@@ -808,6 +1005,17 @@ ob_start();
         
         console.log('Content area found:', contentArea);
         
+        // Mobile navigation toggle
+        window.toggleMobileNav = function() {
+            const navContent = document.querySelector('.mobile-nav-content');
+            const arrow = document.getElementById('mobile-nav-arrow');
+            
+            if (navContent && arrow) {
+                navContent.classList.toggle('show');
+                arrow.style.transform = navContent.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
+        };
+        
         // Test scroll function
         window.testScroll = function() {
             console.log('Testing scroll...');
@@ -824,6 +1032,16 @@ ob_start();
         window.scrollToSection = function(targetId) {
             const target = document.querySelector(targetId);
             console.log('scrollToSection called:', targetId, 'Target:', target, 'ContentArea:', contentArea);
+            
+            // Close mobile navigation if open
+            if (window.innerWidth <= 768) {
+                const navContent = document.querySelector('.mobile-nav-content');
+                const arrow = document.getElementById('mobile-nav-arrow');
+                if (navContent && navContent.classList.contains('show')) {
+                    navContent.classList.remove('show');
+                    if (arrow) arrow.style.transform = 'rotate(0deg)';
+                }
+            }
             
             if (target && contentArea) {
                 // Try multiple approaches to ensure scrolling works
@@ -972,6 +1190,18 @@ ob_start();
                 }, 100);
             });
         }
+        
+        // Handle window resize for responsive behavior
+        window.addEventListener('resize', function() {
+            const navContent = document.querySelector('.mobile-nav-content');
+            const arrow = document.getElementById('mobile-nav-arrow');
+            
+            // Reset mobile navigation on desktop
+            if (window.innerWidth > 768) {
+                if (navContent) navContent.classList.remove('show');
+                if (arrow) arrow.style.transform = 'rotate(0deg)';
+            }
+        });
     });
 </script>
 
