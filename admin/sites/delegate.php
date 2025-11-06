@@ -49,7 +49,7 @@ ob_start();
 
 <!-- Site Information Card -->
 <div class="card mb-6">
-    <div class="card-header">
+    <div class="card-body">
         <h3 class="card-title">Site Information</h3>
     </div>
     <div class="card-body">
@@ -85,7 +85,7 @@ ob_start();
 <?php if ($activeDelegation): ?>
 <!-- Current Delegation Card -->
 <div class="card mb-6">
-    <div class="card-header">
+    <div class="card-body">
         <h3 class="card-title">Current Delegation</h3>
         <span class="badge badge-success">Active</span>
     </div>
@@ -133,7 +133,7 @@ ob_start();
 <?php else: ?>
 <!-- Delegation Form -->
 <div class="card mb-6">
-    <div class="card-header">
+    <div class="card-body">
         <h3 class="card-title">Delegate Site to Vendor</h3>
     </div>
     <div class="card-body">
@@ -179,7 +179,7 @@ ob_start();
 <!-- Delegation History -->
 <?php if (!empty($delegationHistory)): ?>
 <div class="card">
-    <div class="card-header">
+    <div class="card-body">
         <h3 class="card-title">Delegation History</h3>
     </div>
     <div class="card-body">
