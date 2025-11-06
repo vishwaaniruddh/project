@@ -90,6 +90,35 @@ ob_start();
     </div>
 </div>
 
+<!-- Inline script to ensure functions are available -->
+<script>
+// Define critical functions inline to ensure they're available immediately
+if (typeof window.viewDispatch === 'undefined') {
+    window.viewDispatch = function(dispatchId) {
+        window.open('view-dispatch.php?id=' + dispatchId, '_blank');
+    };
+}
+
+if (typeof window.updateDispatchStatus === 'undefined') {
+    window.updateDispatchStatus = function(dispatchId) {
+        alert('Update status functionality will be available shortly. Dispatch ID: ' + dispatchId);
+    };
+}
+
+if (typeof window.printDispatch === 'undefined') {
+    window.printDispatch = function(dispatchId) {
+        window.open('print-dispatch.php?id=' + dispatchId, '_blank');
+    };
+}
+
+// Log that functions are available
+console.log('Dispatch functions loaded:', {
+    viewDispatch: typeof window.viewDispatch,
+    updateDispatchStatus: typeof window.updateDispatchStatus,
+    printDispatch: typeof window.printDispatch
+});
+</script>
+
 <!-- Dispatches Table -->
 <div class="card">
     <div class="card-body">
@@ -360,15 +389,127 @@ ob_start();
     </div>
 </div>
 
+<!-- Update Status Modal -->
+<div id="updateStatusModal" class="modal">
+    <div class="modal-content max-w-lg">
+        <div class="modal-header">
+            <h3 class="modal-title">Update Dispatch Status</h3>
+            <button type="button" class="modal-close" onclick="closeModal('updateStatusModal')">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
+        <form id="updateStatusForm">
+            <div class="modal-body">
+                <input type="hidden" id="updateDispatchId" name="dispatch_id">
+                
+                <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+                    <div class="text-sm text-gray-600">Dispatch Number:</div>
+                    <div class="font-medium text-gray-900" id="currentDispatchNumber"></div>
+                    <div class="text-sm text-gray-600 mt-2">Current Status:</div>
+                    <div class="font-medium text-gray-900" id="currentStatus"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="form-group">
+                        <label for="newStatus" class="form-label">New Status *</label>
+                        <select id="newStatus" name="new_status" class="form-select" required onchange="toggleStatusFields(this.value)">
+                            <option value="prepared">Prepared</option>
+                            <option value="dispatched">Dispatched</option>
+                            <option value="in_transit">In Transit</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="returned">Returned</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="trackingNumber" class="form-label">Tracking Number</label>
+                        <input type="text" id="trackingNumber" name="tracking_number" class="form-input" placeholder="Enter tracking number">
+                    </div>
+                    
+                    <div id="deliveryDateField" class="form-group" style="display: none;">
+                        <label for="actualDeliveryDate" class="form-label">Actual Delivery Date</label>
+                        <input type="date" id="actualDeliveryDate" name="actual_delivery_date" class="form-input">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="statusRemarks" class="form-label">Remarks</label>
+                        <textarea id="statusRemarks" name="status_remarks" rows="3" class="form-input" placeholder="Enter any remarks about the status update..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal('updateStatusModal')" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update Status</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+// Define functions immediately to ensure they're available for onclick handlers
+(function() {
+    'use strict';
+    
+    // Dispatch management functions - Define these first and make them global
+window.viewDispatch = function(dispatchId) {
+    console.log('viewDispatch called with ID:', dispatchId);
+    window.open(`view-dispatch.php?id=${dispatchId}`, '_blank');
+};
+
+window.printDispatch = function(dispatchId) {
+    console.log('printDispatch called with ID:', dispatchId);
+    window.open(`print-dispatch.php?id=${dispatchId}`, '_blank');
+};
+
+window.updateDispatchStatus = function(dispatchId) {
+    console.log('updateDispatchStatus called with ID:', dispatchId);
+    // Load current dispatch details
+    fetch(`get-dispatch-details.php?id=${dispatchId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                openUpdateStatusModal(data.dispatch);
+            } else {
+                showAlert('Error loading dispatch details: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Error loading dispatch details', 'error');
+        });
+};
+
+window.openUpdateStatusModal = function(dispatch) {
+    // Populate the modal with current dispatch data
+    document.getElementById('updateDispatchId').value = dispatch.id;
+    document.getElementById('currentDispatchNumber').textContent = dispatch.dispatch_number;
+    document.getElementById('currentStatus').textContent = dispatch.dispatch_status.replace('_', ' ').toUpperCase();
+    document.getElementById('newStatus').value = dispatch.dispatch_status;
+    document.getElementById('actualDeliveryDate').value = '';
+    document.getElementById('statusRemarks').value = dispatch.delivery_remarks || '';
+    
+    // Show appropriate fields based on current status
+    toggleStatusFields(dispatch.dispatch_status);
+    
+    // Open the modal
+    openModal('updateStatusModal');
+};
+
+window.toggleStatusFields = function(currentStatus) {
+    const deliveryDateField = document.getElementById('deliveryDateField');
+    const trackingField = document.getElementById('trackingField');
+    
+    // Show delivery date field only for delivered status
+    if (currentStatus === 'delivered') {
+        deliveryDateField.style.display = 'block';
+    } else {
+        deliveryDateField.style.display = 'none';
+    }
+};
+
 // Search functionality
-document.getElementById('searchInput').addEventListener('keyup', debounce(function() {
-    applyFilters();
-}, 500));
-
-document.getElementById('statusFilter').addEventListener('change', applyFilters);
-document.getElementById('siteFilter').addEventListener('change', applyFilters);
-
 function applyFilters() {
     const searchTerm = document.getElementById('searchInput').value;
     const status = document.getElementById('statusFilter').value;
@@ -390,23 +531,36 @@ function applyFilters() {
     window.location.href = url.toString();
 }
 
-// Dispatch management functions
-function viewDispatch(dispatchId) {
-    window.open(`view-dispatch.php?id=${dispatchId}`, '_blank');
-}
-
-function updateDispatchStatus(dispatchId) {
-    // Implementation for status update modal
-    console.log('Update dispatch status:', dispatchId);
-}
-
-function printDispatch(dispatchId) {
-    window.open(`print-dispatch.php?id=${dispatchId}`, '_blank');
-}
-
-// Generate dispatch number when modal opens
+// Initialize page functionality
 document.addEventListener('DOMContentLoaded', function() {
+    // Verify functions are loaded
+    console.log('Functions loaded:', {
+        viewDispatch: typeof viewDispatch,
+        updateDispatchStatus: typeof updateDispatchStatus,
+        printDispatch: typeof printDispatch
+    });
+    
+    // Generate dispatch number when modal opens
     generateDispatchNumber();
+    
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const siteFilter = document.getElementById('siteFilter');
+    
+    if (searchInput) {
+        searchInput.addEventListener('keyup', debounce(function() {
+            applyFilters();
+        }, 500));
+    }
+    
+    if (statusFilter) {
+        statusFilter.addEventListener('change', applyFilters);
+    }
+    
+    if (siteFilter) {
+        siteFilter.addEventListener('change', applyFilters);
+    }
 });
 
 function generateDispatchNumber() {
@@ -576,6 +730,32 @@ function calculateDispatchTotalValue() {
     console.log('Total dispatch value:', totalValue);
 }
 
+// Update Status Form submission
+document.getElementById('updateStatusForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('update-dispatch-status.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('Dispatch status updated successfully!', 'success');
+            closeModal('updateStatusModal');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showAlert('Error: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('An error occurred while updating the status.', 'error');
+    });
+});
+
 // Form submission
 document.getElementById('createDispatchForm').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -661,6 +841,60 @@ function debounce(func, wait) {
         timeout = setTimeout(later, wait);
     };
 }
+
+// Modal utility functions - Make them global
+window.openModal = function(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'flex-start';
+        modal.style.justifyContent = 'center';
+        document.body.style.overflow = 'hidden';
+    }
+};
+
+window.closeModal = function(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+};
+
+// Alert function - Make it global
+window.showAlert = function(message, type = 'info') {
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} fixed top-4 right-4 z-50 max-w-sm p-4 rounded-lg shadow-lg`;
+    
+    const alertClasses = {
+        'success': 'bg-green-100 border-green-500 text-green-700',
+        'error': 'bg-red-100 border-red-500 text-red-700',
+        'warning': 'bg-yellow-100 border-yellow-500 text-yellow-700',
+        'info': 'bg-blue-100 border-blue-500 text-blue-700'
+    };
+    
+    alertDiv.className += ' ' + (alertClasses[type] || alertClasses['info']);
+    alertDiv.innerHTML = `
+        <div class="flex items-center">
+            <span class="flex-1">${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-lg font-bold">&times;</button>
+        </div>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentElement) {
+            alertDiv.remove();
+        }
+    }, 5000);
+};
+
+})(); // End of IIFE
 </script>
 
 <?php

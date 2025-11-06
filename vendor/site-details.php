@@ -23,6 +23,15 @@ if (!$site) {
     exit;
 }
 
+// Get survey status if exists
+require_once __DIR__ . '/../models/SiteSurvey.php';
+$surveyModel = new SiteSurvey();
+$survey = $surveyModel->findBySiteAndVendor($siteId, $vendorId);
+if ($survey) {
+    $site['actual_survey_status'] = $survey['survey_status'];
+    $site['survey_submitted_date'] = $survey['submitted_date'];
+}
+
 // Verify this site is delegated to current vendor
 $delegation = $delegationModel->getActiveDelegation($siteId);
 if (!$delegation || $delegation['vendor_id'] != $vendorId) {
@@ -190,11 +199,21 @@ ob_start();
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Survey Status</label>
                 <div class="flex items-center space-x-2">
-                    <span class="badge <?php echo $site['survey_status'] ? 'badge-success' : 'badge-warning'; ?>">
-                        <?php echo $site['survey_status'] ? 'Completed' : 'Pending'; ?>
+                    <?php 
+                    $actualStatus = $site['actual_survey_status'] ?? 'pending';
+                    $statusClasses = [
+                        'pending' => 'badge-warning',
+                        'submitted' => 'badge-info', 
+                        'approved' => 'badge-success',
+                        'rejected' => 'badge-danger'
+                    ];
+                    $badgeClass = $statusClasses[$actualStatus] ?? 'badge-secondary';
+                    ?>
+                    <span class="badge <?php echo $badgeClass; ?>">
+                        <?php echo ucfirst($actualStatus); ?>
                     </span>
-                    <?php if ($site['survey_submission_date']): ?>
-                        <span class="text-xs text-gray-500">on <?php echo date('M d, Y', strtotime($site['survey_submission_date'])); ?></span>
+                    <?php if ($site['survey_submitted_date']): ?>
+                        <span class="text-xs text-gray-500">on <?php echo date('M d, Y', strtotime($site['survey_submitted_date'])); ?></span>
                     <?php endif; ?>
                 </div>
             </div>

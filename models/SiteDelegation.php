@@ -131,15 +131,17 @@ class SiteDelegation extends BaseModel {
     public function getVendorDelegations($vendorId, $status = null) {
         $sql = "
             SELECT sd.*, s.site_id, s.location, s.city, s.state, s.country, 
-                   s.customer, s.bank,
+                   s.customer, s.bank, s.survey_status as site_survey_status, s.survey_submission_date,
                    u.username as delegated_by_name,
-                   ct.name as city, st.name as state, co.name as country
+                   ct.name as city, st.name as state, co.name as country,
+                   ss.survey_status, ss.submitted_date as survey_submitted_date
             FROM {$this->table} sd
             INNER JOIN sites s ON sd.site_id = s.id
             INNER JOIN users u ON sd.delegated_by = u.id
             LEFT JOIN cities ct ON s.city_id = ct.id
             LEFT JOIN states st ON s.state_id = st.id
             LEFT JOIN countries co ON s.country_id = co.id
+            LEFT JOIN site_surveys ss ON s.id = ss.site_id AND sd.id = ss.delegation_id
             WHERE sd.vendor_id = ?
         ";
         
@@ -155,6 +157,11 @@ class SiteDelegation extends BaseModel {
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchAll();
+    }
+    
+    public function updateStatus($delegationId, $status) {
+        $stmt = $this->db->prepare("UPDATE {$this->table} SET status = ?, updated_at = NOW() WHERE id = ?");
+        return $stmt->execute([$status, $delegationId]);
     }
     
     private function getVendorName($vendorId) {

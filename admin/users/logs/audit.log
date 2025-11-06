@@ -3,3 +3,4 @@
 {"timestamp":"2025-11-03 11:53:40","user_id":1,"action":"CREATE_USER","table_name":"users","record_id":"11","ip_address":"::1"}
 {"timestamp":"2025-11-03 14:54:15","user_id":1,"action":"DELETE_USER","table_name":"users","record_id":11,"ip_address":"::1"}
 {"timestamp":"2025-11-03 14:55:11","user_id":1,"action":"CREATE_USER","table_name":"users","record_id":"12","ip_address":"::1"}
+{"timestamp":"2025-11-05 21:09:31","user_id":1,"action":"CREATE_USER","table_name":"users","record_id":"10","ip_address":"::1"}

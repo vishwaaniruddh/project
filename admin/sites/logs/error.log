@@ -1270,3 +1270,26 @@
 {"timestamp":"2025-11-04 14:44:47","type":"DEPRECATED","message":"htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated","file":"C:\\xampp\\htdocs\\project\\admin\\sites\\index.php","line":134,"ip_address":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36","request_uri":"\/project\/admin\/sites\/"}
 [05-Nov-2025 16:04:29 UTC] Database connected successfully to: site_installation_management on localhost
 [05-Nov-2025 16:30:36 UTC] Database connected successfully to: site_installation_management on localhost
+[05-Nov-2025 22:58:28 UTC] Bulk upload AJAX request received
+[05-Nov-2025 22:58:28 UTC] Request method: POST
+[05-Nov-2025 22:58:28 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundarykI6YqcaN292rjaJA
+[05-Nov-2025 22:58:28 UTC] Files received: Array
+(
+    [excel_file] => Array
+        (
+            [name] => bulk1.xlsx
+            [full_path] => bulk1.xlsx
+            [type] => application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+            [tmp_name] => C:\Users\Aniruddh\AppData\Local\Temp\phpC24B.tmp
+            [error] => 0
+            [size] => 12025
+        )
+
+)
+
+[05-Nov-2025 22:58:28 UTC] POST data: Array
+(
+    [ajax] => 1
+)
+
+[05-Nov-2025 22:58:28 UTC] Raw input: 

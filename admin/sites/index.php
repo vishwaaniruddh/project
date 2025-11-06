@@ -116,7 +116,13 @@ ob_start();
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($data['sites'] as $site): ?>
+                    <?php foreach ($data['sites'] as $site): 
+                        
+                        // echo '<pre>';
+                        // var_dump($site);
+                        // echo '</pre>';
+
+                        ?>
                     <tr>
                         <td>
                             <div>

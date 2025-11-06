@@ -257,8 +257,20 @@ ob_start();
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="text-xs font-medium text-gray-900">Survey</div>
-                                            <div class="text-xs text-gray-500">
-                                                <?php echo ($site['survey_status'] ?? false) ? 'Completed' : 'Pending'; ?>
+                                            <div class="text-xs">
+                                                <?php 
+                                                $surveyStatus = $site['survey_status'] ?? 'pending';
+                                                $statusColors = [
+                                                    'pending' => 'text-yellow-600',
+                                                    'submitted' => 'text-blue-600', 
+                                                    'approved' => 'text-green-600',
+                                                    'rejected' => 'text-red-600'
+                                                ];
+                                                $colorClass = $statusColors[$surveyStatus] ?? 'text-gray-500';
+                                                ?>
+                                                <span class="<?php echo $colorClass; ?> font-medium">
+                                                    <?php echo ucfirst($surveyStatus); ?>
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -301,8 +313,8 @@ ob_start();
                                         </svg>
                                     </button>
                                     
-                                    <?php if ($site['delegation_status'] === 'active'): ?>
-                                        <?php if (!($site['survey_status'] ?? false)): ?>
+                                    <?php if ($site['delegation_status'] === 'active' || $site['delegation_status'] === 'completed'): ?>
+
                                             <!-- Survey Button -->
                                             <button onclick="conductSurvey(<?php echo $site['id']; ?>)" 
                                                     class="group relative inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-lg hover:shadow-xl transition-all duration-200" 
@@ -312,17 +324,16 @@ ob_start();
                                                 </svg>
                                                 Survey
                                             </button>
-                                        <?php else: ?>
+
                                             <!-- Material Request Button -->
-                                            <button onclick="generateMaterialRequest(<?php echo $site['id']; ?>)" 
+                                            <!-- <button onclick="generateMaterialRequest(<?php echo $site['id']; ?>)" 
                                                     class="group relative inline-flex items-center justify-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" 
                                                     title="Generate Material Request">
                                                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zM8 6a2 2 0 114 0v1H8V6zM6 9a1 1 0 012 0v1a1 1 0 11-2 0V9zm8 0a1 1 0 012 0v1a1 1 0 11-2 0V9z" clip-rule="evenodd"></path>
                                                 </svg>
                                                 Materials
-                                            </button>
-                                        <?php endif; ?>
+                                            </button> -->
                                         
 
                                     <?php endif; ?>
@@ -464,6 +475,22 @@ function viewSiteDetails(id, siteId) {
         });
 }
 
+// Helper functions for survey status
+function getSurveyStatusClass(status) {
+    const statusClasses = {
+        'pending': 'bg-yellow-100 text-yellow-800',
+        'submitted': 'bg-blue-100 text-blue-800',
+        'approved': 'bg-green-100 text-green-800',
+        'rejected': 'bg-red-100 text-red-800'
+    };
+    return statusClasses[status] || 'bg-gray-100 text-gray-800';
+}
+
+function getSurveyStatusText(status) {
+    if (!status) return 'Pending';
+    return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
 function displaySiteDetails(site) {
     const modalContent = document.getElementById('modalContent');
     const actionButton = document.getElementById('modalActionButton');
@@ -529,8 +556,8 @@ function displaySiteDetails(site) {
                 <div class="space-y-3">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Survey Status</label>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${site.survey_status ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
-                            ${site.survey_status ? 'Completed' : 'Pending'}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSurveyStatusClass(site.survey_status)}">
+                            ${getSurveyStatusText(site.survey_status)}
                         </span>
                     </div>
                     <div>

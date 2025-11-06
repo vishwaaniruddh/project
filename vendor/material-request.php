@@ -97,20 +97,18 @@ if (!$site) {
     exit;
 }
 
-// Get survey details if survey_id is provided
-$survey = null;
-if ($surveyId) {
-    $surveyModel = new SiteSurvey();
-    $survey = $surveyModel->findWithDetails($surveyId);
-    
-    // Verify survey belongs to this vendor
-    if (!$survey || $survey['vendor_id'] != $vendorId) {
-        $survey = null;
-    }
-} else {
-    // Try to find the latest survey for this site by this vendor
-    $surveyModel = new SiteSurvey();
-    $survey = $surveyModel->findBySiteAndVendor($siteId, $vendorId);
+// Get survey details - always try to find the survey for this site and vendor
+$surveyModel = new SiteSurvey();
+$survey = $surveyModel->findBySiteAndVendor($siteId, $vendorId);
+
+// echo '$siteId' . $siteId ; 
+// echo '$vendorId' . $vendorId;
+// var_dump($survey);
+// return ; 
+// If a specific survey_id was provided, verify it matches
+if ($surveyId && $survey && $survey['id'] != $surveyId) {
+    // The provided survey_id doesn't match the site/vendor survey
+    $survey = null;
 }
 
 // Get BOQ items for material selection

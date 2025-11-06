@@ -107,8 +107,8 @@ class SiteSurvey {
             existing_poe_rack, existing_poe_photos, space_new_rack, space_new_rack_photos,
             new_poe_rack, new_poe_photos, zones_recommended,
             rrl_delivery_status, rrl_photos, kptl_space, kptl_photos,
-            site_accessibility, power_availability, network_connectivity, space_adequacy,
-            technical_remarks, challenges_identified, recommendations, estimated_completion_days
+            site_photos, site_accessibility, power_availability, network_connectivity, space_adequacy,
+            technical_remarks, challenges_identified, recommendations, estimated_completion_days,created_by
         ) VALUES (
             ?, ?, ?, ?, ?,
             ?, ?, ?, ?,
@@ -117,8 +117,8 @@ class SiteSurvey {
             ?, ?, ?, ?,
             ?, ?, ?,
             ?, ?, ?, ?,
-            ?, ?, ?, ?,
-            ?, ?, ?, ?
+            ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?
         )";
         
         $params = [
@@ -134,14 +134,26 @@ class SiteSurvey {
             $data['new_poe_rack'], $data['new_poe_photos'], $data['zones_recommended'],
             $data['rrl_delivery_status'], $data['rrl_photos'], $data['kptl_space'], 
             $data['kptl_photos'],
-            $data['site_accessibility'], $data['power_availability'], $data['network_connectivity'], 
-            $data['space_adequacy'],
+            $data['site_photos'], $data['site_accessibility'], $data['power_availability'], 
+            $data['network_connectivity'], $data['space_adequacy'],
             $data['technical_remarks'], $data['challenges_identified'], $data['recommendations'], 
-            $data['estimated_completion_days']
+            $data['estimated_completion_days'],$data['created_by']
         ];
         
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute($params);
+        try {
+            $stmt = $this->db->prepare($sql);
+            $result = $stmt->execute($params);
+            
+            if ($result) {
+                return $this->db->lastInsertId();
+            } else {
+                // Get detailed error information
+                $errorInfo = $stmt->errorInfo();
+                throw new Exception('Database error: ' . $errorInfo[2] . ' (Code: ' . $errorInfo[1] . ')');
+            }
+        } catch (PDOException $e) {
+            throw new Exception('Database PDO error: ' . $e->getMessage());
+        }
     }
     
     public function find($id) {
@@ -154,13 +166,15 @@ class SiteSurvey {
     public function findWithDetails($id) {
         $sql = "SELECT ss.*, s.site_id as site_code, s.location, 
                        ct.name as city_name, st.name as state_name,
-                       v.name as vendor_name, u.username as approved_by_name
+                       v.name as vendor_name, u.username as approved_by_name,
+                       created_user.username as created_by_name
                 FROM site_surveys ss
                 LEFT JOIN sites s ON ss.site_id = s.id
                 LEFT JOIN cities ct ON s.city_id = ct.id
                 LEFT JOIN states st ON s.state_id = st.id
                 LEFT JOIN vendors v ON ss.vendor_id = v.id
                 LEFT JOIN users u ON ss.approved_by = u.id
+                LEFT JOIN users created_user ON ss.created_by = created_user.id
                 WHERE ss.id = ?";
         
         $stmt = $this->db->prepare($sql);
@@ -169,15 +183,18 @@ class SiteSurvey {
     }
     
     public function findBySiteAndVendor($siteId, $vendorId) {
+        // Find survey by site and vendor directly
         $sql = "SELECT ss.*, s.site_id as site_code, s.location, 
                        ct.name as city_name, st.name as state_name,
-                       v.name as vendor_name, u.username as approved_by_name
+                       v.name as vendor_name, u.username as approved_by_name,
+                       created_user.username as created_by_name
                 FROM site_surveys ss
                 LEFT JOIN sites s ON ss.site_id = s.id
                 LEFT JOIN cities ct ON s.city_id = ct.id
                 LEFT JOIN states st ON s.state_id = st.id
                 LEFT JOIN vendors v ON ss.vendor_id = v.id
                 LEFT JOIN users u ON ss.approved_by = u.id
+                LEFT JOIN users created_user ON ss.created_by = created_user.id
                 WHERE ss.site_id = ? AND ss.vendor_id = ?
                 ORDER BY ss.created_at DESC
                 LIMIT 1";
@@ -208,7 +225,8 @@ class SiteSurvey {
     public function getVendorSurveys($vendorId, $status = null) {
         $sql = "SELECT ss.*, s.site_id as site_code, s.location, 
                        ct.name as city_name, st.name as state_name,
-                       v.name as vendor_name, sd.delegation_date, u.username as approved_by_name
+                       v.name as vendor_name, sd.delegation_date, u.username as approved_by_name,
+                       created_user.username as created_by_name
                 FROM site_surveys ss
                 LEFT JOIN sites s ON ss.site_id = s.id
                 LEFT JOIN cities ct ON s.city_id = ct.id
@@ -216,6 +234,7 @@ class SiteSurvey {
                 LEFT JOIN vendors v ON ss.vendor_id = v.id
                 LEFT JOIN site_delegations sd ON ss.delegation_id = sd.id
                 LEFT JOIN users u ON ss.approved_by = u.id
+                LEFT JOIN users created_user ON ss.created_by = created_user.id
                 WHERE ss.vendor_id = ?";
         
         $params = [$vendorId];
@@ -235,14 +254,16 @@ class SiteSurvey {
     public function getAllSurveys($status = null) {
         $sql = "SELECT ss.*, s.site_id as site_code, s.location, 
                        ct.name as city_name, st.name as state_name,
-                       v.name as vendor_name, sd.delegation_date, u.username as approved_by_name
+                       v.name as vendor_name, sd.delegation_date, u.username as approved_by_name,
+                       created_user.username as created_by_name
                 FROM site_surveys ss
                 LEFT JOIN sites s ON ss.site_id = s.id
                 LEFT JOIN cities ct ON s.city_id = ct.id
                 LEFT JOIN states st ON s.state_id = st.id
                 LEFT JOIN vendors v ON ss.vendor_id = v.id
                 LEFT JOIN site_delegations sd ON ss.delegation_id = sd.id
-                LEFT JOIN users u ON ss.approved_by = u.id";
+                LEFT JOIN users u ON ss.approved_by = u.id
+                LEFT JOIN users created_user ON ss.created_by = created_user.id";
         
         $params = [];
         

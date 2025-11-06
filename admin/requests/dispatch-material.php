@@ -155,7 +155,7 @@ ob_start();
                 </div>
                 <div>
                     <label class="text-xs font-medium text-gray-500">Survey Date</label>
-                    <div class="text-sm text-gray-900"><?php echo date('d M Y', strtotime($surveyDetails['survey_date'])); ?></div>
+                    <div class="text-sm text-gray-900"><?php echo date('d M Y', strtotime($surveyDetails['submitted_date'])); ?></div>
                 </div>
                 <?php else: ?>
                 <div>

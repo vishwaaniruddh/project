@@ -532,8 +532,8 @@ class Inventory {
             }
         }
         
-        // Update dispatch totals
-        $this->updateDispatchTotals($dispatchId, $totalItems, $totalValue);
+        // Update dispatch totals (commented out - columns may not exist)
+        // $this->updateDispatchTotals($dispatchId, $totalItems, $totalValue);
         
         return true;
     }
@@ -841,34 +841,44 @@ class Inventory {
     }
     
     public function confirmDelivery($dispatchId, $deliveryData) {
+        // Only update columns that exist in the inventory_dispatches table
         $sql = "UPDATE inventory_dispatches 
-                SET dispatch_status = CAST('delivered' AS CHAR),
-                    delivery_date = ?,
-                    delivery_time = ?,
-                    received_by = ?,
-                    received_by_phone = ?,
-                    actual_delivery_address = ?,
-                    delivery_notes = ?,
-                    lr_copy_path = ?,
-                    additional_documents = ?,
-                    item_confirmations = ?,
-                    confirmed_by = ?,
-                    confirmation_date = ?
+                SET dispatch_status = 'confirmed',
+                    delivery_remarks = ?
                 WHERE id = ?";
+        
+        // Combine all delivery information into delivery_remarks since other columns don't exist
+        $deliveryRemarks = [];
+        
+        if (!empty($deliveryData['delivery_notes'])) {
+            $deliveryRemarks[] = "Notes: " . $deliveryData['delivery_notes'];
+        }
+        
+        if (!empty($deliveryData['received_by'])) {
+            $deliveryRemarks[] = "Received by: " . $deliveryData['received_by'];
+        }
+        
+        if (!empty($deliveryData['received_by_phone'])) {
+            $deliveryRemarks[] = "Phone: " . $deliveryData['received_by_phone'];
+        }
+        
+        if (!empty($deliveryData['delivery_date'])) {
+            $deliveryRemarks[] = "Delivery Date: " . $deliveryData['delivery_date'];
+        }
+        
+        if (!empty($deliveryData['delivery_time'])) {
+            $deliveryRemarks[] = "Delivery Time: " . $deliveryData['delivery_time'];
+        }
+        
+        if (!empty($deliveryData['item_confirmations'])) {
+            $deliveryRemarks[] = "Item Confirmations: " . $deliveryData['item_confirmations'];
+        }
+        
+        $remarksText = implode(" | ", $deliveryRemarks);
         
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
-            $deliveryData['delivery_date'],
-            $deliveryData['delivery_time'],
-            $deliveryData['received_by'],
-            $deliveryData['received_by_phone'],
-            $deliveryData['delivery_address'],
-            $deliveryData['delivery_notes'],
-            $deliveryData['lr_copy_path'],
-            $deliveryData['additional_documents'],
-            $deliveryData['item_confirmations'],
-            $deliveryData['confirmed_by'],
-            $deliveryData['confirmation_date'],
+            $remarksText,
             $dispatchId
         ]);
     }
@@ -920,9 +930,13 @@ class Inventory {
     public function getDispatchItemsSummary($dispatchId) {
         $sql = "SELECT bi.id as boq_item_id, bi.item_name, bi.item_code, bi.unit, bi.icon_class,
                        COUNT(idi.id) as quantity_dispatched,
-                       AVG(idi.unit_cost) as avg_unit_cost,
+                       AVG(idi.unit_cost) as unit_cost,
                        SUM(idi.unit_cost) as total_cost,
-                       GROUP_CONCAT(ist.serial_number ORDER BY ist.serial_number) as serial_numbers
+                       GROUP_CONCAT(DISTINCT ist.serial_number ORDER BY ist.serial_number) as serial_numbers,
+                       GROUP_CONCAT(DISTINCT ist.batch_number ORDER BY ist.batch_number) as batch_number,
+                       MAX(idi.item_condition) as item_condition,
+                       MAX(idi.warranty_period) as warranty_period,
+                       MAX(idi.dispatch_notes) as remarks
                 FROM inventory_dispatch_items idi
                 LEFT JOIN inventory_stock ist ON idi.inventory_stock_id = ist.id
                 LEFT JOIN boq_items bi ON CAST(idi.boq_item_id AS CHAR) = CAST(bi.id AS CHAR)
@@ -1044,6 +1058,53 @@ class Inventory {
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$boqItemId, $boqItemId, $limit]);
         return $stmt->fetchAll();
+    }
+
+    public function getDispatchDetails($dispatchId) {
+        $sql = "SELECT id.*, s.site_id as site_code, v.name as vendor_name, 
+                       u.username as dispatched_by_name
+                FROM inventory_dispatches id
+                LEFT JOIN sites s ON id.site_id = s.id
+                LEFT JOIN vendors v ON id.vendor_id = v.id
+                LEFT JOIN users u ON id.dispatched_by = u.id
+                WHERE id.id = ?";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$dispatchId]);
+        $dispatch = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($dispatch) {
+            // Get dispatch items
+            $dispatch['items'] = $this->getDispatchItemsSummary($dispatchId);
+            
+            // Ensure items is always an array
+            if (!$dispatch['items']) {
+                $dispatch['items'] = [];
+            }
+            
+            // Debug: Log the structure of items (remove this in production)
+            if (!empty($dispatch['items'])) {
+                error_log("Dispatch items structure: " . print_r(array_keys($dispatch['items'][0]), true));
+            }
+        }
+        
+        return $dispatch;
+    }
+
+    public function updateDispatchStatus($dispatchId, $updateData) {
+        $fields = [];
+        $values = [];
+        
+        foreach ($updateData as $key => $value) {
+            $fields[] = "$key = ?";
+            $values[] = $value;
+        }
+        
+        $values[] = $dispatchId;
+        
+        $sql = "UPDATE inventory_dispatches SET " . implode(', ', $fields) . " WHERE id = ?";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute($values);
     }
 
 }

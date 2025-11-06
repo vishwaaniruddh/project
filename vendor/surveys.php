@@ -11,6 +11,7 @@ $surveyModel = new SiteSurvey();
 // Get all surveys for this vendor
 $surveys = $surveyModel->getVendorSurveys($vendorId);
 
+
 // Categorize surveys by status
 $pendingSurveys = array_filter($surveys, fn($s) => $s['survey_status'] === 'pending');
 $approvedSurveys = array_filter($surveys, fn($s) => $s['survey_status'] === 'approved');

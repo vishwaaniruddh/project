@@ -21,13 +21,13 @@ try {
     $request = $materialRequestModel->findWithDetails($requestId);
     
     if (!$request) {
-        echo json_encode(['success' => false, 'message' => 'Request not found']);
+        echo json_encode(['success' => false, 'message' => 'Request not found', 'debug' => ['request_id' => $requestId]]);
         exit;
     }
     
     // Verify the request belongs to this vendor
     if ($request['vendor_id'] != $vendorId) {
-        echo json_encode(['success' => false, 'message' => 'Access denied']);
+        echo json_encode(['success' => false, 'message' => 'Access denied', 'debug' => ['vendor_id' => $vendorId, 'request_vendor_id' => $request['vendor_id']]]);
         exit;
     }
     

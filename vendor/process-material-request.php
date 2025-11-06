@@ -23,6 +23,46 @@ try {
         exit;
     }
     
+    // Fetch the correct survey_id for this site and vendor
+    require_once __DIR__ . '/../models/SiteSurvey.php';
+    $surveyModel = new SiteSurvey();
+    
+    if (!$surveyId) {
+        // If no survey_id provided, find the survey for this site and vendor
+        $survey = $surveyModel->findBySiteAndVendor($siteId, $vendorId);
+        if ($survey) {
+            $surveyId = $survey['id'];
+        } else {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'No survey found for this site. Please complete the site survey first.',
+                'debug' => "No survey found for site_id: $siteId, vendor_id: $vendorId"
+            ]);
+            exit;
+        }
+    } else {
+        // Validate the provided survey_id exists and belongs to this site/vendor
+        $survey = $surveyModel->find($surveyId);
+        if (!$survey) {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Invalid survey reference. Please refresh the page and try again.',
+                'debug' => "Survey ID $surveyId not found"
+            ]);
+            exit;
+        }
+        
+        // Verify the survey belongs to this site
+        if ($survey['site_id'] != $siteId) {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Survey does not match the selected site. Please refresh the page and try again.',
+                'debug' => "Survey site_id: {$survey['site_id']}, provided site_id: $siteId"
+            ]);
+            exit;
+        }
+    }
+    
     // Validate required fields for non-draft submissions
     if (!$isDraft) {
         $requiredFields = ['request_date', 'required_date'];

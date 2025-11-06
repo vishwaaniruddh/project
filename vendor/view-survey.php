@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../models/SiteSurvey.php';
+require_once __DIR__ . '/../models/SiteDelegation.php';
 
 // Require vendor authentication
 Auth::requireVendor();
@@ -16,7 +17,27 @@ $surveyModel = new SiteSurvey();
 
 // Get survey details with site information
 $survey = $surveyModel->findWithDetails($surveyId);
-if (!$survey || $survey['vendor_id'] != $vendorId) {
+
+// Check if survey exists
+if (!$survey) {
+    header('Location: surveys.php');
+    exit;
+}
+
+// For vendor access, check if the survey belongs to a site delegated to this vendor
+// The survey.vendor_id is actually the user_id, so we need to check delegation
+$delegationModel = new SiteDelegation();
+$delegations = $delegationModel->getVendorDelegations($vendorId);
+$hasAccess = false;
+
+foreach ($delegations as $delegation) {
+    if ($delegation['site_id'] == $survey['site_id']) {
+        $hasAccess = true;
+        break;
+    }
+}
+
+if (!$hasAccess) {
     header('Location: surveys.php');
     exit;
 }
@@ -38,6 +59,7 @@ ob_start();
                 <?php
                 $statusClasses = [
                     'pending' => 'bg-yellow-100 text-yellow-800',
+                    'submitted' => 'bg-blue-100 text-blue-800',
                     'completed' => 'bg-blue-100 text-blue-800',
                     'approved' => 'bg-green-100 text-green-800',
                     'rejected' => 'bg-red-100 text-red-800'
@@ -338,6 +360,47 @@ foreach ($photoFields as $field => $label) {
     </div>
 </div>
 <?php endif; ?>
+
+<!-- Photo Modal -->
+<div id="photoModal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex items-center justify-center p-4">
+    <div class="relative max-w-4xl max-h-full">
+        <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
+            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        <img id="modalImage" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
+        <div id="modalCaption" class="absolute bottom-4 left-4 right-4 text-white text-center bg-black bg-opacity-50 rounded px-4 py-2"></div>
+    </div>
+</div>
+
+<script>
+function openImageModal(src, caption) {
+    document.getElementById('photoModal').classList.remove('hidden');
+    document.getElementById('modalImage').src = src;
+    document.getElementById('modalCaption').textContent = caption;
+    document.body.style.overflow = 'hidden';
+}
+
+function closeImageModal() {
+    document.getElementById('photoModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside the image
+document.getElementById('photoModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeImageModal();
+    }
+});
+</script>
 
 <?php
 $content = ob_get_clean();

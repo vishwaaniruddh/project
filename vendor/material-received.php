@@ -17,6 +17,26 @@ $boqModel = new BoqItem();
 // Get received materials for this vendor (delivered dispatches)
 $receivedMaterials = $inventoryModel->getReceivedMaterialsForVendor($vendorId);
 
+// Group materials by material request ID
+$materialsByRequest = [];
+foreach ($receivedMaterials as $material) {
+    $requestId = $material['material_request_id'] ?? 'no_request';
+    if (!isset($materialsByRequest[$requestId])) {
+        $materialsByRequest[$requestId] = [
+            'request_info' => null,
+            'dispatches' => []
+        ];
+    }
+    
+    // Get request info if not already set
+    if (!$materialsByRequest[$requestId]['request_info'] && $requestId !== 'no_request') {
+        $requestInfo = $materialRequestModel->findWithDetails($requestId);
+        $materialsByRequest[$requestId]['request_info'] = $requestInfo;
+    }
+    
+    $materialsByRequest[$requestId]['dispatches'][] = $material;
+}
+
 $title = 'Material Received';
 ob_start();
 ?>
@@ -28,7 +48,10 @@ ob_start();
     </div>
     <div class="flex items-center space-x-2">
         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-            <?php echo count($receivedMaterials); ?> Materials
+            <?php echo count($materialsByRequest); ?> Request(s)
+        </span>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+            <?php echo count($receivedMaterials); ?> Dispatch(es)
         </span>
     </div>
 </div>
@@ -43,15 +66,17 @@ ob_start();
         'total_items' => 0
     ];
     
-    foreach ($receivedMaterials as $material) {
-        $status = $material['dispatch_status'] ?? 'delivered';
-        if ($status === 'dispatched') $statusCounts['pending']++;
-        if ($status === 'delivered') $statusCounts['delivered']++;
-        if ($status === 'confirmed') $statusCounts['confirmed']++;
-        
-        // Count items in stock
-        $items = json_decode($material['item_confirmations'] ?? '[]', true);
-        $statusCounts['total_items'] += count($items);
+    foreach ($materialsByRequest as $requestId => $requestData) {
+        foreach ($requestData['dispatches'] as $material) {
+            $status = $material['dispatch_status'] ?? 'delivered';
+            if ($status === 'dispatched') $statusCounts['pending']++;
+            if ($status === 'delivered') $statusCounts['delivered']++;
+            if ($status === 'confirmed') $statusCounts['confirmed']++;
+            
+            // Count items in stock
+            $items = json_decode($material['item_confirmations'] ?? '[]', true);
+            $statusCounts['total_items'] += count($items);
+        }
     }
     ?>
     
@@ -149,9 +174,9 @@ ob_start();
 <!-- Received Materials List -->
 <div class="card">
     <div class="card-body">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Received Materials</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Material Requests & Dispatches</h3>
         
-        <?php if (empty($receivedMaterials)): ?>
+        <?php if (empty($materialsByRequest)): ?>
         <div class="text-center py-12">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8l-4 4m0 0l-4-4m4 4V3"></path>
@@ -160,52 +185,131 @@ ob_start();
             <p class="mt-1 text-sm text-gray-500">No materials have been received from admin yet.</p>
         </div>
         <?php else: ?>
-        <div class="space-y-6">
-            <?php foreach ($receivedMaterials as $material): ?>
-            <div class="border border-gray-200 rounded-lg">
-                <!-- Material Header -->
-                <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+        <div class="space-y-8">
+            <?php foreach ($materialsByRequest as $requestId => $requestData): ?>
+            
+            <!-- Material Request Group -->
+            <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+                <!-- Request Header -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200 rounded-t-lg">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10">
-                                <div class="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            <div class="flex-shrink-0 h-12 w-12">
+                                <div class="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
                                     </svg>
                                 </div>
                             </div>
                             <div class="ml-4">
-                                <div class="text-lg font-medium text-gray-900">Request #<?php echo $material['material_request_id']; ?></div>
-                                <div class="text-sm text-gray-500">Dispatch #<?php echo $material['dispatch_number']; ?></div>
-                                <div class="text-sm text-gray-500">Received: <?php echo $material['delivery_date'] ? date('d M Y', strtotime($material['delivery_date'])) : 'N/A'; ?></div>
+                                <h3 class="text-lg font-semibold text-gray-900">
+                                    <?php if ($requestId === 'no_request'): ?>
+                                        Direct Dispatches (No Request)
+                                    <?php else: ?>
+                                        Material Request #<?php echo $requestId; ?>
+                                    <?php endif; ?>
+                                </h3>
+                                <?php if ($requestData['request_info']): ?>
+                                <div class="text-sm text-gray-600 mt-1">
+                                    <span class="font-medium">Site:</span> <?php echo htmlspecialchars($requestData['request_info']['site_code'] ?? 'N/A'); ?>
+                                    <span class="mx-2">•</span>
+                                    <span class="font-medium">Requested:</span> <?php echo date('d M Y', strtotime($requestData['request_info']['request_date'])); ?>
+                                    <?php if ($requestData['request_info']['request_notes']): ?>
+                                    <span class="mx-2">•</span>
+                                    <span class="font-medium">Notes:</span> <?php echo htmlspecialchars(substr($requestData['request_info']['request_notes'], 0, 50)); ?><?php echo strlen($requestData['request_info']['request_notes']) > 50 ? '...' : ''; ?>
+                                    <?php endif; ?>
+                                </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="text-right">
+                            <div class="text-sm text-gray-500">
+                                <?php echo count($requestData['dispatches']); ?> dispatch(es)
+                            </div>
                             <?php
-                            $status = $material['dispatch_status'] ?? 'delivered';
-                            $statusColors = [
-                                'dispatched' => 'bg-yellow-100 text-yellow-800',
-                                'delivered' => 'bg-green-100 text-green-800',
-                                'confirmed' => 'bg-purple-100 text-purple-800'
-                            ];
-                            $statusLabels = [
-                                'dispatched' => 'Acceptance Pending',
-                                'delivered' => 'Delivered',
-                                'confirmed' => 'Confirmed'
-                            ];
-                            $colorClass = $statusColors[$status] ?? 'bg-gray-100 text-gray-800';
-                            $statusLabel = $statusLabels[$status] ?? ucfirst($status);
-                            ?>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo $colorClass; ?>">
-                                <?php echo $statusLabel; ?>
-                            </span>
-                            <div class="text-sm text-gray-500 mt-1">Site: <?php echo htmlspecialchars($material['site_code'] ?? 'N/A'); ?></div>
+                            // Calculate overall status for this request
+                            $allConfirmed = true;
+                            $anyPending = false;
+                            foreach ($requestData['dispatches'] as $dispatch) {
+                                if ($dispatch['dispatch_status'] === 'dispatched') {
+                                    $anyPending = true;
+                                    $allConfirmed = false;
+                                } elseif ($dispatch['dispatch_status'] !== 'confirmed') {
+                                    $allConfirmed = false;
+                                }
+                            }
+                            
+                            if ($allConfirmed): ?>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    All Confirmed
+                                </span>
+                            <?php elseif ($anyPending): ?>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Pending Acceptance
+                                </span>
+                            <?php else: ?>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Delivered
+                                </span>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Material Items -->
-                <div class="px-4 py-3">
+                <!-- Dispatches in this Request -->
+                <div class="divide-y divide-gray-200">
+                    <?php foreach ($requestData['dispatches'] as $material): ?>
+                    <!-- Individual Dispatch -->
+                    <div class="p-6">
+                        <!-- Dispatch Header -->
+                        <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-8 w-8">
+                                    <div class="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <div class="text-sm font-medium text-gray-900">Dispatch #<?php echo $material['dispatch_number']; ?></div>
+                                    <div class="text-xs text-gray-500">Received: <?php echo $material['delivery_date'] ? date('d M Y', strtotime($material['delivery_date'])) : 'N/A'; ?></div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <?php
+                                $status = $material['dispatch_status'] ?? 'delivered';
+                                $statusColors = [
+                                    'dispatched' => 'bg-yellow-100 text-yellow-800',
+                                    'delivered' => 'bg-green-100 text-green-800',
+                                    'confirmed' => 'bg-purple-100 text-purple-800'
+                                ];
+                                $statusLabels = [
+                                    'dispatched' => 'Acceptance Pending',
+                                    'delivered' => 'Delivered',
+                                    'confirmed' => 'Confirmed'
+                                ];
+                                $colorClass = $statusColors[$status] ?? 'bg-gray-100 text-gray-800';
+                                $statusLabel = $statusLabels[$status] ?? ucfirst($status);
+                                ?>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo $colorClass; ?>">
+                                    <?php echo $statusLabel; ?>
+                                </span>
+                                <div class="text-xs text-gray-500 mt-1">Site: <?php echo htmlspecialchars($material['site_code'] ?? 'N/A'); ?></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Material Items for this Dispatch -->
+                        <div class="mt-4">
                     <?php if ($material['dispatch_status'] === 'dispatched'): ?>
                     <h4 class="text-md font-medium text-gray-900 mb-3">Request Summary</h4>
                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
@@ -213,17 +317,44 @@ ob_start();
                             <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                             </svg>
-                            <div>
+                            <div class="flex-1">
                                 <p class="text-sm font-medium text-blue-800">
                                     Request #<?php echo $material['material_request_id']; ?> contains 
                                     <?php 
                                     $dispatchItems = $inventoryModel->getDispatchItems($material['id']);
                                     $totalItems = count($dispatchItems);
-                                    $totalQuantity = array_sum(array_column($dispatchItems, 'quantity_dispatched'));
+                                    $totalQuantity = 0;
+                                    foreach ($dispatchItems as $dispatchItem) {
+                                        $totalQuantity += $dispatchItem['quantity_dispatched'] ?? 1;
+                                    }
+                                    
+                                    // Count accepted items
+                                    $existingConfirmations = json_decode($material['item_confirmations'] ?? '[]', true);
+                                    $acceptedItemTypes = count($existingConfirmations);
+                                    $uniqueBoqItems = array_unique(array_column($dispatchItems, 'boq_item_id'));
+                                    $totalItemTypes = count($uniqueBoqItems);
+                                    
                                     echo $totalItems . ' different materials with total quantity of ' . number_format($totalQuantity) . ' units';
                                     ?>
                                 </p>
-                                <p class="text-xs text-blue-600 mt-1">Click "Accept Request" below to confirm receipt of all materials</p>
+                                <?php if ($acceptedItemTypes > 0): ?>
+                                <div class="mt-2">
+                                    <div class="flex items-center justify-between text-xs text-blue-700">
+                                        <span>Individual Acceptance Progress</span>
+                                        <span><?php echo $acceptedItemTypes; ?>/<?php echo $totalItemTypes; ?> item types accepted</span>
+                                    </div>
+                                    <div class="w-full bg-blue-200 rounded-full h-2 mt-1">
+                                        <div class="bg-blue-600 h-2 rounded-full" style="width: <?php echo ($acceptedItemTypes / $totalItemTypes) * 100; ?>%"></div>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                                <p class="text-xs text-blue-600 mt-1">
+                                    <?php if ($acceptedItemTypes == $totalItemTypes): ?>
+                                        All items individually accepted! Click "Accept Request" to finalize.
+                                    <?php else: ?>
+                                        Accept items individually or click "Accept Request" to confirm receipt of all materials
+                                    <?php endif; ?>
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -256,6 +387,9 @@ ob_start();
                                     </th>
                                     <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Individual Records</th>
                                     <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                                    <?php if ($showDispatchItems): ?>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    <?php endif; ?>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -285,7 +419,7 @@ ob_start();
                                     <td class="px-3 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">
                                             <?php 
-                                            $quantity = $showDispatchItems ? $item['quantity_dispatched'] : $item['received_quantity'];
+                                            $quantity = $showDispatchItems ? ($item['quantity_dispatched'] ?? 1) : ($item['received_quantity'] ?? 0);
                                             echo number_format($quantity); 
                                             ?>
                                         </div>
@@ -344,6 +478,37 @@ ob_start();
                                             ?>
                                         </div>
                                     </td>
+                                    <?php if ($showDispatchItems): ?>
+                                    <td class="px-3 py-2">
+                                        <?php
+                                        // Check if this item has been individually accepted
+                                        $existingConfirmations = json_decode($material['item_confirmations'] ?? '[]', true);
+                                        $isAccepted = false;
+                                        foreach ($existingConfirmations as $confirmation) {
+                                            if ($confirmation['boq_item_id'] == $item['boq_item_id']) {
+                                                $isAccepted = true;
+                                                break;
+                                            }
+                                        }
+                                        
+                                        if ($isAccepted): ?>
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                </svg>
+                                                Accepted
+                                            </span>
+                                        <?php else: ?>
+                                            <button onclick="acceptIndividualItem(<?php echo $material['id']; ?>, <?php echo $item['boq_item_id']; ?>, '<?php echo htmlspecialchars($boqItem['item_name'] ?? 'Unknown'); ?>')" 
+                                                    class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                </svg>
+                                                Accept Item
+                                            </button>
+                                        <?php endif; ?>
+                                    </td>
+                                    <?php endif; ?>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -353,58 +518,88 @@ ob_start();
                     <?php endif; ?>
                 </div>
                 
-                <!-- Request-level Actions -->
-                <?php if ($material['dispatch_status'] === 'dispatched'): ?>
-                <div class="px-4 py-3 bg-gray-50 border-t border-gray-200">
-                    <div class="flex items-center justify-between">
-                        <div class="text-sm text-gray-600">
-                            <strong>Request #<?php echo $material['material_request_id']; ?></strong> is ready for acceptance
-                        </div>
-                        <div class="flex space-x-2">
-                            <button onclick="acceptRequest(<?php echo $material['id']; ?>, <?php echo $material['material_request_id']; ?>)" 
-                                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Accept Request
-                            </button>
-                            <button onclick="viewRequestDetails(<?php echo $material['material_request_id']; ?>)" 
-                                    class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
-                                </svg>
-                                View Details
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <?php endif; ?>
-                
-                <!-- Delivery Information -->
-                <?php if (!empty($material['delivery_notes']) || !empty($material['lr_copy_path'])): ?>
-                <div class="px-4 py-3 bg-gray-50 border-t border-gray-200">
-                    <h4 class="text-sm font-medium text-gray-900 mb-2">Delivery Information</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <?php if (!empty($material['delivery_notes'])): ?>
-                        <div>
-                            <label class="text-xs font-medium text-gray-500">Delivery Notes</label>
-                            <div class="text-sm text-gray-900"><?php echo nl2br(htmlspecialchars($material['delivery_notes'])); ?></div>
-                        </div>
-                        <?php endif; ?>
-                        
-                        <?php if (!empty($material['lr_copy_path'])): ?>
-                        <div>
-                            <label class="text-xs font-medium text-gray-500">LR Copy</label>
-                            <div class="text-sm">
-                                <a href="<?php echo BASE_URL . '/' . $material['lr_copy_path']; ?>" target="_blank" class="text-blue-600 hover:text-blue-800">
-                                    <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    View LR Copy
-                                </a>
+                        <!-- Dispatch-level Actions -->
+                        <?php if ($material['dispatch_status'] === 'dispatched'): ?>
+                        <div class="mt-4 pt-4 border-t border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <div class="text-sm text-gray-600">
+                                    <strong>Dispatch #<?php echo $material['dispatch_number']; ?></strong> is ready for acceptance
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="acceptRequest(<?php echo $material['id']; ?>, <?php echo $material['material_request_id']; ?>)" 
+                                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Accept Dispatch
+                                    </button>
+                                    <button onclick="viewRequestDetails(<?php echo $material['material_request_id']; ?>)" 
+                                            class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        View Details
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <?php endif; ?>
+                        
+                        <!-- Delivery Information -->
+                        <?php if (!empty($material['delivery_notes']) || !empty($material['lr_copy_path'])): ?>
+                        <div class="mt-4 pt-4 border-t border-gray-100">
+                            <h4 class="text-sm font-medium text-gray-900 mb-2">Delivery Information</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <?php if (!empty($material['delivery_notes'])): ?>
+                                <div>
+                                    <label class="text-xs font-medium text-gray-500">Delivery Notes</label>
+                                    <div class="text-sm text-gray-900"><?php echo nl2br(htmlspecialchars($material['delivery_notes'])); ?></div>
+                                </div>
+                                <?php endif; ?>
+                                
+                                <?php if (!empty($material['lr_copy_path'])): ?>
+                                <div>
+                                    <label class="text-xs font-medium text-gray-500">LR Copy</label>
+                                    <div class="text-sm">
+                                        <a href="<?php echo BASE_URL . '/' . $material['lr_copy_path']; ?>" target="_blank" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            View LR Copy
+                                        </a>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                
+                <!-- Request-level Summary Actions -->
+                <?php 
+                $hasAnyPending = false;
+                foreach ($requestData['dispatches'] as $dispatch) {
+                    if ($dispatch['dispatch_status'] === 'dispatched') {
+                        $hasAnyPending = true;
+                        break;
+                    }
+                }
+                ?>
+                <?php if ($hasAnyPending && $requestId !== 'no_request'): ?>
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-700">
+                            <strong>Material Request #<?php echo $requestId; ?></strong> - Accept all pending dispatches at once
+                        </div>
+                        <button onclick="acceptAllDispatches(<?php echo $requestId; ?>)" 
+                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            Accept All Dispatches
+                        </button>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -416,6 +611,48 @@ ob_start();
 </div>
 
 <script>
+function acceptIndividualItem(dispatchId, boqItemId, itemName) {
+    if (!confirm('Are you sure you want to accept "' + itemName + '"? This will confirm receipt of this specific item.')) {
+        return;
+    }
+    
+    // Show loading state
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<svg class="animate-spin h-3 w-3 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+    button.disabled = true;
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append('dispatch_id', dispatchId);
+    formData.append('boq_item_id', boqItemId);
+    formData.append('action', 'accept_individual_item');
+    
+    fetch('process-request-acceptance.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('"' + itemName + '" accepted successfully!', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showAlert('Error: ' + data.message, 'error');
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('An error occurred while accepting the item.', 'error');
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+}
+
 function acceptRequest(dispatchId, requestId) {
     if (!confirm('Are you sure you want to accept Request #' + requestId + '? This will confirm receipt of all materials in this request.')) {
         return;
@@ -458,6 +695,47 @@ function acceptRequest(dispatchId, requestId) {
     });
 }
 
+function acceptAllDispatches(requestId) {
+    if (!confirm('Are you sure you want to accept ALL pending dispatches for Request #' + requestId + '? This will confirm receipt of all materials in all pending dispatches for this request.')) {
+        return;
+    }
+    
+    // Show loading state
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Processing...';
+    button.disabled = true;
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append('request_id', requestId);
+    formData.append('action', 'accept_all_dispatches');
+    
+    fetch('process-request-acceptance.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('All dispatches for Request #' + requestId + ' accepted successfully!', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showAlert('Error: ' + data.message, 'error');
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('An error occurred while accepting the dispatches.', 'error');
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+}
+
 function viewRequestDetails(requestId) {
     // Open request details in a new tab or modal
     window.open('material-requests-list.php?request_id=' + requestId, '_blank');
@@ -466,19 +744,20 @@ function viewRequestDetails(requestId) {
 function showAlert(message, type) {
     // Create alert element
     const alertDiv = document.createElement('div');
-    alertDiv.className = `fixed top-4 right-4 z-50 p-4 rounded-md shadow-lg ${
+    alertDiv.className = `fixed top-4 right-4 z-50 p-4 rounded-md shadow-lg max-w-md ${
         type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 
         'bg-red-100 text-red-800 border border-red-200'
     }`;
     alertDiv.innerHTML = `
         <div class="flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 ${type === 'success' ? 
                     '<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>' :
                     '<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>'
                 }
             </svg>
-            <span>${message}</span>
+            <span class="flex-1">${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-lg font-bold hover:opacity-75">&times;</button>
         </div>
     `;
     
@@ -486,7 +765,9 @@ function showAlert(message, type) {
     
     // Remove alert after 5 seconds
     setTimeout(() => {
-        alertDiv.remove();
+        if (alertDiv.parentElement) {
+            alertDiv.remove();
+        }
     }, 5000);
 }
 </script>
