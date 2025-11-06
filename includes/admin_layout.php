@@ -1038,6 +1038,19 @@ $currentUser = Auth::getCurrentUser();
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
         
+        /* User dropdown styles */
+        #user-dropdown {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        #user-dropdown.hidden {
+            display: none !important;
+        }
+        
+        #user-dropdown:not(.hidden) {
+            display: block !important;adow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
         /* Smooth scrolling for sidebar */
         .admin-sidebar nav {
             scrollbar-width: thin;
@@ -1186,21 +1199,7 @@ $currentUser = Auth::getCurrentUser();
                 ?>
             </nav>
 
-            <!-- User Menu -->
-            <div class="px-2 py-2 border-t border-gray-600 mt-auto">
-                <a href="<?php echo url('/admin/profile.php'); ?>" class="sidebar-item" data-tooltip="Profile">
-                    <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                    </svg>
-                    <span class="sidebar-text">Profile</span>
-                </a>
-                <a href="<?php echo url('/auth/logout.php'); ?>" class="sidebar-item text-red-400 hover:bg-red-900 hover:text-red-300" data-tooltip="Logout">
-                    <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path>
-                    </svg>
-                    <span class="sidebar-text">Logout</span>
-                </a>
-            </div>
+
         </div>
     </div>
 
@@ -1216,8 +1215,7 @@ $currentUser = Auth::getCurrentUser();
                             </svg>
                         </button>
                         <div>
-                            <h1 class="text-xl font-semibold text-gray-900">Admin Panel</h1>
-                            <p class="text-sm text-gray-500">System Administration</p>
+                            <h1 class="text-xl font-semibold text-gray-900"><?php echo $title ?? 'Admin Panel'; ?></h1>
                         </div>
                     </div>
                     
@@ -1242,19 +1240,58 @@ $currentUser = Auth::getCurrentUser();
                         </span>
                         
                         <div class="relative" id="user-menu">
-                            <button id="user-menu-button" class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <button id="user-menu-button" onclick="toggleUserDropdown()" class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors">
                                 <div class="admin-badge w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs">
                                     <?php echo strtoupper(substr($currentUser['username'], 0, 1)); ?>
                                 </div>
-                                <span class="ml-2 text-gray-700"><?php echo htmlspecialchars($currentUser['username']); ?></span>
-                                <svg class="ml-1 w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <span class="ml-2 text-gray-700 font-medium"><?php echo htmlspecialchars(ucwords($currentUser['username'])); ?></span>
+                                <svg class="ml-2 w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                                 </svg>
                             </button>
-                            <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                <a href="<?php echo url('/admin/profile.php'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                                <a href="<?php echo url('/admin/settings.php'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
-                                <a href="<?php echo url('/auth/logout.php'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
+                            <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 border border-gray-200" style="z-index: 9999;">
+                                <div class="px-4 py-2 border-b border-gray-100">
+                                    <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($currentUser['username']); ?></p>
+                                    <p class="text-xs text-gray-500">Administrator</p>
+                                </div>
+                                <a href="<?php echo url('/admin/profile.php'); ?>" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    My Profile
+                                </a>
+                                <a href="<?php echo url('/admin/settings.php'); ?>" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    System Settings
+                                </a>
+                                <a href="<?php echo url('/admin/users/'); ?>" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+                                    </svg>
+                                    User Management
+                                </a>
+                                <a href="<?php echo url('/admin/reports/'); ?>" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path>
+                                    </svg>
+                                    Reports & Analytics
+                                </a>
+                                <a href="<?php echo url('/admin/help.php'); ?>" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Help & Documentation
+                                </a>
+                                <div class="border-t border-gray-100 mt-2 pt-2">
+                                    <a href="<?php echo url('/auth/logout.php'); ?>" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                        <svg class="w-4 h-4 mr-3 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Sign Out
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1383,10 +1420,20 @@ $currentUser = Auth::getCurrentUser();
             // Overlay click handler is managed by admin.js
         });
 
-        // User dropdown toggle
-        document.getElementById('user-menu-button')?.addEventListener('click', function() {
+        // User dropdown toggle function
+        function toggleUserDropdown() {
             const dropdown = document.getElementById('user-dropdown');
-            dropdown.classList.toggle('hidden');
+            if (dropdown) {
+                dropdown.classList.toggle('hidden');
+                console.log('Admin dropdown toggled, hidden class:', dropdown.classList.contains('hidden'));
+            }
+        }
+
+        // User dropdown toggle event listener (backup)
+        document.getElementById('user-menu-button')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleUserDropdown();
         });
 
         // Close dropdown when clicking outside
@@ -1394,8 +1441,8 @@ $currentUser = Auth::getCurrentUser();
             const userMenu = document.getElementById('user-menu');
             const dropdown = document.getElementById('user-dropdown');
             
-            if (userMenu && !userMenu.contains(event.target)) {
-                dropdown?.classList.add('hidden');
+            if (userMenu && dropdown && !userMenu.contains(event.target)) {
+                dropdown.classList.add('hidden');
             }
         });
 

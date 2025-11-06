@@ -301,6 +301,19 @@ if (!function_exists('url')) {
                 display: block;
             }
         }
+        
+        /* User dropdown styles */
+        #user-dropdown {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        #user-dropdown.hidden {
+            display: none !important;
+        }
+        
+        #user-dropdown:not(.hidden) {
+            display: block !important;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -423,21 +436,7 @@ if (!function_exists('url')) {
                     <?php endif; ?>
                 </nav>
 
-                <!-- User Menu -->
-                <div class="px-4 py-4 border-t border-blue-800">
-                    <a href="<?php echo url('/vendor/profile.php'); ?>" class="sidebar-item text-white hover:bg-blue-800">
-                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                        </svg>
-                        Profile
-                    </a>
-                    <a href="<?php echo url('/auth/logout.php'); ?>" class="sidebar-item text-white hover:bg-red-600">
-                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path>
-                        </svg>
-                        Logout
-                    </a>
-                </div>
+
             </div>
         </div>
 
@@ -454,7 +453,6 @@ if (!function_exists('url')) {
                         </button>
                         <div class="ml-2">
                             <h1 class="text-xl font-semibold text-gray-900"><?php echo $title ?? 'Vendor Portal'; ?></h1>
-                            <p class="text-sm text-gray-500">Professional Site Management</p>
                         </div>
                     </div>
                     
@@ -479,18 +477,52 @@ if (!function_exists('url')) {
                         </span>
                         
                         <div class="relative" id="user-menu">
-                            <button id="user-menu-button" class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <button id="user-menu-button" onclick="toggleUserDropdown()" class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors">
                                 <div class="vendor-badge w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs">
                                     V
                                 </div>
-                                <span class="ml-2 text-gray-700"><?php echo htmlspecialchars(Auth::getCurrentUser()['username']); ?></span>
-                                <svg class="ml-1 w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <span class="ml-2 text-gray-700 font-medium"><?php echo htmlspecialchars(Auth::getCurrentUser()['username']); ?></span>
+                                <svg class="ml-2 w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                                 </svg>
                             </button>
-                            <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                <a href="<?php echo url('/vendor/profile.php'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                                <a href="<?php echo url('/auth/logout.php'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+                            <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 border border-gray-200" style="z-index: 9999;">
+                                <div class="px-4 py-2 border-b border-gray-100">
+                                    <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars(Auth::getCurrentUser()['username']); ?></p>
+                                    <p class="text-xs text-gray-500">Vendor Account</p>
+                                </div>
+                                <a href="<?php echo url('/vendor/profile.php'); ?>" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    My Profile
+                                </a>
+                                <a href="<?php echo url('/vendor/settings.php'); ?>" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Account Settings
+                                </a>
+                                <a href="<?php echo url('/vendor/notifications.php'); ?>" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
+                                    </svg>
+                                    Notifications
+                                </a>
+                                <a href="<?php echo url('/vendor/help.php'); ?>" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Help & Support
+                                </a>
+                                <div class="border-t border-gray-100 mt-2 pt-2">
+                                    <a href="<?php echo url('/auth/logout.php'); ?>" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                        <svg class="w-4 h-4 mr-3 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Sign Out
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -530,10 +562,20 @@ if (!function_exists('url')) {
             overlay.classList.add('hidden');
         });
 
-        // User dropdown toggle
-        document.getElementById('user-menu-button')?.addEventListener('click', function() {
+        // User dropdown toggle function
+        function toggleUserDropdown() {
             const dropdown = document.getElementById('user-dropdown');
-            dropdown.classList.toggle('hidden');
+            if (dropdown) {
+                dropdown.classList.toggle('hidden');
+                console.log('Dropdown toggled, hidden class:', dropdown.classList.contains('hidden'));
+            }
+        }
+
+        // User dropdown toggle event listener (backup)
+        document.getElementById('user-menu-button')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleUserDropdown();
         });
 
         // Close dropdown when clicking outside
@@ -541,8 +583,8 @@ if (!function_exists('url')) {
             const userMenu = document.getElementById('user-menu');
             const dropdown = document.getElementById('user-dropdown');
             
-            if (userMenu && !userMenu.contains(event.target)) {
-                dropdown?.classList.add('hidden');
+            if (userMenu && dropdown && !userMenu.contains(event.target)) {
+                dropdown.classList.add('hidden');
             }
         });
 
