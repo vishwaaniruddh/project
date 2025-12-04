@@ -5,6 +5,7 @@ error_reporting(E_ERROR | E_PARSE);
 require_once __DIR__ . '/../../config/auth.php';
 require_once __DIR__ . '/../../models/Site.php';
 require_once __DIR__ . '/../../models/SiteDelegation.php';
+require_once __DIR__ . '/../../models/DelegationLayout.php';
 
 // Set JSON header
 header('Content-Type: application/json');
@@ -33,20 +34,22 @@ try {
     $completedDelegations = $delegationModel->getVendorDelegations($vendorId, 'completed');
     $allDelegations = array_merge($vendorDelegations, $completedDelegations);
     
-    // Find the site by ID in delegations
+    // Find the site by delegation ID
+    // The 'id' parameter passed is actually the delegation ID (site_delegations.id)
     $targetSite = null;
     $delegation = null;
     
     foreach ($allDelegations as $delegatedSite) {
+        // Match by delegation ID (sd.id from site_delegations table)
         if ($delegatedSite['id'] == $id) {
             $targetSite = $delegatedSite;
             
-            // Create delegation info from the delegated site data
+            // Store delegation info
             $delegation = [
-                'id' => $delegatedSite['delegation_id'] ?? null,
+                'id' => $delegatedSite['id'],  // Delegation ID
                 'vendor_id' => $vendorId,
                 'delegation_date' => $delegatedSite['delegation_date'] ?? null,
-                'status' => $delegatedSite['delegation_status'] ?? 'active',
+                'status' => $delegatedSite['status'] ?? 'active',
                 'notes' => $delegatedSite['notes'] ?? null
             ];
             
@@ -67,12 +70,24 @@ try {
     
     $site = $targetSite;
     
+    // Get layout files if delegation exists
+    $layoutFiles = [];
+    $delegationIdForLayouts = null;
+    
+    if ($delegation && isset($delegation['id']) && $delegation['id']) {
+        $delegationIdForLayouts = $delegation['id'];
+        $layoutModel = new DelegationLayout();
+        $layoutFiles = $layoutModel->getLayoutsByDelegation($delegationIdForLayouts);
+    }
+    
     // Combine site and delegation data
     $siteData = array_merge($site, [
         'delegation_id' => $delegation ? ($delegation['id'] ?? null) : null,
         'delegation_date' => $delegation ? ($delegation['delegation_date'] ?? null) : null,
         'delegation_status' => $delegation ? ($delegation['status'] ?? null) : null,
-        'notes' => $delegation ? ($delegation['notes'] ?? null) : null
+        'notes' => $delegation ? ($delegation['notes'] ?? null) : null,
+        'layout_files' => $layoutFiles,
+        '_debug_delegation_id' => $delegationIdForLayouts  // Debug info
     ]);
     
     echo json_encode([

@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../config/auth.php';
 require_once __DIR__ . '/../../models/SiteDelegation.php';
+require_once __DIR__ . '/../../models/DelegationLayout.php';
 
 // Require admin authentication
 Auth::requireRole(ADMIN_ROLE);
@@ -27,10 +28,56 @@ try {
             
             $delegationId = $delegationModel->delegateSite($siteId, $vendorId, Auth::getUserId(), $notes);
             
+            // Handle multiple file uploads if present
+            $layoutsUploaded = 0;
+            $uploadedPaths = [];
+            
+            if (isset($_FILES['layout_files']) && is_array($_FILES['layout_files']['name'])) {
+                $layoutModel = new DelegationLayout();
+                $remarks = $_POST['layout_remarks'] ?? '';
+                
+                $fileCount = count($_FILES['layout_files']['name']);
+                
+                for ($i = 0; $i < $fileCount; $i++) {
+                    // Check if file was uploaded
+                    if ($_FILES['layout_files']['error'][$i] === UPLOAD_ERR_OK) {
+                        try {
+                            // Create individual file array for each upload
+                            $file = [
+                                'name' => $_FILES['layout_files']['name'][$i],
+                                'type' => $_FILES['layout_files']['type'][$i],
+                                'tmp_name' => $_FILES['layout_files']['tmp_name'][$i],
+                                'error' => $_FILES['layout_files']['error'][$i],
+                                'size' => $_FILES['layout_files']['size'][$i]
+                            ];
+                            
+                            $layoutId = $layoutModel->uploadLayout($delegationId, $file, $remarks, Auth::getUserId());
+                            $layoutsUploaded++;
+                            
+                            // Get the uploaded file path
+                            $layoutInfo = $layoutModel->find($layoutId);
+                            if ($layoutInfo) {
+                                $uploadedPaths[] = $layoutInfo['file_path'];
+                            }
+                        } catch (Exception $e) {
+                            // Log the error but continue with other files
+                            error_log("Layout upload error for delegation {$delegationId}, file {$i}: " . $e->getMessage());
+                        }
+                    }
+                }
+            }
+            
+            $message = 'Site delegated successfully';
+            if ($layoutsUploaded > 0) {
+                $message .= " with {$layoutsUploaded} layout file(s)";
+            }
+            
             echo json_encode([
                 'success' => true,
-                'message' => 'Site delegated successfully',
-                'delegation_id' => $delegationId
+                'message' => $message,
+                'delegation_id' => $delegationId,
+                'layouts_uploaded' => $layoutsUploaded,
+                'file_paths' => implode(',', $uploadedPaths)
             ]);
             break;
             

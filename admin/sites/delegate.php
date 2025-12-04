@@ -28,6 +28,14 @@ $activeDelegation = $delegationModel->getActiveDelegation($siteId);
 $vendors = $vendorModel->getActiveVendors();
 $delegationHistory = $delegationModel->getDelegationHistory($siteId);
 
+// Get layout files if delegation exists
+$layoutFiles = [];
+if ($activeDelegation) {
+    require_once __DIR__ . '/../../models/DelegationLayout.php';
+    $layoutModel = new DelegationLayout();
+    $layoutFiles = $layoutModel->getLayoutsByDelegation($activeDelegation['id']);
+}
+
 $title = 'Delegate Site - ' . $site['site_id'];
 ob_start();
 ?>
@@ -114,6 +122,84 @@ ob_start();
             </div>
             <?php endif; ?>
         </div>
+        
+        <?php if (!empty($layoutFiles)): ?>
+        <div class="mt-6">
+            <label class="block text-sm font-medium text-gray-700 mb-3">Uploaded Layout Files</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <?php foreach ($layoutFiles as $layout): ?>
+                <div class="border rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
+                    <div class="flex items-start space-x-3">
+                        <?php 
+                        $isImage = in_array(strtolower($layout['file_type']), ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                        if ($isImage): 
+                        ?>
+                            <img src="../../<?php echo htmlspecialchars($layout['file_path']); ?>" 
+                                 alt="Layout" 
+                                 class="h-20 w-20 object-cover rounded cursor-pointer"
+                                 onclick="window.open('../../<?php echo htmlspecialchars($layout['file_path']); ?>', '_blank')">
+                        <?php else: ?>
+                            <div class="h-20 w-20 flex items-center justify-center bg-gray-100 rounded">
+                                <?php if ($layout['file_type'] === 'pdf'): ?>
+                                    <svg class="w-10 h-10 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h12l4 4v16H2v-1z"></path>
+                                    </svg>
+                                <?php elseif (in_array($layout['file_type'], ['xls', 'xlsx'])): ?>
+                                    <svg class="w-10 h-10 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M4 2h12l4 4v12H4V2zm1 1v14h10V7h-4V3H5z"></path>
+                                    </svg>
+                                <?php elseif (in_array($layout['file_type'], ['doc', 'docx'])): ?>
+                                    <svg class="w-10 h-10 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M4 2h12l4 4v12H4V2zm1 1v14h10V7h-4V3H5z"></path>
+                                    </svg>
+                                <?php else: ?>
+                                    <svg class="w-10 h-10 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M4 2h12l4 4v12H4V2zm1 1v14h10V7h-4V3H5z"></path>
+                                    </svg>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate">
+                                <?php echo htmlspecialchars($layout['original_filename']); ?>
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                <?php 
+                                $size = $layout['file_size'];
+                                if ($size < 1024) {
+                                    echo $size . ' B';
+                                } elseif ($size < 1048576) {
+                                    echo round($size / 1024, 2) . ' KB';
+                                } else {
+                                    echo round($size / 1048576, 2) . ' MB';
+                                }
+                                ?>
+                            </p>
+                            <p class="text-xs text-gray-500">
+                                <?php echo date('M d, Y H:i', strtotime($layout['uploaded_at'])); ?>
+                            </p>
+                            <?php if ($layout['remarks']): ?>
+                            <p class="text-xs text-gray-600 mt-2 italic">
+                                "<?php echo htmlspecialchars($layout['remarks']); ?>"
+                            </p>
+                            <?php endif; ?>
+                            <a href="<?php echo htmlspecialchars($layout['file_path']); ?>" 
+                               download 
+                               class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 mt-2">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                                Download
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+        
         <div class="mt-4 flex space-x-2" >
             <button style="display:none;" onclick="completeDelegation(<?php echo $activeDelegation['id']; ?>)" class="btn btn-success">
                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -137,7 +223,7 @@ ob_start();
         <h3 class="card-title">Delegate Site to Vendor</h3>
     </div>
     <div class="card-body">
-        <form id="delegationForm" action="process_delegation.php" method="POST">
+        <form id="delegationForm" action="process_delegation.php" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="site_id" value="<?php echo $siteId; ?>">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -157,6 +243,42 @@ ob_start();
                 <div>
                     <label class="form-label">Delegation Date</label>
                     <input type="text" class="form-input" value="<?php echo date('M d, Y H:i'); ?>" readonly>
+                </div>
+                <div class="md:col-span-2">
+                    <label for="layout_files" class="form-label">Layout Upload (Optional) - Multiple Files Allowed</label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-gray-400 transition-colors">
+                        <input type="file" 
+                               id="layout_files" 
+                               name="layout_files[]" 
+                               class="hidden" 
+                               accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.xls,.xlsx,.doc,.docx"
+                               multiple>
+                        <div id="file-upload-area" class="text-center cursor-pointer">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                            <p class="mt-2 text-sm text-gray-600">
+                                Click to upload or drag and drop multiple files
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                Images, PDF, Excel, Word (Max 10MB each)
+                            </p>
+                        </div>
+                        <div id="files-preview" class="mt-4 space-y-2"></div>
+                    </div>
+                </div>
+                <div class="md:col-span-2" id="remarks-section" style="display:none;">
+                    <label for="layout_remarks" class="form-label">Layout Remarks (Optional)</label>
+                    <textarea id="layout_remarks" 
+                              name="layout_remarks" 
+                              class="form-textarea" 
+                              rows="2" 
+                              maxlength="500"
+                              placeholder="Add any notes about the uploaded layout files..."></textarea>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <span id="remarks-count">0</span>/500 characters
+                    </p>
                 </div>
                 <div class="md:col-span-2">
                     <label for="notes" class="form-label">Notes (Optional)</label>
@@ -216,6 +338,212 @@ ob_start();
 <?php endif; ?>
 
 <script>
+// File upload handling for multiple files
+const fileInput = document.getElementById('layout_files');
+const fileUploadArea = document.getElementById('file-upload-area');
+const filesPreview = document.getElementById('files-preview');
+const remarksSection = document.getElementById('remarks-section');
+const remarksTextarea = document.getElementById('layout_remarks');
+const remarksCount = document.getElementById('remarks-count');
+
+let selectedFiles = [];
+
+// Allowed file types
+const allowedTypes = {
+    'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/png': 'png',
+    'image/gif': 'gif', 'image/webp': 'webp',
+    'application/pdf': 'pdf',
+    'application/vnd.ms-excel': 'xls',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+    'application/msword': 'doc',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx'
+};
+
+const maxFileSize = 10 * 1024 * 1024; // 10MB
+
+// Click to upload
+fileUploadArea?.addEventListener('click', () => {
+    fileInput?.click();
+});
+
+// File selection
+fileInput?.addEventListener('change', function(e) {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+        handleFilesSelect(files);
+    }
+});
+
+// Drag and drop
+fileUploadArea?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    fileUploadArea.classList.add('border-blue-400', 'bg-blue-50');
+});
+
+fileUploadArea?.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    fileUploadArea.classList.remove('border-blue-400', 'bg-blue-50');
+});
+
+fileUploadArea?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    fileUploadArea.classList.remove('border-blue-400', 'bg-blue-50');
+    
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+        const dataTransfer = new DataTransfer();
+        files.forEach(file => dataTransfer.items.add(file));
+        fileInput.files = dataTransfer.files;
+        handleFilesSelect(files);
+    }
+});
+
+// Handle multiple files selection
+function handleFilesSelect(files) {
+    let validFiles = [];
+    let hasErrors = false;
+    
+    files.forEach(file => {
+        if (validateFile(file)) {
+            validFiles.push(file);
+        } else {
+            hasErrors = true;
+        }
+    });
+    
+    if (validFiles.length > 0) {
+        selectedFiles = validFiles;
+        displayFilesPreview(validFiles);
+        remarksSection.style.display = 'block';
+    }
+    
+    if (hasErrors && validFiles.length === 0) {
+        fileInput.value = '';
+    }
+}
+
+// Validate file
+function validateFile(file) {
+    if (file.size > maxFileSize) {
+        showAlert(`File "${file.name}" exceeds 10MB limit`, 'error');
+        return false;
+    }
+    
+    if (file.size === 0) {
+        showAlert(`File "${file.name}" is empty`, 'error');
+        return false;
+    }
+    
+    if (!allowedTypes[file.type]) {
+        showAlert(`File "${file.name}" type not supported`, 'error');
+        return false;
+    }
+    
+    return true;
+}
+
+// Display multiple files preview
+function displayFilesPreview(files) {
+    filesPreview.innerHTML = '';
+    
+    files.forEach((file, index) => {
+        const isImage = file.type.startsWith('image/');
+        const fileSize = formatFileSize(file.size);
+        
+        const fileCard = document.createElement('div');
+        fileCard.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-lg';
+        fileCard.id = `file-card-${index}`;
+        
+        if (isImage) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                fileCard.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <img src="${e.target.result}" alt="Preview" class="h-16 w-16 object-cover rounded">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">${file.name}</p>
+                            <p class="text-xs text-gray-500">${fileSize}</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="removeFileByIndex(${index})" class="text-red-600 hover:text-red-800">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                `;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            const icon = getFileIcon(file.type);
+            fileCard.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <div class="h-16 w-16 flex items-center justify-center bg-gray-200 rounded">
+                        ${icon}
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">${file.name}</p>
+                        <p class="text-xs text-gray-500">${fileSize}</p>
+                    </div>
+                </div>
+                <button type="button" onclick="removeFileByIndex(${index})" class="text-red-600 hover:text-red-800">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            `;
+        }
+        
+        filesPreview.appendChild(fileCard);
+    });
+}
+
+// Remove file by index
+function removeFileByIndex(index) {
+    selectedFiles.splice(index, 1);
+    
+    const dataTransfer = new DataTransfer();
+    selectedFiles.forEach(file => dataTransfer.items.add(file));
+    fileInput.files = dataTransfer.files;
+    
+    if (selectedFiles.length === 0) {
+        filesPreview.innerHTML = '';
+        remarksSection.style.display = 'none';
+        remarksTextarea.value = '';
+        remarksCount.textContent = '0';
+    } else {
+        displayFilesPreview(selectedFiles);
+    }
+}
+
+// Format file size
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+// Get file icon
+function getFileIcon(fileType) {
+    if (fileType === 'application/pdf') {
+        return '<svg class="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path d="M4 18h12V6h-4V2H4v16zm-2 1V0h12l4 4v16H2v-1z"></path></svg>';
+    } else if (fileType.includes('excel') || fileType.includes('spreadsheet')) {
+        return '<svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2h12l4 4v12H4V2zm1 1v14h10V7h-4V3H5z"></path></svg>';
+    } else if (fileType.includes('word') || fileType.includes('document')) {
+        return '<svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2h12l4 4v12H4V2zm1 1v14h10V7h-4V3H5z"></path></svg>';
+    }
+    return '<svg class="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2h12l4 4v12H4V2zm1 1v14h10V7h-4V3H5z"></path></svg>';
+}
+
+// Remarks character counter
+remarksTextarea?.addEventListener('input', function() {
+    remarksCount.textContent = this.value.length;
+});
+
 // Form submission
 document.getElementById('delegationForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
@@ -224,7 +552,6 @@ document.getElementById('delegationForm')?.addEventListener('submit', function(e
     const submitBtn = this.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     
-    // Show loading state
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="spinner mr-2"></span>Processing...';
     

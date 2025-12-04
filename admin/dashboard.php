@@ -144,7 +144,7 @@ ob_start();
 <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg p-6 mb-8 text-white">
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
         <div class="flex-1">
-            <h1 class="text-3xl font-bold">Welcome back -2 , <?php echo htmlspecialchars($currentUser['username']); ?>!</h1>
+            <h1 class="text-3xl font-bold">Welcome back, <?php echo htmlspecialchars($currentUser['username']); ?>!</h1>
             <p class="mt-2 text-blue-100">Here's what's happening with your site installation management system today.</p>
             <p class="text-sm text-blue-200 mt-1"><?php echo date('l, F j, Y'); ?></p>
         </div>

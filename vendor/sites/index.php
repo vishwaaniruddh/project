@@ -436,7 +436,9 @@ function viewSiteDetails(id, siteId) {
         .then(text => {
             try {
                 const data = JSON.parse(text);
+                console.log('Site data received:', data);
                 if (data.success) {
+                    console.log('Layout files count:', data.site.layout_files ? data.site.layout_files.length : 0);
                     displaySiteDetails(data.site);
                 } else {
                     modalContent.innerHTML = `
@@ -591,6 +593,55 @@ function displaySiteDetails(site) {
             </div>
         </div>
         ` : ''}
+        
+        ${site.layout_files && site.layout_files.length > 0 ? `
+        <div class="mt-6 pt-4 border-t">
+            <h4 class="font-semibold text-gray-900 mb-3">Layout Files</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                ${site.layout_files.map(layout => {
+                    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(layout.file_type.toLowerCase());
+                    const fileSize = formatFileSize(layout.file_size);
+                    const uploadDate = new Date(layout.uploaded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    
+                    return `
+                        <div class="border rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
+                            <div class="flex items-start space-x-3">
+                                ${isImage ? `
+                                    <img src="${layout.file_path}" 
+                                         alt="Layout" 
+                                         class="h-20 w-20 object-cover rounded cursor-pointer"
+                                         onclick="window.open('${layout.file_path}', '_blank')">
+                                ` : `
+                                    <div class="h-20 w-20 flex items-center justify-center bg-gray-100 rounded">
+                                        ${getFileIcon(layout.file_type)}
+                                    </div>
+                                `}
+                                
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate" title="${layout.original_filename}">
+                                        ${layout.original_filename}
+                                    </p>
+                                    <p class="text-xs text-gray-500 mt-1">${fileSize}</p>
+                                    <p class="text-xs text-gray-500">${uploadDate}</p>
+                                    ${layout.remarks ? `
+                                        <p class="text-xs text-gray-600 mt-2 italic">"${layout.remarks}"</p>
+                                    ` : ''}
+                                    <a href="${layout.file_path}" 
+                                       download 
+                                       class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 mt-2">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Download
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+        ` : ''}
     `;
     
     // Show action button if needed
@@ -601,6 +652,26 @@ function displaySiteDetails(site) {
     } else {
         actionButton.classList.add('hidden');
     }
+}
+
+// Helper function to format file size
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / 1048576).toFixed(2) + ' MB';
+}
+
+// Helper function to get file icon
+function getFileIcon(fileType) {
+    const type = fileType.toLowerCase();
+    if (type === 'pdf') {
+        return '<svg class="w-10 h-10 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path d="M4 18h12V6h-4V2H4v16zm-2 1V0h12l4 4v16H2v-1z"></path></svg>';
+    } else if (type === 'xls' || type === 'xlsx') {
+        return '<svg class="w-10 h-10 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2h12l4 4v12H4V2zm1 1v14h10V7h-4V3H5z"></path></svg>';
+    } else if (type === 'doc' || type === 'docx') {
+        return '<svg class="w-10 h-10 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2h12l4 4v12H4V2zm1 1v14h10V7h-4V3H5z"></path></svg>';
+    }
+    return '<svg class="w-10 h-10 text-gray-600" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2h12l4 4v12H4V2zm1 1v14h10V7h-4V3H5z"></path></svg>';
 }
 
 function closeSiteModal() {
