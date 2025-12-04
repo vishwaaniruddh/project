@@ -607,10 +607,10 @@ function displaySiteDetails(site) {
                         <div class="border rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
                             <div class="flex items-start space-x-3">
                                 ${isImage ? `
-                                    <img src="${layout.file_path}" 
+                                    <img src="../../admin/sites/${layout.file_path}" 
                                          alt="Layout" 
                                          class="h-20 w-20 object-cover rounded cursor-pointer"
-                                         onclick="window.open('${layout.file_path}', '_blank')">
+                                         onclick="window.open('../../admin/sites/${layout.file_path}', '_blank')">
                                 ` : `
                                     <div class="h-20 w-20 flex items-center justify-center bg-gray-100 rounded">
                                         ${getFileIcon(layout.file_type)}
@@ -626,7 +626,7 @@ function displaySiteDetails(site) {
                                     ${layout.remarks ? `
                                         <p class="text-xs text-gray-600 mt-2 italic">"${layout.remarks}"</p>
                                     ` : ''}
-                                    <a href="${layout.file_path}" 
+                                    <a href="../../admin/sites/${layout.file_path}" 
                                        download 
                                        class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 mt-2">
                                         <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
