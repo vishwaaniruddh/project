@@ -1,5 +1,9 @@
 /* Custom styles for Site Installation Management System */
 
+.ordered_list li{
+    list-style-type: decimal;
+}
+
 .btn-primary {
     @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200;
 }

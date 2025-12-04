@@ -40,7 +40,7 @@ ob_start();
 
     <div class="bg-white shadow-lg overflow-hidden rounded-lg">
         <div class="px-6 py-5 sm:px-6 flex justify-between items-center border-b border-gray-200">
-            <h2 class="text-xl font-semibold text-gray-900">Vendor Details</h2>
+            <h2 class="text-xl font-semibold text-gray-900">Vendor Details </span></h2>
             <span class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium <?php echo $statusBadgeClass; ?>">
                 Status: <?php echo ucfirst($vendor['status']); ?>
             </span>
@@ -49,7 +49,7 @@ ob_start();
             <dl class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
                 <div class="sm:col-span-1">
                     <dt class="text-sm font-medium text-gray-500">Company Name</dt>
-                    <dd class="mt-1 text-base text-gray-900"><?php echo htmlspecialchars($vendor['name']); ?></dd>
+                    <dd class="mt-1 text-base text-gray-900"><?php echo htmlspecialchars($vendor['name']); ?> - <span><?php echo $vendor['id']; ?></dd>
                 </div>
                 <div class="sm:col-span-1">
                     <dt class="text-sm font-medium text-gray-500">Contact Person</dt>

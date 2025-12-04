@@ -2,6 +2,19 @@
 require_once __DIR__ . '/../../config/auth.php';
 require_once __DIR__ . '/../../models/Installation.php';
 
+// Helper function for file size formatting
+function formatFileSize($bytes) {
+    if ($bytes >= 1073741824) {
+        return number_format($bytes / 1073741824, 2) . ' GB';
+    } elseif ($bytes >= 1048576) {
+        return number_format($bytes / 1048576, 2) . ' MB';
+    } elseif ($bytes >= 1024) {
+        return number_format($bytes / 1024, 2) . ' KB';
+    } else {
+        return $bytes . ' bytes';
+    }
+}
+
 // Require admin authentication
 Auth::requireRole(ADMIN_ROLE);
 
@@ -583,20 +596,7 @@ $progressWithAttachments = $installationModel->getInstallationProgressWithAttach
     </div>
 </div>
 
-<?php
-// Helper function for file size formatting
-function formatFileSize($bytes) {
-    if ($bytes >= 1073741824) {
-        return number_format($bytes / 1073741824, 2) . ' GB';
-    } elseif ($bytes >= 1048576) {
-        return number_format($bytes / 1048576, 2) . ' MB';
-    } elseif ($bytes >= 1024) {
-        return number_format($bytes / 1024, 2) . ' KB';
-    } else {
-        return $bytes . ' bytes';
-    }
-}
-?>
+
 
 <?php elseif (!empty($progress)): ?>
 <!-- Fallback to regular progress if no attachments -->

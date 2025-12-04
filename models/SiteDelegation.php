@@ -131,7 +131,7 @@ class SiteDelegation extends BaseModel {
     public function getVendorDelegations($vendorId, $status = null) {
         $sql = "
             SELECT sd.*, s.site_id, s.location, s.city, s.state, s.country, 
-                   s.customer, s.bank, s.survey_status as site_survey_status, s.survey_submission_date,
+                   s.customer, s.survey_status as site_survey_status, s.survey_submission_date,
                    u.username as delegated_by_name,
                    ct.name as city, st.name as state, co.name as country,
                    ss.survey_status, ss.submitted_date as survey_submitted_date
@@ -169,6 +169,20 @@ class SiteDelegation extends BaseModel {
         $stmt->execute([$vendorId]);
         $result = $stmt->fetch();
         return $result ? $result['name'] : null;
+    }
+    
+    public function findDelegationId($siteId) {
+        $stmt = $this->db->prepare("SELECT id FROM  {$this->table} WHERE site_id = ?");
+        $stmt->execute([$siteId]);
+        $result = $stmt->fetch();
+        return $result ? $result['id'] : null;
+    }
+    
+    public function findSiteVendorId($siteId) {
+        $stmt = $this->db->prepare("SELECT vendor_id FROM  {$this->table} WHERE site_id = ?");
+        $stmt->execute([$siteId]);
+        $result = $stmt->fetch();
+        return $result ? $result['vendor_id'] : null;
     }
 }
 ?>

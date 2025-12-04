@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/../models/VendorPermission.php';
 $permissionModel = new VendorPermission();
-$vendorPermissions = $permissionModel->getVendorPermissions(Auth::getVendorId());
+$vendorPermissions = $permissionModel->getUserPermissions(Auth::getUserId());
+
+
 
 // Ensure url() function is available (fallback)
 if (!function_exists('url')) {
@@ -348,19 +350,25 @@ if (!function_exists('url')) {
                         Dashboard
                     </a>
                     
-                    <?php if ($vendorPermissions['view_sites'] ?? false): ?>
+                    <?php if ($vendorPermissions['view_my_sites'] ?? false): ?>
                     <a href="<?php echo url('/vendor/sites/'); ?>" class="sidebar-item text-white hover:bg-blue-800">
                         <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z" clip-rule="evenodd"></path>
                         </svg>
                         My Sites
                     </a>
+                    <?php endif; ?>
+                    
+                    <?php if ($vendorPermissions['view_site_surveys'] ?? false): ?>
                     <a href="<?php echo url('/vendor/surveys.php'); ?>" class="sidebar-item text-white hover:bg-blue-800">
                         <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
                         </svg>
                         Site Surveys
                     </a>
+                    <?php endif; ?>
+                    
+                    <?php if ($vendorPermissions['view_installations'] ?? false): ?>
                     <a href="<?php echo url('/vendor/installations.php'); ?>" class="sidebar-item text-white hover:bg-blue-800">
                         <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M9.504 1.132a1 1 0 01.992 0l1.75 1a1 1 0 11-.992 1.736L10 3.152l-1.254.716a1 1 0 11-.992-1.736l1.75-1zM5.618 4.504a1 1 0 01-.372 1.364L5.016 6l.23.132a1 1 0 11-.992 1.736L3 7.723V8a1 1 0 01-2 0V6a.996.996 0 01.52-.878l1.734-.99a1 1 0 011.364.372zm8.764 0a1 1 0 011.364-.372l1.734.99A.996.996 0 0118 6v2a1 1 0 11-2 0v-.277l-1.254.145a1 1 0 11-.992-1.736L14.984 6l-.23-.132a1 1 0 01-.372-1.364zm-7 4a1 1 0 011.364-.372L10 8.848l1.254-.716a1 1 0 11.992 1.736L11 10.723V12a1 1 0 11-2 0v-1.277l-1.246-.855a1 1 0 01-.372-1.364zM3 11a1 1 0 011 1v1.277l1.246.855a1 1 0 11-.992 1.736l-1.75-1A1 1 0 012 14v-2a1 1 0 011-1zm14 0a1 1 0 011 1v2a1 1 0 01-.504.868l-1.75 1a1 1 0 11-.992-1.736L16 13.277V12a1 1 0 011-1zm-9.618 5.504a1 1 0 011.364-.372l.254.145V16a1 1 0 112 0v.277l.254-.145a1 1 0 11.992 1.736l-1.75 1a.996.996 0 01-.992 0l-1.75-1a1 1 0 01-.372-1.364z" clip-rule="evenodd"></path>
@@ -369,16 +377,7 @@ if (!function_exists('url')) {
                     </a>
                     <?php endif; ?>
                     
-                    <?php if ($vendorPermissions['view_masters'] ?? false): ?>
-                    <a href="<?php echo url('/vendor/masters/'); ?>" class="sidebar-item text-white hover:bg-blue-800">
-                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
-                        </svg>
-                        Master Data
-                    </a>
-                    <?php endif; ?>
-                    
-                    <?php // Temporarily removed permission check for testing ?>
+                    <?php if ($vendorPermissions['view_inventory'] ?? true): ?>
                     <!-- Inventory Main Menu with Dropdown -->
                     <div class="relative">
                         <button onclick="toggleInventoryMenu()" class="sidebar-item text-white hover:bg-blue-800 w-full flex items-center justify-between">
@@ -395,44 +394,43 @@ if (!function_exists('url')) {
                         
                         <!-- Inventory Submenu -->
                         <div id="inventory-submenu" class="hidden ml-8 mt-2 space-y-1">
+                            <?php if ($vendorPermissions['view_inventory_overview'] ?? false): ?>
                             <a href="<?php echo url('/vendor/inventory/'); ?>" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
                                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
                                 </svg>
                                 Inventory Overview
                             </a>
+                            <?php endif; ?>
                             
+                            <?php if ($vendorPermissions['view_material_requests'] ?? false): ?>
                             <a href="<?php echo url('/vendor/material-requests-list.php'); ?>" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
                                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
                                 </svg>
                                 Material Requests
                             </a>
+                            <?php endif; ?>
                             
+                            <?php if ($vendorPermissions['view_material_received'] ?? false): ?>
                             <a href="<?php echo url('/vendor/material-received.php'); ?>" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
                                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                                 </svg>
                                 Material Received
                             </a>
+                            <?php endif; ?>
                             
+                            <?php if ($vendorPermissions['view_material_dispatches'] ?? false): ?>
                             <a href="<?php echo url('/vendor/material-dispatches.php'); ?>" class="sidebar-subitem text-gray-300 hover:text-white hover:bg-blue-800">
                                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                 </svg>
                                 Material Dispatches
                             </a>
+                            <?php endif; ?>
                         </div>
                     </div>
-                    <?php // End of temporarily removed permission check ?>
-                    
-                    <?php if ($vendorPermissions['view_reports'] ?? false): ?>
-                    <a href="<?php echo url('/vendor/reports/'); ?>" class="sidebar-item text-white hover:bg-blue-800">
-                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                        </svg>
-                        Reports
-                    </a>
                     <?php endif; ?>
                 </nav>
 

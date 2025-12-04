@@ -4,3 +4,17 @@
 {"timestamp":"2025-11-02 00:30:02","user_id":1,"action":"DELETE_SITE","table_name":"sites","record_id":3,"ip_address":"::1"}
 {"timestamp":"2025-11-02 00:30:06","user_id":1,"action":"DELETE_SITE","table_name":"sites","record_id":1,"ip_address":"::1"}
 {"timestamp":"2025-11-03 09:28:02","user_id":1,"action":"CREATE_SITE","table_name":"sites","record_id":"8","ip_address":"::1"}
+{"timestamp":"2025-12-03 10:55:24","user_id":1,"action":"CREATE_SITE","table_name":"sites","record_id":"46","ip_address":"27.107.226.38"}
+{"timestamp":"2025-12-03 10:57:47","user_id":1,"action":"CREATE_SITE","table_name":"sites","record_id":"47","ip_address":"27.107.226.38"}
+{"timestamp":"2025-12-03 11:00:19","user_id":1,"action":"CREATE_SITE","table_name":"sites","record_id":"48","ip_address":"27.107.226.38"}
+{"timestamp":"2025-12-03 11:02:35","user_id":1,"action":"CREATE_SITE","table_name":"sites","record_id":"49","ip_address":"27.107.226.38"}
+{"timestamp":"2025-12-03 11:06:48","user_id":1,"action":"CREATE_SITE","table_name":"sites","record_id":"50","ip_address":"27.107.226.38"}
+{"timestamp":"2025-12-03 11:11:03","user_id":1,"action":"DELETE_SITE","table_name":"sites","record_id":2,"ip_address":"27.107.226.38"}
+{"timestamp":"2025-12-03 11:11:09","user_id":1,"action":"DELETE_SITE","table_name":"sites","record_id":1,"ip_address":"27.107.226.38"}
+{"timestamp":"2025-12-03 11:11:30","user_id":1,"action":"DELETE_SITE","table_name":"sites","record_id":4,"ip_address":"27.107.226.38"}
+{"timestamp":"2025-12-03 11:11:41","user_id":1,"action":"DELETE_SITE","table_name":"sites","record_id":3,"ip_address":"27.107.226.38"}
+{"timestamp":"2025-12-03 11:11:52","user_id":1,"action":"DELETE_SITE","table_name":"sites","record_id":6,"ip_address":"27.107.226.38"}
+{"timestamp":"2025-12-03 11:12:04","user_id":1,"action":"DELETE_SITE","table_name":"sites","record_id":5,"ip_address":"27.107.226.38"}
+{"timestamp":"2025-12-03 11:12:12","user_id":1,"action":"DELETE_SITE","table_name":"sites","record_id":7,"ip_address":"27.107.226.38"}
+{"timestamp":"2025-12-04 11:30:29","user_id":1,"action":"CREATE_SITE","table_name":"sites","record_id":"51","ip_address":"27.107.226.38"}
+{"timestamp":"2025-12-04 11:59:08","user_id":1,"action":"CREATE_SITE","table_name":"sites","record_id":"52","ip_address":"27.107.226.38"}

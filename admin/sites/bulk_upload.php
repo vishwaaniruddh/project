@@ -348,20 +348,24 @@ ob_start();
             
             <div>
                 <h4 class="font-medium text-gray-900 mb-2">Column Order</h4>
-                <ul class="text-sm text-gray-600 space-y-1">
-                    <li>1. Site ID (Required)</li>
-                    <li>2. Store ID</li>
-                    <li>3. Location (Required)</li>
-                    <li>4. Country</li>
-                    <li>5. State</li>
-                    <li>6. City</li>
-                    <li>7. Branch</li>
-                    <li>8. Customer</li>
-                    <li>9. Bank</li>
-                    <li>10. PO Number</li>
-                    <li>11. PO Date (YYYY-MM-DD)</li>
-                    <li>12. Remarks</li>
-                </ul>
+                <ol class="text-sm text-gray-600 space-y-1 ordered_list">
+                    <li>Site ID (Required)</li>
+                    <li>Store ID</li>
+                    <li>Location (Required)</li>
+                    <li>Country</li>
+                    <li>State</li>
+                    <li>City</li>
+                    <li>Branch</li>
+                    <li>Customer</li>
+                    <li>PO Number</li>
+                    <li>PO Date (YYYY-MM-DD)</li>
+                    <li>Remarks</li>
+                    <li>Contact Person Name</li>
+                    <li>Contact Person Number</li>
+                    <li>Contact Person Email ID</li>
+                    <li>Zone</li>
+                    <li>Pincode</li>
+                </ol>
             </div>
         </div>
         
@@ -374,7 +378,7 @@ ob_start();
                     <h5 class="text-sm font-medium text-blue-800">Important Notes</h5>
                     <p class="text-sm text-blue-700 mt-1">
                         • Download the template file to ensure correct format<br>
-                        • Master data (Country, State, City, Customer, Bank) must exist in the system<br>
+                        • Master data (Country, State, City, Customer) must exist in the system<br>
                         • Existing sites will be updated, new sites will be created<br>
                         • Invalid data will be reported in the results
                     </p>
@@ -954,8 +958,8 @@ function readExcelFile($filePath) {
 function validateAndProcessRow($row, $rowNumber) {
     $errors = [];
     
-    // Expected columns: Site ID, Store ID, Location, Country, State, City, Branch, Customer, Bank, PO Number, PO Date, Remarks
-    $expectedColumns = 12;
+    // Expected columns: Site ID, Store ID, Location, Country, State, City, Zone, Pincode, Branch, Customer, Contact Person Name, Contact Person Number, Contact Person Email, PO Number, PO Date, Remarks
+    $expectedColumns = 16;
     
     // Pad row with empty strings if it has fewer columns
     while (count($row) < $expectedColumns) {
@@ -974,12 +978,16 @@ function validateAndProcessRow($row, $rowNumber) {
         'country' => trim($row[3] ?? ''),
         'state' => trim($row[4] ?? ''),
         'city' => trim($row[5] ?? ''),
-        'branch' => trim($row[6] ?? ''),
-        'customer' => trim($row[7] ?? ''),
-        'bank' => trim($row[8] ?? ''),
-        'po_number' => trim($row[9] ?? ''),
-        'po_date' => trim($row[10] ?? ''),
-        'remarks' => trim($row[11] ?? ''),
+        'zone' => trim($row[6] ?? ''),
+        'pincode' => trim($row[7] ?? ''),
+        'branch' => trim($row[8] ?? ''),
+        'customer' => trim($row[9] ?? ''),
+        'contact_person_name' => trim($row[10] ?? ''),
+        'contact_person_number' => trim($row[11] ?? ''),
+        'contact_person_email' => trim($row[12] ?? ''),
+        'po_number' => trim($row[13] ?? ''),
+        'po_date' => trim($row[14] ?? ''),
+        'remarks' => trim($row[15] ?? ''),
         'created_by' => 'bulk_upload'
     ];
     
@@ -1030,13 +1038,24 @@ function validateAndProcessRow($row, $rowNumber) {
         }
     }
     
-    // Validate and convert bank data
-    if (!empty($siteData['bank'])) {
-        $bankId = findMasterIdByName('banks', $siteData['bank']);
-        if ($bankId) {
-            $siteData['bank_id'] = $bankId;
-        } else {
-            $errors[] = "Row {$rowNumber}: Bank '{$siteData['bank']}' not found in master data";
+    // Validate contact person email format
+    if (!empty($siteData['contact_person_email'])) {
+        if (!filter_var($siteData['contact_person_email'], FILTER_VALIDATE_EMAIL)) {
+            $errors[] = "Row {$rowNumber}: Invalid email format for contact person email '{$siteData['contact_person_email']}'";
+        }
+    }
+    
+    // Validate contact person number format (basic validation)
+    if (!empty($siteData['contact_person_number'])) {
+        if (!preg_match('/^[\d\s\+\-\(\)]+$/', $siteData['contact_person_number'])) {
+            $errors[] = "Row {$rowNumber}: Invalid phone number format for contact person number '{$siteData['contact_person_number']}'";
+        }
+    }
+    
+    // Validate pincode format (basic validation for Indian pincodes)
+    if (!empty($siteData['pincode'])) {
+        if (!preg_match('/^\d{6}$/', $siteData['pincode'])) {
+            $errors[] = "Row {$rowNumber}: Invalid pincode format '{$siteData['pincode']}'. Should be 6 digits";
         }
     }
     

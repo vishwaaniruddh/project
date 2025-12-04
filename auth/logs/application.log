@@ -18,3 +18,362 @@
 {"timestamp":"2025-11-06 09:32:49","level":"INFO","message":"User login successful","user_id":10,"ip_address":"::1","context":{"username":"aniruddh@gmail.com","success":true}}
 {"timestamp":"2025-11-06 09:33:23","level":"INFO","message":"User logout","user_id":10,"ip_address":"::1","context":{"username":"Aniruddh"}}
 {"timestamp":"2025-11-06 09:33:34","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-06 09:43:39","level":"INFO","message":"User login successful","user_id":1,"ip_address":"106.215.181.144","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-06 10:11:17","level":"INFO","message":"User login successful","user_id":1,"ip_address":"2401:4900:8fc8:eda6:9403:94c6:439f:ad43","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-06 10:27:35","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-06 10:28:34","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-06 10:35:45","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"106.215.181.144","context":{"username":"aniruddh@sarsspl.com","success":false}}
+{"timestamp":"2025-11-06 10:36:03","level":"INFO","message":"User login successful","user_id":10,"ip_address":"106.215.181.144","context":{"username":"aniruddh@gmail.com","success":true}}
+{"timestamp":"2025-11-06 10:36:24","level":"INFO","message":"User logout","user_id":9,"ip_address":"27.107.226.38","context":{"username":"Ganesh Panchal"}}
+{"timestamp":"2025-11-06 10:36:47","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":false}}
+{"timestamp":"2025-11-06 10:37:14","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-06 10:38:48","level":"INFO","message":"User logout","user_id":9,"ip_address":"27.107.226.38","context":{"username":"Ganesh Panchal"}}
+{"timestamp":"2025-11-06 10:42:10","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-06 10:43:47","level":"INFO","message":"User logout","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin"}}
+{"timestamp":"2025-11-06 10:43:58","level":"INFO","message":"User login successful","user_id":10,"ip_address":"27.107.226.38","context":{"username":"aniruddh@gmail.com","success":true}}
+{"timestamp":"2025-11-06 11:09:19","level":"INFO","message":"User login successful","user_id":1,"ip_address":"106.215.181.144","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-06 11:35:53","level":"INFO","message":"User logout","user_id":1,"ip_address":"106.215.181.144","context":{"username":"admin"}}
+{"timestamp":"2025-11-06 11:43:30","level":"INFO","message":"User login successful","user_id":1,"ip_address":"106.215.181.144","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-06 12:05:12","level":"INFO","message":"User login successful","user_id":10,"ip_address":"106.215.181.144","context":{"username":"aniruddh@gmail.com","success":true}}
+{"timestamp":"2025-11-06 12:45:29","level":"INFO","message":"User login successful","user_id":1,"ip_address":"106.215.181.144","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-07 10:03:47","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"106.215.178.96","context":{"username":"aniruddh@sarsspl.com","success":false}}
+{"timestamp":"2025-11-07 10:04:00","level":"INFO","message":"User login successful","user_id":10,"ip_address":"106.215.178.96","context":{"username":"aniruddh@gmail.com","success":true}}
+{"timestamp":"2025-11-07 10:13:00","level":"INFO","message":"User logout","user_id":10,"ip_address":"106.215.178.96","context":{"username":"Aniruddh Vishwakarma"}}
+{"timestamp":"2025-11-07 10:13:06","level":"INFO","message":"User login successful","user_id":1,"ip_address":"106.215.178.96","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-08 02:25:06","level":"INFO","message":"User login successful","user_id":1,"ip_address":"106.215.178.96","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-08 03:16:30","level":"INFO","message":"User logout","user_id":1,"ip_address":"106.215.178.96","context":{"username":"admin"}}
+{"timestamp":"2025-11-08 03:22:34","level":"INFO","message":"User login successful","user_id":1,"ip_address":"106.215.178.96","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-08 03:59:30","level":"INFO","message":"User login successful","user_id":10,"ip_address":"106.215.178.96","context":{"username":"aniruddh@gmail.com","success":true}}
+{"timestamp":"2025-11-08 10:13:45","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"106.215.178.96","context":{"username":"anirudd@gmail.com","success":false}}
+{"timestamp":"2025-11-08 10:13:49","level":"INFO","message":"User login successful","user_id":10,"ip_address":"106.215.178.96","context":{"username":"aniruddh@gmail.com","success":true}}
+{"timestamp":"2025-11-08 10:19:57","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-08 10:20:18","level":"INFO","message":"User logout","user_id":10,"ip_address":"106.215.178.96","context":{"username":"Aniruddh Vishwakarma"}}
+{"timestamp":"2025-11-08 10:20:50","level":"INFO","message":"User logout","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin"}}
+{"timestamp":"2025-11-08 10:21:03","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-08 10:49:39","level":"INFO","message":"User login successful","user_id":10,"ip_address":"106.215.178.96","context":{"username":"aniruddh@gmail.com","success":true}}
+{"timestamp":"2025-11-08 10:54:51","level":"INFO","message":"User login successful","user_id":1,"ip_address":"106.215.178.96","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-08 11:53:46","level":"INFO","message":"User login successful","user_id":10,"ip_address":"106.215.178.96","context":{"username":"aniruddh@gmail.com","success":true}}
+{"timestamp":"2025-11-08 11:55:00","level":"INFO","message":"User login successful","user_id":1,"ip_address":"106.215.178.96","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-08 11:59:18","level":"INFO","message":"User logout","user_id":1,"ip_address":"106.215.178.96","context":{"username":"admin"}}
+{"timestamp":"2025-11-08 11:59:34","level":"INFO","message":"User login successful","user_id":1,"ip_address":"106.215.178.96","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-10 12:04:22","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-11 06:05:11","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-11 06:32:10","level":"INFO","message":"User login successful","user_id":9,"ip_address":"110.224.114.50","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-11 07:47:28","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"Reliance@gmail.com","success":false}}
+{"timestamp":"2025-11-11 07:48:07","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-11 08:01:46","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"2409:40c0:1071:e2ed:8000::","context":{"username":"arun.kumar@karvytech.in","success":false}}
+{"timestamp":"2025-11-11 08:02:13","level":"INFO","message":"User login successful","user_id":9,"ip_address":"2409:40c0:1071:e2ed:8000::","context":{"username":"Ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-11 12:29:31","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-11 14:34:40","level":"INFO","message":"User login successful","user_id":9,"ip_address":"2401:4900:7977:816b:f8a1:7056:d6b0:dc2c","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-11 14:56:19","level":"INFO","message":"User login successful","user_id":9,"ip_address":"2409:40c0:1071:e2ed:8000::","context":{"username":"Ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-11 17:13:32","level":"INFO","message":"User login successful","user_id":9,"ip_address":"2401:4900:7977:816b:c987:e919:704b:1ef9","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-12 04:30:01","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com password","success":false}}
+{"timestamp":"2025-11-12 04:30:45","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-12 04:33:24","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-12 05:05:11","level":"INFO","message":"User logout","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin"}}
+{"timestamp":"2025-11-12 05:06:25","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-12 05:44:46","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-12 06:14:31","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-12 06:17:05","level":"INFO","message":"User logout","user_id":9,"ip_address":"27.107.226.38","context":{"username":"Ganesh Panchal"}}
+{"timestamp":"2025-11-12 06:18:30","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-12 11:07:59","level":"INFO","message":"User login successful","user_id":1,"ip_address":"106.215.179.33","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-15 05:48:36","level":"INFO","message":"User login successful","user_id":13,"ip_address":"27.107.226.38","context":{"username":"vikram.rathod@karvytech.in","success":true}}
+{"timestamp":"2025-11-15 08:32:58","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"nikhil.lambe@karvytech.in","success":false}}
+{"timestamp":"2025-11-15 08:33:15","level":"INFO","message":"User login successful","user_id":11,"ip_address":"27.107.226.38","context":{"username":"nikhil.lambe@karvytech.in","success":true}}
+{"timestamp":"2025-11-15 08:34:07","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":false}}
+{"timestamp":"2025-11-15 08:34:22","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-15 08:35:35","level":"INFO","message":"User logout","user_id":11,"ip_address":"27.107.226.38","context":{"username":"nikhil.lambe@karvytech.in"}}
+{"timestamp":"2025-11-15 09:13:20","level":"INFO","message":"User login successful","user_id":11,"ip_address":"27.107.226.38","context":{"username":"nikhil.lambe@karvytech.in","success":true}}
+{"timestamp":"2025-11-15 10:13:09","level":"INFO","message":"User logout","user_id":11,"ip_address":"27.107.226.38","context":{"username":"nikhil.lambe@karvytech.in"}}
+{"timestamp":"2025-11-18 11:29:14","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"vikram.rathod@karvytech.in","success":false}}
+{"timestamp":"2025-11-18 11:29:35","level":"INFO","message":"User login successful","user_id":13,"ip_address":"27.107.226.38","context":{"username":"vikram.rathod@karvytech.in","success":true}}
+{"timestamp":"2025-11-19 04:01:33","level":"INFO","message":"User login successful","user_id":13,"ip_address":"27.107.226.38","context":{"username":"vikram.rathod@karvytech.in","success":true}}
+{"timestamp":"2025-11-19 09:56:58","level":"INFO","message":"User login successful","user_id":1,"ip_address":"2401:4900:8fca:1405:6566:1630:6d6d:a252","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-19 14:20:38","level":"INFO","message":"User login successful","user_id":9,"ip_address":"2409:40c0:1051:4856:8000::","context":{"username":"Ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-19 14:20:45","level":"INFO","message":"User logout","user_id":9,"ip_address":"2409:40c0:1051:4856:8000::","context":{"username":"Ganesh Panchal"}}
+{"timestamp":"2025-11-19 14:20:50","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"2409:40c0:1051:4856:8000::","context":{"username":"arun.kumar@karvytech.in","success":false}}
+{"timestamp":"2025-11-19 14:20:51","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"2409:40c0:1051:4856:8000::","context":{"username":"arun.kumar@karvytech.in","success":false}}
+{"timestamp":"2025-11-19 14:21:03","level":"INFO","message":"User login successful","user_id":9,"ip_address":"2409:40c0:1051:4856:8000::","context":{"username":"Ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-20 07:26:36","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":false}}
+{"timestamp":"2025-11-20 07:26:47","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":false}}
+{"timestamp":"2025-11-20 07:27:08","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-20 09:21:45","level":"INFO","message":"User login successful","user_id":14,"ip_address":"27.107.226.38","context":{"username":"project7@karvytech.in","success":true}}
+{"timestamp":"2025-11-20 10:39:08","level":"INFO","message":"User login successful","user_id":14,"ip_address":"27.107.226.38","context":{"username":"project7@karvytech.in","success":true}}
+{"timestamp":"2025-11-20 12:02:26","level":"INFO","message":"User login successful","user_id":14,"ip_address":"27.107.226.38","context":{"username":"project7@karvytech.in","success":true}}
+{"timestamp":"2025-11-21 06:11:37","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-21 08:08:32","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-21 09:19:22","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-21 10:21:48","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-21 11:32:52","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"bela shah","success":false}}
+{"timestamp":"2025-11-21 11:33:18","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"Bela shah","success":false}}
+{"timestamp":"2025-11-21 11:33:39","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"Bela Shah","success":false}}
+{"timestamp":"2025-11-21 11:34:06","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"Bela Shah","success":false}}
+{"timestamp":"2025-11-21 11:34:21","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-21 11:35:54","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"Bela Shah","success":false}}
+{"timestamp":"2025-11-21 11:36:01","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"BelaShah","success":false}}
+{"timestamp":"2025-11-21 11:36:10","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"BelaShah","success":false}}
+{"timestamp":"2025-11-21 11:36:38","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"Bela Shah","success":false}}
+{"timestamp":"2025-11-21 11:37:27","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"Altaf bagwan","success":false}}
+{"timestamp":"2025-11-21 11:37:28","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"Altaf bagwan","success":false}}
+{"timestamp":"2025-11-21 11:39:37","level":"INFO","message":"User logout","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin"}}
+{"timestamp":"2025-11-21 11:40:13","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"Bela Shah","success":false}}
+{"timestamp":"2025-11-21 11:40:24","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-22 12:02:28","level":"INFO","message":"User login successful","user_id":14,"ip_address":"27.107.226.38","context":{"username":"project7@karvytech.in","success":true}}
+{"timestamp":"2025-11-22 12:03:27","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-22 12:28:41","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-22 13:12:08","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-22 17:58:07","level":"INFO","message":"User login successful","user_id":1,"ip_address":"2409:40c2:129c:ce91:145d:6bbe:7776:df61","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-22 17:58:36","level":"INFO","message":"User login successful","user_id":9,"ip_address":"2409:40c2:129c:ce91:145d:6bbe:7776:df61","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-22 18:19:48","level":"INFO","message":"User logout","user_id":1,"ip_address":"2409:40c2:129c:ce91:145d:6bbe:7776:df61","context":{"username":"admin"}}
+{"timestamp":"2025-11-22 18:20:02","level":"INFO","message":"User login successful","user_id":1,"ip_address":"2409:40c2:129c:ce91:145d:6bbe:7776:df61","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-23 11:59:30","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"Bela Shah","success":false}}
+{"timestamp":"2025-11-23 11:59:36","level":"INFO","message":"User login successful","user_id":17,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"procurement@karvytech.in","success":true}}
+{"timestamp":"2025-11-23 11:59:49","level":"INFO","message":"User logout","user_id":17,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"Bela Shah"}}
+{"timestamp":"2025-11-23 11:59:56","level":"INFO","message":"User login successful","user_id":12,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"marks.technology@gmail.com","success":true}}
+{"timestamp":"2025-11-23 12:00:04","level":"INFO","message":"User logout","user_id":12,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"Bipin Arekar"}}
+{"timestamp":"2025-11-23 12:00:22","level":"INFO","message":"User login successful","user_id":11,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"nikhil.lambe@karvytech.in","success":true}}
+{"timestamp":"2025-11-23 12:00:30","level":"INFO","message":"User logout","user_id":11,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"nikhil.lambe@karvytech.in"}}
+{"timestamp":"2025-11-23 12:05:26","level":"INFO","message":"User login successful","user_id":17,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"procurement@karvytech.in","success":true}}
+{"timestamp":"2025-11-23 12:05:33","level":"INFO","message":"User logout","user_id":17,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"Bela Shah"}}
+{"timestamp":"2025-11-23 12:05:49","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"admin@example.com","success":false}}
+{"timestamp":"2025-11-23 12:06:02","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"admin@example.com","success":false}}
+{"timestamp":"2025-11-23 12:06:07","level":"INFO","message":"User login successful","user_id":1,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-23 12:07:47","level":"INFO","message":"User login successful","user_id":26,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"Info@neuronetworks.in","success":true}}
+{"timestamp":"2025-11-23 12:07:56","level":"INFO","message":"User logout","user_id":26,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"NEURO NETWORKS"}}
+{"timestamp":"2025-11-23 12:14:01","level":"INFO","message":"User login successful","user_id":17,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"procurement@karvytech.in","success":true}}
+{"timestamp":"2025-11-23 12:36:43","level":"INFO","message":"User logout","user_id":17,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"Bela Shah"}}
+{"timestamp":"2025-11-23 12:36:52","level":"INFO","message":"User login successful","user_id":23,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"krishnaenterprises.helpdesk@gmail.com","success":true}}
+{"timestamp":"2025-11-23 12:37:50","level":"INFO","message":"User logout","user_id":23,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"KRISHNA ENTERPRISES"}}
+{"timestamp":"2025-11-23 12:38:03","level":"INFO","message":"User login successful","user_id":23,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"krishnaenterprises.helpdesk@gmail.com","success":true}}
+{"timestamp":"2025-11-23 12:38:31","level":"INFO","message":"User logout","user_id":23,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"KRISHNA ENTERPRISES"}}
+{"timestamp":"2025-11-23 12:38:37","level":"INFO","message":"User login successful","user_id":15,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"arun.kumar@karvytech.in","success":true}}
+{"timestamp":"2025-11-23 12:38:54","level":"INFO","message":"User logout","user_id":15,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"Arun Kumar"}}
+{"timestamp":"2025-11-23 12:39:03","level":"INFO","message":"User login successful","user_id":16,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"benson.sajimon@karvytech.in","success":true}}
+{"timestamp":"2025-11-23 12:39:26","level":"INFO","message":"User logout","user_id":16,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"Benson sajimon"}}
+{"timestamp":"2025-11-23 12:39:35","level":"INFO","message":"User login successful","user_id":24,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"nirdesh@homatico.com","success":true}}
+{"timestamp":"2025-11-23 12:39:49","level":"INFO","message":"User logout","user_id":24,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"HOMATICO SMART SOLUTIONS"}}
+{"timestamp":"2025-11-23 12:40:00","level":"INFO","message":"User login successful","user_id":25,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"deepraj.pathak@anekalabs.com","success":true}}
+{"timestamp":"2025-11-23 12:40:10","level":"INFO","message":"User logout","user_id":25,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"ANEKA LABS"}}
+{"timestamp":"2025-11-23 12:40:17","level":"INFO","message":"User login successful","user_id":26,"ip_address":"2401:4900:5020:d569:4127:dbdb:d8b6:8d07","context":{"username":"Info@neuronetworks.in","success":true}}
+{"timestamp":"2025-11-23 17:49:18","level":"INFO","message":"User login successful","user_id":16,"ip_address":"2409:40c2:801f:8347:98e1:13a7:68e0:2650","context":{"username":"benson.sajimon@karvytech.in","success":true}}
+{"timestamp":"2025-11-24 04:27:31","level":"INFO","message":"User login successful","user_id":14,"ip_address":"27.107.226.38","context":{"username":"project7@karvytech.in","success":true}}
+{"timestamp":"2025-11-24 08:45:17","level":"INFO","message":"User login successful","user_id":20,"ip_address":"27.107.226.38","context":{"username":"altaf.bagwan@karvytech.in","success":true}}
+{"timestamp":"2025-11-24 10:03:57","level":"INFO","message":"User login successful","user_id":20,"ip_address":"27.107.226.38","context":{"username":"altaf.bagwan@karvytech.in","success":true}}
+{"timestamp":"2025-11-24 10:04:51","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-24 10:05:38","level":"INFO","message":"User logout","user_id":20,"ip_address":"27.107.226.38","context":{"username":"Altaf bagwan"}}
+{"timestamp":"2025-11-24 10:05:42","level":"INFO","message":"User login successful","user_id":20,"ip_address":"27.107.226.38","context":{"username":"altaf.bagwan@karvytech.in","success":true}}
+{"timestamp":"2025-11-24 10:12:34","level":"INFO","message":"User login successful","user_id":16,"ip_address":"27.107.226.38","context":{"username":"benson.sajimon@karvytech.in","success":true}}
+{"timestamp":"2025-11-24 10:29:09","level":"INFO","message":"User login successful","user_id":17,"ip_address":"27.107.226.38","context":{"username":"procurement@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 04:59:12","level":"INFO","message":"User login successful","user_id":18,"ip_address":"27.107.226.38","context":{"username":"pentyala.phani@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 05:17:14","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"2406:b400:1a:5ada:4997:f740:3088:49f2","context":{"username":"pentyala.phani@karvytech.in","success":false}}
+{"timestamp":"2025-11-25 05:17:24","level":"INFO","message":"User login successful","user_id":18,"ip_address":"2406:b400:1a:5ada:4997:f740:3088:49f2","context":{"username":"pentyala.phani@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 05:24:49","level":"INFO","message":"User logout","user_id":18,"ip_address":"2406:b400:1a:5ada:4997:f740:3088:49f2","context":{"username":"Phani Kumar"}}
+{"timestamp":"2025-11-25 05:26:49","level":"INFO","message":"User login successful","user_id":18,"ip_address":"2406:b400:1a:5ada:4997:f740:3088:49f2","context":{"username":"pentyala.phani@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 05:27:10","level":"INFO","message":"User logout","user_id":18,"ip_address":"2406:b400:1a:5ada:4997:f740:3088:49f2","context":{"username":"Phani Kumar"}}
+{"timestamp":"2025-11-25 05:28:25","level":"INFO","message":"User logout","user_id":18,"ip_address":"27.107.226.38","context":{"username":"Phani Kumar"}}
+{"timestamp":"2025-11-25 05:30:34","level":"INFO","message":"User login successful","user_id":18,"ip_address":"2406:b400:1a:5ada:d58a:35e0:dbd7:194e","context":{"username":"pentyala.phani@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 05:30:58","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-25 05:44:30","level":"INFO","message":"User login successful","user_id":17,"ip_address":"27.107.226.38","context":{"username":"procurement@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 05:59:32","level":"INFO","message":"User login successful","user_id":19,"ip_address":"27.107.226.38","context":{"username":"support7@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 06:05:14","level":"INFO","message":"User login successful","user_id":16,"ip_address":"27.107.226.38","context":{"username":"benson.sajimon@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 06:49:09","level":"INFO","message":"User login successful","user_id":17,"ip_address":"27.107.226.38","context":{"username":"procurement@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 06:50:29","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-25 07:27:53","level":"INFO","message":"User login successful","user_id":20,"ip_address":"27.107.226.38","context":{"username":"altaf.bagwan@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 08:15:46","level":"INFO","message":"User logout","user_id":20,"ip_address":"27.107.226.38","context":{"username":"Altaf bagwan"}}
+{"timestamp":"2025-11-25 08:16:09","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-25 08:20:21","level":"INFO","message":"User logout","user_id":9,"ip_address":"27.107.226.38","context":{"username":"Ganesh Panchal"}}
+{"timestamp":"2025-11-25 08:20:28","level":"INFO","message":"User login successful","user_id":20,"ip_address":"27.107.226.38","context":{"username":"altaf.bagwan@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 08:30:50","level":"INFO","message":"User login successful","user_id":18,"ip_address":"2401:4900:16ba:53e0:20ac:8d61:600f:fffe","context":{"username":"pentyala.phani@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 08:47:41","level":"INFO","message":"User login successful","user_id":21,"ip_address":"2409:40c0:46:86dd:8000::","context":{"username":"liobin.v@gmail.com","success":true}}
+{"timestamp":"2025-11-25 08:51:00","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-25 08:58:36","level":"INFO","message":"User logout","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin"}}
+{"timestamp":"2025-11-25 08:58:53","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-25 09:27:26","level":"INFO","message":"User login successful","user_id":17,"ip_address":"27.107.226.38","context":{"username":"procurement@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 10:20:08","level":"INFO","message":"User login successful","user_id":20,"ip_address":"27.107.226.38","context":{"username":"altaf.bagwan@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 10:21:06","level":"INFO","message":"User logout","user_id":20,"ip_address":"27.107.226.38","context":{"username":"Altaf bagwan"}}
+{"timestamp":"2025-11-25 10:21:14","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-25 10:22:38","level":"INFO","message":"User logout","user_id":9,"ip_address":"27.107.226.38","context":{"username":"Ganesh Panchal"}}
+{"timestamp":"2025-11-25 10:22:44","level":"INFO","message":"User login successful","user_id":20,"ip_address":"27.107.226.38","context":{"username":"altaf.bagwan@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 10:23:29","level":"INFO","message":"User logout","user_id":20,"ip_address":"27.107.226.38","context":{"username":"Altaf bagwan"}}
+{"timestamp":"2025-11-25 10:23:35","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-25 10:35:47","level":"INFO","message":"User login successful","user_id":17,"ip_address":"27.107.226.38","context":{"username":"procurement@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 11:19:32","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-25 11:29:43","level":"INFO","message":"User logout","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin"}}
+{"timestamp":"2025-11-25 11:30:12","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-25 11:30:56","level":"INFO","message":"User logout","user_id":9,"ip_address":"27.107.226.38","context":{"username":"Ganesh Panchal"}}
+{"timestamp":"2025-11-25 11:31:00","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-25 11:39:46","level":"INFO","message":"User login successful","user_id":17,"ip_address":"27.107.226.38","context":{"username":"procurement@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 11:48:02","level":"INFO","message":"User logout","user_id":9,"ip_address":"27.107.226.38","context":{"username":"Ganesh Panchal"}}
+{"timestamp":"2025-11-25 11:48:07","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-25 12:28:23","level":"INFO","message":"User logout","user_id":9,"ip_address":"27.107.226.38","context":{"username":"Ganesh Panchal"}}
+{"timestamp":"2025-11-25 12:28:29","level":"INFO","message":"User login successful","user_id":20,"ip_address":"27.107.226.38","context":{"username":"altaf.bagwan@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 12:31:23","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-25 12:33:54","level":"INFO","message":"User logout","user_id":20,"ip_address":"27.107.226.38","context":{"username":"Altaf bagwan"}}
+{"timestamp":"2025-11-25 12:34:00","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-25 12:39:54","level":"INFO","message":"User login successful","user_id":17,"ip_address":"27.107.226.38","context":{"username":"procurement@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 13:52:35","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-25 14:00:35","level":"INFO","message":"User logout","user_id":9,"ip_address":"27.107.226.38","context":{"username":"Ganesh Panchal"}}
+{"timestamp":"2025-11-25 14:00:41","level":"INFO","message":"User login successful","user_id":20,"ip_address":"27.107.226.38","context":{"username":"altaf.bagwan@karvytech.in","success":true}}
+{"timestamp":"2025-11-25 23:21:02","level":"INFO","message":"User login successful","user_id":18,"ip_address":"2401:4900:ab9c:a4fa:fd:3ce6:4afb:dc90","context":{"username":"pentyala.phani@karvytech.in","success":true}}
+{"timestamp":"2025-11-26 04:57:04","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-26 04:57:51","level":"INFO","message":"User logout","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin"}}
+{"timestamp":"2025-11-26 04:58:03","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-26 05:40:38","level":"INFO","message":"User login successful","user_id":17,"ip_address":"27.107.226.38","context":{"username":"procurement@karvytech.in","success":true}}
+{"timestamp":"2025-11-26 08:17:06","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-26 08:17:15","level":"INFO","message":"User logout","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin"}}
+{"timestamp":"2025-11-26 08:19:15","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-26 09:59:07","level":"INFO","message":"User login successful","user_id":11,"ip_address":"27.107.226.38","context":{"username":"nikhil.lambe@karvytech.in","success":true}}
+{"timestamp":"2025-11-26 09:59:38","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-26 11:48:40","level":"INFO","message":"User login successful","user_id":20,"ip_address":"2409:4042:241f:2bea:4de4:2d58:ad50:5ed","context":{"username":"altaf.bagwan@karvytech.in","success":true}}
+{"timestamp":"2025-11-26 12:59:05","level":"INFO","message":"User login successful","user_id":17,"ip_address":"27.107.226.38","context":{"username":"procurement@karvytech.in","success":true}}
+{"timestamp":"2025-11-28 06:43:56","level":"INFO","message":"User login successful","user_id":17,"ip_address":"27.107.226.38","context":{"username":"procurement@karvytech.in","success":true}}
+{"timestamp":"2025-11-28 09:10:18","level":"INFO","message":"User login successful","user_id":23,"ip_address":"27.107.226.38","context":{"username":"krishnaenterprises.helpdesk@gmail.com","success":true}}
+{"timestamp":"2025-11-28 09:12:04","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-28 09:21:01","level":"INFO","message":"User logout","user_id":23,"ip_address":"27.107.226.38","context":{"username":"KRISHNA ENTERPRISES"}}
+{"timestamp":"2025-11-28 09:21:13","level":"INFO","message":"User login successful","user_id":23,"ip_address":"27.107.226.38","context":{"username":"krishnaenterprises.helpdesk@gmail.com","success":true}}
+{"timestamp":"2025-11-28 10:25:55","level":"INFO","message":"User login successful","user_id":23,"ip_address":"223.182.122.63","context":{"username":"krishnaenterprises.helpdesk@gmail.com","success":true}}
+{"timestamp":"2025-11-28 10:33:47","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-28 10:51:08","level":"INFO","message":"User logout","user_id":23,"ip_address":"223.182.122.63","context":{"username":"KRISHNA ENTERPRISES"}}
+{"timestamp":"2025-11-28 10:51:41","level":"INFO","message":"User login successful","user_id":23,"ip_address":"223.182.122.63","context":{"username":"krishnaenterprises.helpdesk@gmail.com","success":true}}
+{"timestamp":"2025-11-28 11:17:08","level":"INFO","message":"User login successful","user_id":23,"ip_address":"27.107.226.38","context":{"username":"krishnaenterprises.helpdesk@gmail.com","success":true}}
+{"timestamp":"2025-11-28 11:17:33","level":"INFO","message":"User logout","user_id":23,"ip_address":"27.107.226.38","context":{"username":"KRISHNA ENTERPRISES"}}
+{"timestamp":"2025-11-28 11:17:48","level":"INFO","message":"User login successful","user_id":24,"ip_address":"27.107.226.38","context":{"username":"nirdesh@homatico.com","success":true}}
+{"timestamp":"2025-11-28 11:18:38","level":"INFO","message":"User logout","user_id":24,"ip_address":"27.107.226.38","context":{"username":"HOMATICO SMART SOLUTIONS"}}
+{"timestamp":"2025-11-28 11:18:55","level":"INFO","message":"User login successful","user_id":23,"ip_address":"27.107.226.38","context":{"username":"krishnaenterprises.helpdesk@gmail.com","success":true}}
+{"timestamp":"2025-11-29 05:21:30","level":"INFO","message":"User login successful","user_id":23,"ip_address":"223.182.122.63","context":{"username":"krishnaenterprises.helpdesk@gmail.com","success":true}}
+{"timestamp":"2025-11-29 06:54:37","level":"INFO","message":"User login successful","user_id":11,"ip_address":"27.107.226.38","context":{"username":"nikhil.lambe@karvytech.in","success":true}}
+{"timestamp":"2025-11-29 06:55:17","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-29 07:04:57","level":"INFO","message":"User logout","user_id":11,"ip_address":"27.107.226.38","context":{"username":"nikhil.lambe@karvytech.in"}}
+{"timestamp":"2025-11-29 10:11:11","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-29 10:12:31","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-29 11:44:17","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-29 11:45:58","level":"INFO","message":"User login successful","user_id":23,"ip_address":"223.182.122.63","context":{"username":"krishnaenterprises.helpdesk@gmail.com","success":true}}
+{"timestamp":"2025-11-29 12:06:24","level":"INFO","message":"User logout","user_id":23,"ip_address":"223.182.122.63","context":{"username":"KRISHNA ENTERPRISES"}}
+{"timestamp":"2025-11-29 12:06:32","level":"INFO","message":"User login successful","user_id":9,"ip_address":"223.182.122.63","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-11-29 12:45:04","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-29 12:55:41","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-11-29 18:11:27","level":"INFO","message":"User login successful","user_id":1,"ip_address":"2409:40c4:311f:f68d:20b5:e5f0:9466:4306","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-01 05:14:43","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-01 07:53:20","level":"INFO","message":"User login successful","user_id":18,"ip_address":"27.107.226.38","context":{"username":"pentyala.phani@karvytech.in","success":true}}
+{"timestamp":"2025-12-01 09:10:46","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-01 09:39:22","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-01 10:57:54","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-01 11:03:43","level":"INFO","message":"User login successful","user_id":27,"ip_address":"27.107.226.38","context":{"username":"vijil.cv@karvytech.in","success":true}}
+{"timestamp":"2025-12-01 11:18:14","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-01 11:27:45","level":"INFO","message":"User logout","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin"}}
+{"timestamp":"2025-12-01 11:27:59","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":false}}
+{"timestamp":"2025-12-01 11:28:07","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-01 11:28:56","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-01 11:37:02","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-01 12:01:29","level":"INFO","message":"User logout","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin"}}
+{"timestamp":"2025-12-01 12:01:52","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-01 12:02:12","level":"INFO","message":"User logout","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin"}}
+{"timestamp":"2025-12-01 12:04:11","level":"INFO","message":"User login successful","user_id":27,"ip_address":"27.107.226.38","context":{"username":"vijil.cv@karvytech.in","success":true}}
+{"timestamp":"2025-12-01 12:22:01","level":"INFO","message":"User logout","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin"}}
+{"timestamp":"2025-12-01 12:22:09","level":"INFO","message":"User login successful","user_id":23,"ip_address":"27.107.226.38","context":{"username":"krishnaenterprises.helpdesk@gmail.com","success":true}}
+{"timestamp":"2025-12-01 12:22:41","level":"INFO","message":"User logout","user_id":23,"ip_address":"27.107.226.38","context":{"username":"KRISHNA ENTERPRISES"}}
+{"timestamp":"2025-12-01 12:22:48","level":"INFO","message":"User login successful","user_id":25,"ip_address":"27.107.226.38","context":{"username":"deepraj.pathak@anekalabs.com","success":true}}
+{"timestamp":"2025-12-01 12:36:13","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-01 12:38:17","level":"INFO","message":"User logout","user_id":25,"ip_address":"27.107.226.38","context":{"username":"ANEKA LABS"}}
+{"timestamp":"2025-12-01 12:38:46","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-01 12:45:50","level":"INFO","message":"User login successful","user_id":18,"ip_address":"27.107.226.38","context":{"username":"pentyala.phani@karvytech.in","success":true}}
+{"timestamp":"2025-12-01 12:45:55","level":"INFO","message":"User logout","user_id":18,"ip_address":"27.107.226.38","context":{"username":"Phani Kumar"}}
+{"timestamp":"2025-12-01 12:46:15","level":"INFO","message":"User login successful","user_id":18,"ip_address":"27.107.226.38","context":{"username":"pentyala.phani@karvytech.in","success":true}}
+{"timestamp":"2025-12-01 13:03:10","level":"INFO","message":"User logout","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin"}}
+{"timestamp":"2025-12-01 16:03:39","level":"INFO","message":"User login successful","user_id":1,"ip_address":"2405:201:302b:c035:9cf6:5444:df29:efcd","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 04:46:16","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 04:49:52","level":"INFO","message":"User logout","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin"}}
+{"timestamp":"2025-12-02 04:50:04","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 04:51:52","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 05:41:50","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-02 06:00:27","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 06:00:36","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 06:01:07","level":"INFO","message":"User logout","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin"}}
+{"timestamp":"2025-12-02 06:05:30","level":"INFO","message":"User login successful","user_id":9,"ip_address":"223.182.122.63","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-02 06:33:03","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 07:04:24","level":"INFO","message":"User login successful","user_id":9,"ip_address":"223.182.122.63","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-02 07:08:17","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 07:34:56","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 08:05:15","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":false}}
+{"timestamp":"2025-12-02 08:05:25","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-02 08:10:34","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 08:37:20","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 08:38:34","level":"INFO","message":"User logout","user_id":9,"ip_address":"27.107.226.38","context":{"username":"Ganesh Panchal"}}
+{"timestamp":"2025-12-02 08:38:58","level":"INFO","message":"User login successful","user_id":23,"ip_address":"27.107.226.38","context":{"username":"krishnaenterprises.helpdesk@gmail.com","success":true}}
+{"timestamp":"2025-12-02 08:40:21","level":"INFO","message":"User logout","user_id":23,"ip_address":"27.107.226.38","context":{"username":"KRISHNA ENTERPRISES"}}
+{"timestamp":"2025-12-02 08:40:33","level":"INFO","message":"User login successful","user_id":24,"ip_address":"27.107.226.38","context":{"username":"nirdesh@homatico.com","success":true}}
+{"timestamp":"2025-12-02 09:09:35","level":"INFO","message":"User login successful","user_id":11,"ip_address":"27.107.226.38","context":{"username":"nikhil.lambe@karvytech.in","success":true}}
+{"timestamp":"2025-12-02 09:11:56","level":"INFO","message":"User logout","user_id":11,"ip_address":"27.107.226.38","context":{"username":"nikhil.lambe@karvytech.in"}}
+{"timestamp":"2025-12-02 09:15:29","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 09:16:44","level":"INFO","message":"User login successful","user_id":9,"ip_address":"223.182.122.63","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-02 09:33:45","level":"INFO","message":"User login successful","user_id":27,"ip_address":"27.107.226.38","context":{"username":"vijil.cv@karvytech.in","success":true}}
+{"timestamp":"2025-12-02 09:41:45","level":"INFO","message":"User login successful","user_id":27,"ip_address":"27.107.226.38","context":{"username":"vijil.cv@karvytech.in","success":true}}
+{"timestamp":"2025-12-02 09:42:27","level":"INFO","message":"User login successful","user_id":9,"ip_address":"223.182.122.63","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-02 10:17:41","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 10:33:17","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"223.182.122.63","context":{"username":"ganesh@gmail.com","success":false}}
+{"timestamp":"2025-12-02 10:33:38","level":"INFO","message":"User login successful","user_id":9,"ip_address":"223.182.122.63","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-02 10:52:15","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 10:55:00","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":false}}
+{"timestamp":"2025-12-02 10:55:09","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":false}}
+{"timestamp":"2025-12-02 10:55:25","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-02 11:21:04","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 11:38:06","level":"INFO","message":"User login successful","user_id":9,"ip_address":"223.182.122.63","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-02 12:04:34","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 12:42:47","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 13:02:00","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-02 13:06:05","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 13:24:57","level":"INFO","message":"User login successful","user_id":1,"ip_address":"2405:201:302b:c035:5011:36e6:f9a:50c1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-02 13:25:38","level":"INFO","message":"User login successful","user_id":9,"ip_address":"2405:201:302b:c035:5011:36e6:f9a:50c1","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-03 04:32:13","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-03 05:32:16","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-03 05:35:23","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-03 06:35:38","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"liobin.V@atitai.io","success":false}}
+{"timestamp":"2025-12-03 06:36:04","level":"INFO","message":"User login successful","user_id":21,"ip_address":"27.107.226.38","context":{"username":"Liobin.v@gmail.com","success":true}}
+{"timestamp":"2025-12-03 06:52:46","level":"INFO","message":"User logout","user_id":21,"ip_address":"27.107.226.38","context":{"username":"Liobin Joseph"}}
+{"timestamp":"2025-12-03 07:47:39","level":"INFO","message":"User login successful","user_id":1,"ip_address":"2401:4900:5ab9:640a:89ea:2dd:fd1a:8ad5","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-03 07:47:50","level":"INFO","message":"User logout","user_id":1,"ip_address":"2401:4900:5ab9:640a:89ea:2dd:fd1a:8ad5","context":{"username":"admin"}}
+{"timestamp":"2025-12-03 07:48:00","level":"INFO","message":"User login successful","user_id":10,"ip_address":"2401:4900:5ab9:640a:89ea:2dd:fd1a:8ad5","context":{"username":"aniruddh@gmail.com","success":true}}
+{"timestamp":"2025-12-03 07:49:49","level":"INFO","message":"User logout","user_id":10,"ip_address":"2401:4900:5ab9:640a:89ea:2dd:fd1a:8ad5","context":{"username":"Aniruddh Vishwakarma"}}
+{"timestamp":"2025-12-03 07:49:55","level":"INFO","message":"User login successful","user_id":9,"ip_address":"2401:4900:5ab9:640a:89ea:2dd:fd1a:8ad5","context":{"username":"Ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-03 08:06:42","level":"INFO","message":"User login successful","user_id":9,"ip_address":"27.107.226.38","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-03 08:09:53","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-03 08:57:49","level":"INFO","message":"User login successful","user_id":23,"ip_address":"2401:4900:5ab9:640a:c867:e10a:86eb:b7ba","context":{"username":"krishnaenterprises.helpdesk@gmail.com","success":true}}
+{"timestamp":"2025-12-03 08:58:41","level":"INFO","message":"User login successful","user_id":1,"ip_address":"2401:4900:5ab9:640a:c867:e10a:86eb:b7ba","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-03 10:18:47","level":"INFO","message":"User login successful","user_id":23,"ip_address":"27.107.226.38","context":{"username":"krishnaenterprises.helpdesk@gmail.com","success":true}}
+{"timestamp":"2025-12-03 10:19:10","level":"INFO","message":"User logout","user_id":23,"ip_address":"27.107.226.38","context":{"username":"KRISHNA ENTERPRISES"}}
+{"timestamp":"2025-12-03 10:19:21","level":"INFO","message":"User login successful","user_id":24,"ip_address":"27.107.226.38","context":{"username":"nirdesh@homatico.com","success":true}}
+{"timestamp":"2025-12-03 10:19:29","level":"INFO","message":"User logout","user_id":24,"ip_address":"27.107.226.38","context":{"username":"HOMATICO SMART SOLUTIONS"}}
+{"timestamp":"2025-12-03 10:19:34","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"ANEKA LABS","success":false}}
+{"timestamp":"2025-12-03 10:19:48","level":"INFO","message":"User login successful","user_id":25,"ip_address":"27.107.226.38","context":{"username":"deepraj.pathak@anekalabs.com","success":true}}
+{"timestamp":"2025-12-03 10:19:56","level":"INFO","message":"User logout","user_id":25,"ip_address":"27.107.226.38","context":{"username":"ANEKA LABS"}}
+{"timestamp":"2025-12-03 10:20:01","level":"INFO","message":"User login successful","user_id":26,"ip_address":"27.107.226.38","context":{"username":"Info@neuronetworks.in","success":true}}
+{"timestamp":"2025-12-03 10:20:10","level":"INFO","message":"User logout","user_id":26,"ip_address":"27.107.226.38","context":{"username":"NEURO NETWORKS"}}
+{"timestamp":"2025-12-03 10:20:18","level":"INFO","message":"User login successful","user_id":12,"ip_address":"27.107.226.38","context":{"username":"marks.technology@gmail.com","success":true}}
+{"timestamp":"2025-12-03 10:51:28","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-03 11:01:00","level":"INFO","message":"User login successful","user_id":1,"ip_address":"2401:4900:5ab9:640a:2df8:efda:cbf6:dd4e","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-03 11:02:23","level":"INFO","message":"User login successful","user_id":23,"ip_address":"2401:4900:5ab9:640a:c867:e10a:86eb:b7ba","context":{"username":"krishnaenterprises.helpdesk@gmail.com","success":true}}
+{"timestamp":"2025-12-03 12:25:41","level":"INFO","message":"User login successful","user_id":1,"ip_address":"2401:4900:5ab9:640a:bc01:aea9:b6cd:e6b4","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-03 12:42:29","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-03 18:17:26","level":"INFO","message":"User login successful","user_id":1,"ip_address":"2401:4900:8125:1908:dc06:9f22:ed1c:cb1b","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-03 18:18:20","level":"INFO","message":"User login successful","user_id":26,"ip_address":"106.221.53.3","context":{"username":"Info@neuronetworks.in","success":true}}
+{"timestamp":"2025-12-03 19:57:20","level":"INFO","message":"User login successful","user_id":1,"ip_address":"2401:4900:8125:1908:f883:9d11:9baf:a9fb","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-03 19:58:50","level":"INFO","message":"User login successful","user_id":26,"ip_address":"2401:4900:8125:1908:f883:9d11:9baf:a9fb","context":{"username":"Info@neuronetworks.in","success":true}}
+{"timestamp":"2025-12-04 04:37:26","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.182.122.63","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-04 04:39:18","level":"INFO","message":"User login successful","user_id":9,"ip_address":"223.182.122.63","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-04 09:28:53","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-04 09:32:36","level":"INFO","message":"User login successful","user_id":25,"ip_address":"27.107.226.38","context":{"username":"deepraj.pathak@anekalabs.com","success":true}}
+{"timestamp":"2025-12-04 09:34:18","level":"INFO","message":"User logout","user_id":25,"ip_address":"27.107.226.38","context":{"username":"ANEKA LABS"}}
+{"timestamp":"2025-12-04 09:34:28","level":"INFO","message":"User login successful","user_id":23,"ip_address":"27.107.226.38","context":{"username":"krishnaenterprises.helpdesk@gmail.com","success":true}}
+{"timestamp":"2025-12-04 09:35:30","level":"INFO","message":"User logout","user_id":23,"ip_address":"27.107.226.38","context":{"username":"KRISHNA ENTERPRISES"}}
+{"timestamp":"2025-12-04 09:36:07","level":"INFO","message":"User login successful","user_id":24,"ip_address":"27.107.226.38","context":{"username":"nirdesh@homatico.com","success":true}}
+{"timestamp":"2025-12-04 09:36:18","level":"INFO","message":"User logout","user_id":24,"ip_address":"27.107.226.38","context":{"username":"HOMATICO SMART SOLUTIONS"}}
+{"timestamp":"2025-12-04 09:37:29","level":"INFO","message":"User login successful","user_id":26,"ip_address":"27.107.226.38","context":{"username":"Info@neuronetworks.in","success":true}}
+{"timestamp":"2025-12-04 09:37:46","level":"INFO","message":"User logout","user_id":26,"ip_address":"27.107.226.38","context":{"username":"NEURO NETWORKS"}}
+{"timestamp":"2025-12-04 09:37:53","level":"INFO","message":"User login successful","user_id":25,"ip_address":"27.107.226.38","context":{"username":"deepraj.pathak@anekalabs.com","success":true}}
+{"timestamp":"2025-12-04 10:30:04","level":"INFO","message":"User logout","user_id":25,"ip_address":"27.107.226.38","context":{"username":"ANEKA LABS"}}
+{"timestamp":"2025-12-04 11:26:52","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":false}}
+{"timestamp":"2025-12-04 11:27:10","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":false}}
+{"timestamp":"2025-12-04 11:27:22","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":false}}
+{"timestamp":"2025-12-04 11:27:30","level":"INFO","message":"User login successful","user_id":1,"ip_address":"27.107.226.38","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-04 13:04:09","level":"INFO","message":"User login successful","user_id":1,"ip_address":"223.189.245.19","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-04 13:12:10","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}

@@ -17,7 +17,7 @@ class Site extends BaseModel {
         
         // Search functionality
         if (!empty($search)) {
-            $conditions[] = "(s.site_id LIKE ? OR s.store_id LIKE ? OR s.location LIKE ? OR ct.name LIKE ? OR cu.name LIKE ? OR b.name LIKE ?)";
+            $conditions[] = "(s.site_id LIKE ? OR s.store_id LIKE ? OR s.location LIKE ? OR ct.name LIKE ? OR cu.name LIKE ? OR s.contact_person_name LIKE ?)";
             $searchTerm = "%$search%";
             $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm]);
         }
@@ -74,7 +74,6 @@ class Site extends BaseModel {
                      LEFT JOIN states st ON s.state_id = st.id 
                      LEFT JOIN countries co ON s.country_id = co.id 
                      LEFT JOIN customers cu ON s.customer_id = cu.id 
-                     LEFT JOIN banks b ON s.bank_id = b.id 
                      LEFT JOIN site_delegations sd ON s.id = sd.site_id AND sd.status = 'active'
                      LEFT JOIN vendors v ON sd.vendor_id = v.id
                      LEFT JOIN (
@@ -94,7 +93,7 @@ class Site extends BaseModel {
         // Get paginated results with relationships
         $sql = "SELECT s.*, 
                        ct.name as city, st.name as state, co.name as country,
-                       cu.name as customer, b.name as bank,
+                       cu.name as customer,
                        sd.id as delegation_id, v.name as delegated_vendor_name,
                        sd.status as delegation_status, sd.delegation_date,
                        ss.id as survey_id, ss.survey_status as actual_survey_status,
@@ -109,7 +108,6 @@ class Site extends BaseModel {
                 LEFT JOIN states st ON s.state_id = st.id 
                 LEFT JOIN countries co ON s.country_id = co.id 
                 LEFT JOIN customers cu ON s.customer_id = cu.id 
-                LEFT JOIN banks b ON s.bank_id = b.id 
                 LEFT JOIN site_delegations sd ON s.id = sd.site_id AND sd.status = 'active'
                 LEFT JOIN vendors v ON sd.vendor_id = v.id
                 LEFT JOIN (
@@ -154,13 +152,12 @@ class Site extends BaseModel {
     public function findWithRelations($id) {
         $sql = "SELECT s.*, 
                        ct.name as city_name, st.name as state_name, co.name as country_name,
-                       cu.name as customer_name, b.name as bank_name
+                       cu.name as customer_name
                 FROM {$this->table} s 
                 LEFT JOIN cities ct ON s.city_id = ct.id 
                 LEFT JOIN states st ON s.state_id = st.id 
                 LEFT JOIN countries co ON s.country_id = co.id 
                 LEFT JOIN customers cu ON s.customer_id = cu.id 
-                LEFT JOIN banks b ON s.bank_id = b.id 
                 WHERE s.id = ?";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$id]);

@@ -8,6 +8,19 @@ class VendorPermission extends BaseModel {
         parent::__construct();
     }
     
+    public function getUserPermissions($userId) {
+        $stmt = $this->db->prepare("SELECT permission_key, permission_value FROM {$this->table} WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        $permissions = $stmt->fetchAll();
+        
+        $result = [];
+        foreach ($permissions as $permission) {
+            $result[$permission['permission_key']] = (bool)$permission['permission_value'];
+        }
+        
+        return $result;
+    }
+    
     public function getVendorPermissions($vendorId) {
         $stmt = $this->db->prepare("SELECT permission_key, permission_value FROM {$this->table} WHERE vendor_id = ?");
         $stmt->execute([$vendorId]);
@@ -21,32 +34,27 @@ class VendorPermission extends BaseModel {
         return $result;
     }
     
-    public function hasPermission($vendorId, $permissionKey) {
-        $stmt = $this->db->prepare("SELECT permission_value FROM {$this->table} WHERE vendor_id = ? AND permission_key = ?");
-        $stmt->execute([$vendorId, $permissionKey]);
+    public function hasPermission($userId, $permissionKey) {
+        $stmt = $this->db->prepare("SELECT permission_value FROM {$this->table} WHERE user_id = ? AND permission_key = ?");
+        $stmt->execute([$userId, $permissionKey]);
         $result = $stmt->fetch();
         
         return $result ? (bool)$result['permission_value'] : false;
     }
     
-    public function setPermission($vendorId, $permissionKey, $value, $grantedBy) {
-        $data = [
-            'vendor_id' => $vendorId,
-            'permission_key' => $permissionKey,
-            'permission_value' => $value ? 1 : 0,
-            'granted_by' => $grantedBy
-        ];
-        
+    public function setPermission($vendorId, $permissionKey, $value, $grantedBy, $userId = null) {
         // Use INSERT ... ON DUPLICATE KEY UPDATE
-        $sql = "INSERT INTO {$this->table} (vendor_id, permission_key, permission_value, granted_by) 
-                VALUES (?, ?, ?, ?) 
+        // NOTE: We do NOT update user_id in the UPDATE clause because the unique key is (user_id, permission_key)
+        // If a record exists for this user_id + permission_key, we only update the value, not the user_id
+        $sql = "INSERT INTO {$this->table} (vendor_id, user_id, permission_key, permission_value, granted_by) 
+                VALUES (?, ?, ?, ?, ?) 
                 ON DUPLICATE KEY UPDATE 
                 permission_value = VALUES(permission_value), 
                 granted_by = VALUES(granted_by),
                 updated_at = CURRENT_TIMESTAMP";
         
         $stmt = $this->db->prepare($sql);
-        return $stmt->execute([$vendorId, $permissionKey, $value ? 1 : 0, $grantedBy]);
+        return $stmt->execute([$vendorId, $userId, $permissionKey, $value ? 1 : 0, $grantedBy]);
     }
     
     public function getAllPermissions() {

@@ -371,5 +371,28 @@ class Installation {
         }
         return false;
     }
+    
+    public function getMaterialUsage($installationId) {
+        $sql = "SELECT imu.*, bi.item_name, bi.item_code, bi.unit
+                FROM installation_material_usage imu
+                LEFT JOIN boq_items bi ON imu.boq_item_id = bi.id
+                WHERE imu.installation_id = ?
+                ORDER BY imu.created_at DESC";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$installationId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function getAttachments($installationId) {
+        $sql = "SELECT ia.*
+                FROM installation_attachments ia
+                WHERE ia.installation_id = ?
+                ORDER BY ia.uploaded_at DESC";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$installationId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>

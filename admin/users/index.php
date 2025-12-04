@@ -10,13 +10,13 @@ ob_start();
 
 <div class="mb-6">
     <h1 class="text-2xl font-semibold text-gray-900 mb-2">Users Management</h1>
-    
+
     <div class="flex justify-between items-center">
         <div class="flex gap-3">
             <button onclick="exportUsersData()" class="btn btn-secondary">Export</button>
             <button onclick="resetCreateUserForm(); openModal('createUserModal')" class="btn btn-primary">Add User</button>
         </div>
-        
+
         <p class="text-sm text-gray-600">Manage system users and their permissions</p>
     </div>
 </div>
@@ -68,106 +68,124 @@ ob_start();
                 </thead>
                 <tbody id="usersTableBody">
                     <?php foreach ($data['users'] as $user): ?>
-                    <tr>
-                        <td>
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white font-medium mr-3">
-                                    <?php echo strtoupper(substr($user['username'], 0, 1)); ?>
+                        <tr>
+                            <td>
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white font-medium mr-3">
+                                        <?php echo strtoupper(substr($user['username'], 0, 1)); ?>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($user['username']); ?></div>
+                                        <div class="text-sm text-gray-500">ID: <?php echo $user['id']; ?></div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($user['username']); ?></div>
-                                    <div class="text-sm text-gray-500">ID: <?php echo $user['id']; ?></div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="text-sm text-gray-900"><?php echo htmlspecialchars($user['email']); ?></div>
-                            <div class="text-sm text-gray-500"><?php echo htmlspecialchars($user['phone'] ?? 'N/A'); ?></div>
-                        </td>
-                        <td>
-                            <span class="badge <?php echo $user['role'] === 'admin' ? 'badge-info' : 'badge-secondary'; ?>">
-                                <?php echo ucfirst($user['role']); ?>
-                            </span>
-                            <?php if ($user['role'] === 'vendor' && !empty($user['vendor_name'])): ?>
-                                <div class="text-xs text-gray-500 mt-1">
-                                    <?php echo htmlspecialchars($user['vendor_name']); ?>
-                                </div>
-                            <?php elseif ($user['role'] === 'vendor' && !empty($user['vendor_id'])): ?>
-                                <div class="text-xs text-gray-500 mt-1">
-                                    Vendor ID: <?php echo $user['vendor_id']; ?>
-                                </div>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <span class="badge <?php echo $user['status'] === 'active' ? 'badge-success' : 'badge-danger'; ?>">
-                                <?php echo ucfirst($user['status']); ?>
-                            </span>
-                        </td>
-                        <td class="text-sm text-gray-500">
-                            <?php echo date('M j, Y', strtotime($user['created_at'])); ?>
-                        </td>
-                        <td>
-                            <div class="flex items-center space-x-2">
-                                <button onclick="viewUser(<?php echo $user['id']; ?>)" class="btn btn-sm btn-secondary" title="View">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-                                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
-                                    </svg>
-                                </button>
-                                <button onclick="editUser(<?php echo $user['id']; ?>)" class="btn btn-sm btn-primary" title="Edit">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
-                                    </svg>
-                                </button>
-                                <a href="<?php echo BASE_URL; ?>/admin/users/menu-permissions.php?user_id=<?php echo $user['id']; ?>" class="btn btn-sm btn-info" title="Menu Permissions">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
-                                    </svg>
-                                </a>
-                                <button onclick="toggleUserStatus(<?php echo $user['id']; ?>)" class="btn btn-sm <?php echo $user['status'] === 'active' ? 'btn-warning' : 'btn-success'; ?>" title="<?php echo $user['status'] === 'active' ? 'Deactivate' : 'Activate'; ?>">
-                                    <?php if ($user['status'] === 'active'): ?>
+                            </td>
+                            <td>
+                                <div class="text-sm text-gray-900"><?php echo htmlspecialchars($user['email']); ?></div>
+                                <div class="text-sm text-gray-500"><?php echo htmlspecialchars($user['phone'] ?? 'N/A'); ?></div>
+                            </td>
+                            <td>
+                                <span class="badge <?php echo $user['role'] === 'admin' ? 'badge-info' : 'badge-secondary'; ?>">
+                                    <?php echo ucfirst($user['role']); ?>
+                                </span>
+                                <?php if ($user['role'] === 'vendor' && !empty($user['vendor_name'])): ?>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        <?php echo htmlspecialchars($user['vendor_name']); ?>
+                                    </div>
+                                <?php elseif ($user['role'] === 'vendor' && !empty($user['vendor_id'])): ?>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        Vendor ID: <?php echo $user['vendor_id']; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <span class="badge <?php echo $user['status'] === 'active' ? 'badge-success' : 'badge-danger'; ?>">
+                                    <?php echo ucfirst($user['status']); ?>
+                                </span>
+                            </td>
+                            <td class="text-sm text-gray-500">
+                                <?php echo date('M j, Y', strtotime($user['created_at'])); ?>
+                            </td>
+                            <td>
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="viewUser(<?php echo $user['id']; ?>)" class="btn btn-sm btn-secondary" title="View">
                                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"></path>
-                                        </svg>
-                                    <?php else: ?>
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                        </svg>
-                                    <?php endif; ?>
-                                </button>
-                                <button onclick="deleteUser(<?php echo $user['id']; ?>)" class="btn btn-sm btn-danger" title="Delete">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"></path>
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 012 0v4a1 1 0 11-2 0V7zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V7a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
                                         </svg>
                                     </button>
-                            </div>
-                        </td>
-                    </tr>
+                                    <button onclick="editUser(<?php echo $user['id']; ?>)" class="btn btn-sm btn-primary" title="Edit">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
+                                        </svg>
+                                    </button>
+
+
+                                    <?php
+
+                                    if ($user['role'] == 'vendor') { ?>
+
+                                        <a href="<?php echo BASE_URL; ?>/admin/users/menu-permissions2.php?user_id=<?php echo $user['id']; ?>" class="btn btn-sm btn-info" title="Menu Permissions">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </a>
+
+                                    <?php } else { ?>
+
+                                        <a href="<?php echo BASE_URL; ?>/admin/users/menu-permissions.php?user_id=<?php echo $user['id']; ?>" class="btn btn-sm btn-info" title="Menu Permissions">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </a>
+
+                                    <?php } ?>
+
+
+                                    <button onclick="toggleUserStatus(<?php echo $user['id']; ?>)" class="btn btn-sm <?php echo $user['status'] === 'active' ? 'btn-warning' : 'btn-success'; ?>" title="<?php echo $user['status'] === 'active' ? 'Deactivate' : 'Activate'; ?>">
+                                        <?php if ($user['status'] === 'active'): ?>
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        <?php else: ?>
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        <?php endif; ?>
+                                    </button>
+                                    <button onclick="deleteUser(<?php echo $user['id']; ?>)" class="btn btn-sm btn-danger" title="Delete">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 012 0v4a1 1 0 11-2 0V7zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V7a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
-        
+
         <!-- Pagination -->
         <?php if ($data['pagination']['total_pages'] > 1): ?>
-        <div class="pagination">
-            <div class="pagination-info">
-                Showing <?php echo (($data['pagination']['current_page'] - 1) * $data['pagination']['limit']) + 1; ?> to 
-                <?php echo min($data['pagination']['current_page'] * $data['pagination']['limit'], $data['pagination']['total_records']); ?> of 
-                <?php echo $data['pagination']['total_records']; ?> results
+            <div class="pagination">
+                <div class="pagination-info">
+                    Showing <?php echo (($data['pagination']['current_page'] - 1) * $data['pagination']['limit']) + 1; ?> to
+                    <?php echo min($data['pagination']['current_page'] * $data['pagination']['limit'], $data['pagination']['total_records']); ?> of
+                    <?php echo $data['pagination']['total_records']; ?> results
+                </div>
+                <div class="pagination-nav-desktop">
+                    <nav class="flex space-x-2">
+                        <?php for ($i = 1; $i <= $data['pagination']['total_pages']; $i++): ?>
+                            <a href="?page=<?php echo $i; ?><?php echo !empty($data['search']) ? '&search=' . urlencode($data['search']) : ''; ?>"
+                                class="pagination-btn <?php echo $i === $data['pagination']['current_page'] ? 'active' : ''; ?>">
+                                <?php echo $i; ?>
+                            </a>
+                        <?php endfor; ?>
+                    </nav>
+                </div>
             </div>
-            <div class="pagination-nav-desktop">
-                <nav class="flex space-x-2">
-                    <?php for ($i = 1; $i <= $data['pagination']['total_pages']; $i++): ?>
-                        <a href="?page=<?php echo $i; ?><?php echo !empty($data['search']) ? '&search=' . urlencode($data['search']) : ''; ?>" 
-                           class="pagination-btn <?php echo $i === $data['pagination']['current_page'] ? 'active' : ''; ?>">
-                            <?php echo $i; ?>
-                        </a>
-                    <?php endfor; ?>
-                </nav>
-            </div>
-        </div>
         <?php endif; ?>
     </div>
 </div>
@@ -196,7 +214,7 @@ ob_start();
                         <input type="email" id="email" name="email" class="form-input" required>
                     </div>
                 </div>
-                
+
                 <!-- Row 2: Phone and Password -->
                 <div class="grid grid-cols-2 gap-4">
                     <div class="form-group">
@@ -208,7 +226,7 @@ ob_start();
                         <input type="password" id="password" name="password" class="form-input" required>
                     </div>
                 </div>
-                
+
                 <!-- Row 3: Role and Status -->
                 <div class="grid grid-cols-2 gap-4">
                     <div class="form-group">
@@ -227,7 +245,7 @@ ob_start();
                         </select>
                     </div>
                 </div>
-                
+
                 <!-- Vendor Field (Full Width when visible) -->
                 <div class="form-group" id="vendor_field" style="display: none;">
                     <label for="vendor_id" class="form-label">Select Vendor *</label>
@@ -268,7 +286,7 @@ ob_start();
                         <input type="email" id="edit_email" name="email" class="form-input" required>
                     </div>
                 </div>
-                
+
                 <!-- Row 2: Phone and Password -->
                 <div class="grid grid-cols-2 gap-4">
                     <div class="form-group">
@@ -280,7 +298,7 @@ ob_start();
                         <input type="password" id="edit_password" name="password" class="form-input">
                     </div>
                 </div>
-                
+
                 <!-- Row 3: Role and Status -->
                 <div class="grid grid-cols-2 gap-4">
                     <div class="form-group">
@@ -298,7 +316,7 @@ ob_start();
                         </select>
                     </div>
                 </div>
-                
+
                 <!-- Vendor Field (Full Width when visible) -->
                 <div class="form-group" id="edit_vendor_field" style="display: none;">
                     <label for="edit_vendor_id" class="form-label">Select Vendor *</label>
@@ -379,340 +397,344 @@ ob_start();
 </div>
 
 <script>
-// Export users data to CSV
-function exportUsersData() {
-    const searchInput = document.getElementById('searchInput');
-    const roleFilter = document.getElementById('roleFilter');
-    const statusFilter = document.getElementById('statusFilter');
-    
-    const params = new URLSearchParams();
-    if (searchInput && searchInput.value) params.append('search', searchInput.value);
-    if (roleFilter && roleFilter.value) params.append('role', roleFilter.value);
-    if (statusFilter && statusFilter.value) params.append('status', statusFilter.value);
-    
-    const exportUrl = `export-users.php?${params.toString()}`;
-    window.open(exportUrl, '_blank');
-}
+    // Export users data to CSV
+    function exportUsersData() {
+        const searchInput = document.getElementById('searchInput');
+        const roleFilter = document.getElementById('roleFilter');
+        const statusFilter = document.getElementById('statusFilter');
 
-// Real-time table filtering (client-side)
-function filterUsersTable() {
-    const searchInput = document.getElementById('searchInput');
-    const roleFilter = document.getElementById('roleFilter');
-    const statusFilter = document.getElementById('statusFilter');
-    
-    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-    const roleValue = roleFilter ? roleFilter.value.toLowerCase() : '';
-    const statusValue = statusFilter ? statusFilter.value.toLowerCase() : '';
-    
-    const tableBody = document.getElementById('usersTableBody');
-    if (!tableBody) return;
-    
-    const rows = tableBody.getElementsByTagName('tr');
-    
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        const cells = row.getElementsByTagName('td');
-        let shouldShow = true;
-        
-        // Search filter
-        if (searchTerm) {
-            let found = false;
-            for (let j = 0; j < cells.length - 1; j++) { // -1 to exclude action column
-                const cellText = cells[j].textContent.toLowerCase();
-                if (cellText.includes(searchTerm)) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) shouldShow = false;
-        }
-        
-        // Role filter
-        if (roleValue && shouldShow) {
-            const roleCell = row.querySelector('.badge');
-            if (roleCell) {
-                const roleText = roleCell.textContent.toLowerCase();
-                if (!roleText.includes(roleValue)) {
-                    shouldShow = false;
-                }
-            }
-        }
-        
-        // Status filter
-        if (statusValue && shouldShow) {
-            const statusCell = row.querySelector('.badge');
-            if (statusCell) {
-                const statusText = statusCell.textContent.toLowerCase();
-                if (!statusText.includes(statusValue)) {
-                    shouldShow = false;
-                }
-            }
-        }
-        
-        row.style.display = shouldShow ? '' : 'none';
+        const params = new URLSearchParams();
+        if (searchInput && searchInput.value) params.append('search', searchInput.value);
+        if (roleFilter && roleFilter.value) params.append('role', roleFilter.value);
+        if (statusFilter && statusFilter.value) params.append('status', statusFilter.value);
+
+        const exportUrl = `export-users.php?${params.toString()}`;
+        window.open(exportUrl, '_blank');
     }
-}
 
+    // Real-time table filtering (client-side)
+    function filterUsersTable() {
+        const searchInput = document.getElementById('searchInput');
+        const roleFilter = document.getElementById('roleFilter');
+        const statusFilter = document.getElementById('statusFilter');
 
+        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+        const roleValue = roleFilter ? roleFilter.value.toLowerCase() : '';
+        const statusValue = statusFilter ? statusFilter.value.toLowerCase() : '';
 
-// Reset create user form when modal opens
-function resetCreateUserForm() {
-    const form = document.getElementById('createUserForm');
-    form.reset();
-    
-    // Reset vendor field visibility
-    const vendorField = document.getElementById('vendor_field');
-    const vendorSelect = document.getElementById('vendor_id');
-    vendorField.style.display = 'none';
-    vendorSelect.required = false;
-    vendorSelect.value = '';
-    
-    // Reset role selection
-    document.getElementById('role').value = '';
-}
+        const tableBody = document.getElementById('usersTableBody');
+        if (!tableBody) return;
 
-// Create user form submission
-document.getElementById('createUserForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    submitForm('createUserForm', function(data) {
-        closeModal('createUserModal');
-        location.reload();
-    });
-});
+        const rows = tableBody.getElementsByTagName('tr');
 
-// Edit user form submission
-document.getElementById('editUserForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    submitForm('editUserForm', function(data) {
-        closeModal('editUserModal');
-        location.reload();
-    });
-});
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            let shouldShow = true;
 
-// User management functions
-function viewUser(id) {
-    fetch(`view.php?id=${id}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const user = data.user;
-                document.getElementById('view_username').textContent = user.username;
-                document.getElementById('view_email').textContent = user.email;
-                document.getElementById('view_phone').textContent = user.phone || 'N/A';
-                document.getElementById('view_role').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
-                document.getElementById('view_status').textContent = user.status.charAt(0).toUpperCase() + user.status.slice(1);
-                document.getElementById('view_plain_password').textContent = user.plain_password || 'N/A';
-                document.getElementById('view_created_at').textContent = formatDate(user.created_at);
-                document.getElementById('view_updated_at').textContent = formatDate(user.updated_at);
-                document.getElementById('view_jwt_token').textContent = user.jwt_token || 'No token generated';
-                
-                // Show vendor information if user is a vendor
-                const vendorInfo = document.getElementById('view_vendor_info');
-                if (user.role === 'vendor' && user.vendor_name) {
-                    document.getElementById('view_vendor_name').textContent = user.vendor_name;
-                    vendorInfo.style.display = 'block';
-                } else {
-                    vendorInfo.style.display = 'none';
+            // Search filter
+            if (searchTerm) {
+                let found = false;
+                for (let j = 0; j < cells.length - 1; j++) { // -1 to exclude action column
+                    const cellText = cells[j].textContent.toLowerCase();
+                    if (cellText.includes(searchTerm)) {
+                        found = true;
+                        break;
+                    }
                 }
-                
-                openModal('viewUserModal');
-            } else {
-                showAlert(data.message, 'error');
+                if (!found) shouldShow = false;
             }
-        })
-        .catch(error => {
-            showAlert('Failed to load user data', 'error');
-        });
-}
 
-function editUser(id) {
-    fetch(`edit.php?id=${id}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const user = data.user;
-                document.getElementById('edit_username').value = user.username;
-                document.getElementById('edit_email').value = user.email;
-                document.getElementById('edit_phone').value = user.phone || '';
-                document.getElementById('edit_password').value = '';
-                document.getElementById('edit_role').value = user.role;
-                document.getElementById('edit_status').value = user.status;
-                
-                // Handle vendor field
-                toggleEditVendorField(user.role);
-                if (user.role === 'vendor' && user.vendor_id) {
-                    // Wait for vendors to load, then set the value
-                    setTimeout(() => {
-                        document.getElementById('edit_vendor_id').value = user.vendor_id;
-                    }, 500);
+            // Role filter
+            if (roleValue && shouldShow) {
+                const roleCell = row.querySelector('.badge');
+                if (roleCell) {
+                    const roleText = roleCell.textContent.toLowerCase();
+                    if (!roleText.includes(roleValue)) {
+                        shouldShow = false;
+                    }
                 }
-                
-                document.getElementById('editUserForm').action = `edit.php?id=${id}`;
-                openModal('editUserModal');
-            } else {
-                showAlert(data.message, 'error');
             }
-        })
-        .catch(error => {
-            showAlert('Failed to load user data', 'error');
-        });
-}
 
-function toggleUserStatus(id) {
-    confirmAction('Are you sure you want to change this user\'s status?', function() {
-        fetch(`toggle_status.php?id=${id}`, { method: 'POST' })
+            // Status filter
+            if (statusValue && shouldShow) {
+                const statusCell = row.querySelector('.badge');
+                if (statusCell) {
+                    const statusText = statusCell.textContent.toLowerCase();
+                    if (!statusText.includes(statusValue)) {
+                        shouldShow = false;
+                    }
+                }
+            }
+
+            row.style.display = shouldShow ? '' : 'none';
+        }
+    }
+
+
+
+    // Reset create user form when modal opens
+    function resetCreateUserForm() {
+        const form = document.getElementById('createUserForm');
+        form.reset();
+
+        // Reset vendor field visibility
+        const vendorField = document.getElementById('vendor_field');
+        const vendorSelect = document.getElementById('vendor_id');
+        vendorField.style.display = 'none';
+        vendorSelect.required = false;
+        vendorSelect.value = '';
+
+        // Reset role selection
+        document.getElementById('role').value = '';
+    }
+
+    // Create user form submission
+    document.getElementById('createUserForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitForm('createUserForm', function(data) {
+            closeModal('createUserModal');
+            location.reload();
+        });
+    });
+
+    // Edit user form submission
+    document.getElementById('editUserForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitForm('editUserForm', function(data) {
+            closeModal('editUserModal');
+            location.reload();
+        });
+    });
+
+    // User management functions
+    function viewUser(id) {
+        fetch(`view.php?id=${id}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showAlert(data.message, 'success');
-                    location.reload();
-                } else {
-                    showAlert(data.message, 'error');
-                }
-            });
-    });
-}
+                    const user = data.user;
+                    document.getElementById('view_username').textContent = user.username;
+                    document.getElementById('view_email').textContent = user.email;
+                    document.getElementById('view_phone').textContent = user.phone || 'N/A';
+                    document.getElementById('view_role').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+                    document.getElementById('view_status').textContent = user.status.charAt(0).toUpperCase() + user.status.slice(1);
+                    document.getElementById('view_plain_password').textContent = user.plain_password || 'N/A';
+                    document.getElementById('view_created_at').textContent = formatDate(user.created_at);
+                    document.getElementById('view_updated_at').textContent = formatDate(user.updated_at);
+                    document.getElementById('view_jwt_token').textContent = user.jwt_token || 'No token generated';
 
-function deleteUser(id) {
-    confirmAction('Are you sure you want to delete this user? This action cannot be undone.', function() {
-        fetch(`delete.php?id=${id}`, { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showAlert(data.message, 'success');
-                    setTimeout(() => location.reload(), 1500);
+                    // Show vendor information if user is a vendor
+                    const vendorInfo = document.getElementById('view_vendor_info');
+                    if (user.role === 'vendor' && user.vendor_name) {
+                        document.getElementById('view_vendor_name').textContent = user.vendor_name;
+                        vendorInfo.style.display = 'block';
+                    } else {
+                        vendorInfo.style.display = 'none';
+                    }
+
+                    openModal('viewUserModal');
                 } else {
                     showAlert(data.message, 'error');
                 }
             })
             .catch(error => {
-                showAlert('Failed to delete user', 'error');
+                showAlert('Failed to load user data', 'error');
             });
-    });
-}
-
-// Utility function to format dates
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-}
-
-// Toggle vendor field visibility based on role selection
-function toggleVendorField(role) {
-    const vendorField = document.getElementById('vendor_field');
-    const vendorSelect = document.getElementById('vendor_id');
-    
-    if (role === 'vendor') {
-        vendorField.style.display = 'block';
-        vendorSelect.required = true;
-        loadVendors('vendor_id');
-    } else {
-        vendorField.style.display = 'none';
-        vendorSelect.required = false;
-        vendorSelect.value = '';
     }
-}
 
-function toggleEditVendorField(role) {
-    const vendorField = document.getElementById('edit_vendor_field');
-    const vendorSelect = document.getElementById('edit_vendor_id');
-    
-    if (role === 'vendor') {
-        vendorField.style.display = 'block';
-        vendorSelect.required = true;
-        loadVendors('edit_vendor_id');
-    } else {
-        vendorField.style.display = 'none';
-        vendorSelect.required = false;
-        vendorSelect.value = '';
+    function editUser(id) {
+        fetch(`edit.php?id=${id}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const user = data.user;
+                    document.getElementById('edit_username').value = user.username;
+                    document.getElementById('edit_email').value = user.email;
+                    document.getElementById('edit_phone').value = user.phone || '';
+                    document.getElementById('edit_password').value = '';
+                    document.getElementById('edit_role').value = user.role;
+                    document.getElementById('edit_status').value = user.status;
+
+                    // Handle vendor field
+                    toggleEditVendorField(user.role);
+                    if (user.role === 'vendor' && user.vendor_id) {
+                        // Wait for vendors to load, then set the value
+                        setTimeout(() => {
+                            document.getElementById('edit_vendor_id').value = user.vendor_id;
+                        }, 500);
+                    }
+
+                    document.getElementById('editUserForm').action = `edit.php?id=${id}`;
+                    openModal('editUserModal');
+                } else {
+                    showAlert(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showAlert('Failed to load user data', 'error');
+            });
     }
-}
 
-// Load vendors from API
-function loadVendors(selectId) {
-    const vendorSelect = document.getElementById(selectId);
-    if (!vendorSelect) return;
-    
-    // Show loading state
-    vendorSelect.innerHTML = '<option value="">Loading vendors...</option>';
-    
-    fetch('../../api/masters.php?path=vendors&status=active')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.data && data.data.records) {
-                vendorSelect.innerHTML = '<option value="">Choose Vendor</option>';
-                data.data.records.forEach(vendor => {
-                    vendorSelect.innerHTML += `<option value="${vendor.id}">${vendor.name}</option>`;
-                });
-            } else {
-                throw new Error('Invalid API response');
-            }
-        })
-        .catch(error => {
-            fetch('../vendors/get-vendor.php?action=list')
+    function toggleUserStatus(id) {
+        confirmAction('Are you sure you want to change this user\'s status?', function() {
+            fetch(`toggle_status.php?id=${id}`, {
+                    method: 'POST'
+                })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success && data.vendors) {
-                        vendorSelect.innerHTML = '<option value="">Choose Vendor</option>';
-                        data.vendors.forEach(vendor => {
-                            vendorSelect.innerHTML += `<option value="${vendor.id}">${vendor.name}</option>`;
-                        });
+                    if (data.success) {
+                        showAlert(data.message, 'success');
+                        location.reload();
                     } else {
-                        vendorSelect.innerHTML = '<option value="">No vendors available</option>';
+                        showAlert(data.message, 'error');
                     }
-                })
-                .catch(err => {
-                    vendorSelect.innerHTML = '<option value="">Error loading vendors</option>';
                 });
         });
-}
+    }
 
-// Utility functions for alerts and confirmations
-function showAlert(message, type) {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `fixed top-4 right-4 z-50 p-4 rounded-md shadow-lg ${
+    function deleteUser(id) {
+        confirmAction('Are you sure you want to delete this user? This action cannot be undone.', function() {
+            fetch(`delete.php?id=${id}`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert(data.message, 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showAlert(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    showAlert('Failed to delete user', 'error');
+                });
+        });
+    }
+
+    // Utility function to format dates
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    }
+
+    // Toggle vendor field visibility based on role selection
+    function toggleVendorField(role) {
+        const vendorField = document.getElementById('vendor_field');
+        const vendorSelect = document.getElementById('vendor_id');
+
+        if (role === 'vendor') {
+            vendorField.style.display = 'block';
+            vendorSelect.required = true;
+            loadVendors('vendor_id');
+        } else {
+            vendorField.style.display = 'none';
+            vendorSelect.required = false;
+            vendorSelect.value = '';
+        }
+    }
+
+    function toggleEditVendorField(role) {
+        const vendorField = document.getElementById('edit_vendor_field');
+        const vendorSelect = document.getElementById('edit_vendor_id');
+
+        if (role === 'vendor') {
+            vendorField.style.display = 'block';
+            vendorSelect.required = true;
+            loadVendors('edit_vendor_id');
+        } else {
+            vendorField.style.display = 'none';
+            vendorSelect.required = false;
+            vendorSelect.value = '';
+        }
+    }
+
+    // Load vendors from API
+    function loadVendors(selectId) {
+        const vendorSelect = document.getElementById(selectId);
+        if (!vendorSelect) return;
+
+        // Show loading state
+        vendorSelect.innerHTML = '<option value="">Loading vendors...</option>';
+
+        fetch('../../api/masters.php?path=vendors&status=active')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data && data.data.records) {
+                    vendorSelect.innerHTML = '<option value="">Choose Vendor</option>';
+                    data.data.records.forEach(vendor => {
+                        vendorSelect.innerHTML += `<option value="${vendor.id}">${vendor.name}</option>`;
+                    });
+                } else {
+                    throw new Error('Invalid API response');
+                }
+            })
+            .catch(error => {
+                fetch('../vendors/get-vendor.php?action=list')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.vendors) {
+                            vendorSelect.innerHTML = '<option value="">Choose Vendor</option>';
+                            data.vendors.forEach(vendor => {
+                                vendorSelect.innerHTML += `<option value="${vendor.id}">${vendor.name}</option>`;
+                            });
+                        } else {
+                            vendorSelect.innerHTML = '<option value="">No vendors available</option>';
+                        }
+                    })
+                    .catch(err => {
+                        vendorSelect.innerHTML = '<option value="">Error loading vendors</option>';
+                    });
+            });
+    }
+
+    // Utility functions for alerts and confirmations
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `fixed top-4 right-4 z-50 p-4 rounded-md shadow-lg ${
         type === 'success' ? 'bg-green-100 border border-green-400 text-green-700' :
         type === 'error' ? 'bg-red-100 border border-red-400 text-red-700' :
         'bg-blue-100 border border-blue-400 text-blue-700'
     }`;
-    alertDiv.textContent = message;
-    
-    document.body.appendChild(alertDiv);
-    
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.parentNode.removeChild(alertDiv);
-        }
-    }, 3000);
-}
+        alertDiv.textContent = message;
 
-function confirmAction(message, callback) {
-    if (confirm(message)) {
-        callback();
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        }, 3000);
     }
-}
 
-function submitForm(formId, callback) {
-    const form = document.getElementById(formId);
-    const formData = new FormData(form);
-    
-    fetch(form.action, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showAlert(data.message, 'success');
-            callback(data);
-        } else {
-            showAlert(data.message, 'error');
+    function confirmAction(message, callback) {
+        if (confirm(message)) {
+            callback();
         }
-    })
-    .catch(error => {
-        showAlert('An error occurred', 'error');
-    });
-}
+    }
+
+    function submitForm(formId, callback) {
+        const form = document.getElementById(formId);
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    callback(data);
+                } else {
+                    showAlert(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showAlert('An error occurred', 'error');
+            });
+    }
 </script>
 
 <?php
