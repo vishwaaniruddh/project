@@ -134,10 +134,10 @@ ob_start();
                         $isImage = in_array(strtolower($layout['file_type']), ['jpg', 'jpeg', 'png', 'gif', 'webp']);
                         if ($isImage): 
                         ?>
-                            <img src="../../<?php echo htmlspecialchars($layout['file_path']); ?>" 
+                            <img src="<?php echo htmlspecialchars($layout['file_path']); ?>" 
                                  alt="Layout" 
                                  class="h-20 w-20 object-cover rounded cursor-pointer"
-                                 onclick="window.open('../../<?php echo htmlspecialchars($layout['file_path']); ?>', '_blank')">
+                                 onclick="window.open('<?php echo htmlspecialchars($layout['file_path']); ?>', '_blank')">
                         <?php else: ?>
                             <div class="h-20 w-20 flex items-center justify-center bg-gray-100 rounded">
                                 <?php if ($layout['file_type'] === 'pdf'): ?>
