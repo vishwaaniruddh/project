@@ -42,6 +42,30 @@ $title = 'Material Request #' . $request['id'];
 ob_start();
 ?>
 
+<style>
+.edit-mode input.form-input {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    width: 100%;
+}
+.edit-mode input.form-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+tr[data-removed="true"] {
+    opacity: 0.5;
+    text-decoration: line-through;
+}
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+}
+</style>
+
+
 <div class="flex justify-between items-center mb-6">
     <div>
         <h1 class="text-2xl font-semibold text-gray-900">Material Request #<?php echo $request['id']; ?></h1>
@@ -66,6 +90,14 @@ ob_start();
                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                 </svg>
                 Reject Request
+            </button>
+        <?php endif; ?>
+        <?php if (in_array($request['status'], ['pending', 'approved'])): ?>
+            <button onclick="toggleEditMode()" id="editItemsBtn" class="btn btn-warning">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
+                </svg>
+                Edit Items
             </button>
         <?php endif; ?>
         <?php if ($request['status'] === 'approved'): ?>
@@ -212,10 +244,26 @@ ob_start();
 <!-- Requested Items -->
 <div class="card">
     <div class="card-body">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Requested Items</h3>
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Requested Items</h3>
+            <div id="editModeActions" class="hidden space-x-2">
+                <button onclick="saveItemChanges()" class="btn btn-success btn-sm">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    Save Changes
+                </button>
+                <button onclick="cancelEditMode()" class="btn btn-secondary btn-sm">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                    Cancel
+                </button>
+            </div>
+        </div>
         
         <div class="overflow-x-auto">
-            <table class="data-table">
+            <table class="data-table" id="itemsTable">
                 <thead>
                     <tr>
                         <th>Item Details</th>
@@ -223,16 +271,17 @@ ob_start();
                         <th>Quantity</th>
                         <th>Unit</th>
                         <th>Notes</th>
+                        <th class="edit-mode-column hidden">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($items)): ?>
                     <tr>
-                        <td colspan="5" class="text-center py-4 text-gray-500">No items found</td>
+                        <td colspan="6" class="text-center py-4 text-gray-500">No items found</td>
                     </tr>
                     <?php else: ?>
-                        <?php foreach ($items as $item): ?>
-                        <tr>
+                        <?php foreach ($items as $index => $item): ?>
+                        <tr data-index="<?php echo $index; ?>" data-boq-id="<?php echo $item['boq_item_id']; ?>">
                             <td>
                                 <?php if (isset($boqItems[$item['boq_item_id']])): ?>
                                     <div class="flex items-center">
@@ -251,16 +300,27 @@ ob_start();
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <div class="text-sm text-gray-900"><?php echo htmlspecialchars($item['item_code']); ?></div>
+                                <div class="text-sm text-gray-900 view-mode"><?php echo htmlspecialchars($item['item_code']); ?></div>
+                                <input type="text" class="form-input text-sm edit-mode hidden" value="<?php echo htmlspecialchars($item['item_code']); ?>" data-field="item_code">
                             </td>
                             <td>
-                                <div class="text-sm font-medium text-gray-900"><?php echo number_format($item['quantity']); ?></div>
+                                <div class="text-sm font-medium text-gray-900 view-mode"><?php echo number_format($item['quantity']); ?></div>
+                                <input type="number" class="form-input text-sm edit-mode hidden" value="<?php echo $item['quantity']; ?>" data-field="quantity" min="1" step="1">
                             </td>
                             <td>
-                                <div class="text-sm text-gray-900"><?php echo htmlspecialchars($item['unit']); ?></div>
+                                <div class="text-sm text-gray-900 view-mode"><?php echo htmlspecialchars($item['unit']); ?></div>
+                                <input type="text" class="form-input text-sm edit-mode hidden" value="<?php echo htmlspecialchars($item['unit']); ?>" data-field="unit">
                             </td>
                             <td>
-                                <div class="text-sm text-gray-900"><?php echo htmlspecialchars($item['notes'] ?? ''); ?></div>
+                                <div class="text-sm text-gray-900 view-mode"><?php echo htmlspecialchars($item['notes'] ?? ''); ?></div>
+                                <input type="text" class="form-input text-sm edit-mode hidden" value="<?php echo htmlspecialchars($item['notes'] ?? ''); ?>" data-field="notes">
+                            </td>
+                            <td class="edit-mode-column hidden">
+                                <button onclick="removeItem(<?php echo $index; ?>)" class="text-red-600 hover:text-red-900" title="Remove item">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </button>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -272,6 +332,9 @@ ob_start();
 </div>
 
 <script>
+let isEditMode = false;
+let originalItems = [];
+
 function approveRequest(requestId) {
     if (confirm('Are you sure you want to approve this material request?')) {
         updateRequestStatus(requestId, 'approved');
@@ -307,6 +370,129 @@ function updateRequestStatus(requestId, status) {
     .catch(error => {
         console.error('Error:', error);
         showAlert('An error occurred while updating the request.', 'error');
+    });
+}
+
+function toggleEditMode() {
+    isEditMode = !isEditMode;
+    
+    if (isEditMode) {
+        // Store original values
+        originalItems = [];
+        document.querySelectorAll('#itemsTable tbody tr').forEach(row => {
+            const index = row.dataset.index;
+            if (index !== undefined) {
+                const item = {
+                    boq_item_id: row.dataset.boqId,
+                    item_code: row.querySelector('[data-field="item_code"]').value,
+                    quantity: row.querySelector('[data-field="quantity"]').value,
+                    unit: row.querySelector('[data-field="unit"]').value,
+                    notes: row.querySelector('[data-field="notes"]').value
+                };
+                originalItems.push(item);
+            }
+        });
+        
+        // Show edit mode
+        document.querySelectorAll('.view-mode').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.edit-mode').forEach(el => el.classList.remove('hidden'));
+        document.querySelectorAll('.edit-mode-column').forEach(el => el.classList.remove('hidden'));
+        document.getElementById('editModeActions').classList.remove('hidden');
+        document.getElementById('editItemsBtn').classList.add('hidden');
+    } else {
+        cancelEditMode();
+    }
+}
+
+function cancelEditMode() {
+    isEditMode = false;
+    
+    // Hide edit mode
+    document.querySelectorAll('.view-mode').forEach(el => el.classList.remove('hidden'));
+    document.querySelectorAll('.edit-mode').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.edit-mode-column').forEach(el => el.classList.add('hidden'));
+    document.getElementById('editModeActions').classList.add('hidden');
+    document.getElementById('editItemsBtn').classList.remove('hidden');
+    
+    // Restore original values
+    if (originalItems.length > 0) {
+        document.querySelectorAll('#itemsTable tbody tr').forEach((row, index) => {
+            if (originalItems[index]) {
+                row.querySelector('[data-field="item_code"]').value = originalItems[index].item_code;
+                row.querySelector('[data-field="quantity"]').value = originalItems[index].quantity;
+                row.querySelector('[data-field="unit"]').value = originalItems[index].unit;
+                row.querySelector('[data-field="notes"]').value = originalItems[index].notes;
+            }
+        });
+    }
+}
+
+function removeItem(index) {
+    if (confirm('Are you sure you want to remove this item?')) {
+        const row = document.querySelector(`#itemsTable tbody tr[data-index="${index}"]`);
+        if (row) {
+            row.style.opacity = '0.5';
+            row.dataset.removed = 'true';
+        }
+    }
+}
+
+function saveItemChanges() {
+    const items = [];
+    let hasError = false;
+    
+    document.querySelectorAll('#itemsTable tbody tr').forEach(row => {
+        const index = row.dataset.index;
+        if (index !== undefined && row.dataset.removed !== 'true') {
+            const quantity = parseFloat(row.querySelector('[data-field="quantity"]').value);
+            
+            if (!quantity || quantity <= 0) {
+                hasError = true;
+                showAlert('Please enter valid quantities for all items', 'error');
+                return;
+            }
+            
+            const item = {
+                boq_item_id: row.dataset.boqId,
+                item_code: row.querySelector('[data-field="item_code"]').value,
+                quantity: quantity,
+                unit: row.querySelector('[data-field="unit"]').value,
+                notes: row.querySelector('[data-field="notes"]').value
+            };
+            items.push(item);
+        }
+    });
+    
+    if (hasError) return;
+    
+    if (items.length === 0) {
+        showAlert('Cannot save request with no items', 'error');
+        return;
+    }
+    
+    // Send update request
+    fetch('update-request-items.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            request_id: <?php echo $request['id']; ?>,
+            items: items
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('Items updated successfully!', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showAlert('Error: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('An error occurred while updating items.', 'error');
     });
 }
 </script>

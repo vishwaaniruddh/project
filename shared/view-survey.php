@@ -207,7 +207,11 @@ ob_start();
                 <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded"><?php echo htmlspecialchars($survey['total_cameras'] ?? 'N/A'); ?></p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Analytic Cameras</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nos. of SLP Cameras</label>
+                <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded"><?php echo htmlspecialchars($survey['slp_cameras'] ?? 'N/A'); ?></p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nos. of Analytic Cameras</label>
                 <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded"><?php echo htmlspecialchars($survey['analytic_cameras'] ?? 'N/A'); ?></p>
             </div>
             <div>
@@ -266,11 +270,17 @@ ob_start();
         <h3 class="text-lg font-semibold text-gray-900">Technical Assessment</h3>
     </div>
     <div class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Site Accessibility</label>
                 <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded"><?php echo htmlspecialchars($survey['site_accessibility'] ?? 'N/A'); ?></p>
             </div>
+            <?php if (!empty($survey['site_accessibility_others'])): ?>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Site Accessibility (Others)</label>
+                <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded"><?php echo htmlspecialchars($survey['site_accessibility_others']); ?></p>
+            </div>
+            <?php endif; ?>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Power Availability</label>
                 <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded"><?php echo htmlspecialchars($survey['power_availability'] ?? 'N/A'); ?></p>
@@ -280,8 +290,12 @@ ob_start();
                 <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded"><?php echo htmlspecialchars($survey['network_connectivity'] ?? 'N/A'); ?></p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Space Adequacy</label>
-                <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded"><?php echo htmlspecialchars($survey['space_adequacy'] ?? 'N/A'); ?></p>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nos. of Ladder Required</label>
+                <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded"><?php echo htmlspecialchars($survey['nos_of_ladder'] ?? 'N/A'); ?></p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Size of Ladder Required</label>
+                <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded"><?php echo htmlspecialchars($survey['ladder_size'] ?? 'N/A'); ?></p>
             </div>
         </div>
     </div>
@@ -312,8 +326,39 @@ ob_start();
             </div>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Estimated Completion Days</label>
-            <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded"><?php echo htmlspecialchars($survey['estimated_completion_days'] ?? 'N/A'); ?></p>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Additional Equipment Needed</label>
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <p class="text-sm text-gray-900 whitespace-pre-wrap"><?php echo htmlspecialchars($survey['additional_equipment_needed'] ?? 'No additional equipment specified'); ?></p>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Estimated Completion Days</label>
+                <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded"><?php echo htmlspecialchars($survey['estimated_completion_days'] ?? 'N/A'); ?> days</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Work Requirements</label>
+                <div class="flex flex-wrap gap-2">
+                    <?php if (!empty($survey['electrical_work_required'])): ?>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            ⚡ Electrical Work
+                        </span>
+                    <?php endif; ?>
+                    <?php if (!empty($survey['civil_work_required'])): ?>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                            🏗️ Civil Work
+                        </span>
+                    <?php endif; ?>
+                    <?php if (!empty($survey['network_work_required'])): ?>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            🌐 Network Work
+                        </span>
+                    <?php endif; ?>
+                    <?php if (empty($survey['electrical_work_required']) && empty($survey['civil_work_required']) && empty($survey['network_work_required'])): ?>
+                        <span class="text-sm text-gray-500">No special work requirements</span>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -348,12 +393,35 @@ foreach ($photoFields as $field => $label) {
             <p class="text-sm text-gray-500 mt-1">Visual documentation from the site survey</p>
         </div>
         <div class="p-6">
+            <?php 
+            // Map photo fields to their remark fields
+            $photoRemarksMap = [
+                'floor_height_photos' => 'floor_height_photo_remarks',
+                'ceiling_photos' => 'ceiling_photo_remarks',
+                'analytic_photos' => 'analytic_photos_remarks',
+                'existing_poe_photos' => 'existing_poe_photos_remarks',
+                'space_new_rack_photos' => 'space_new_rack_photo_remarks',
+                'new_poe_photos' => 'new_poe_photos_remarks',
+                'rrl_photos' => 'rrl_photos_remarks',
+                'kptl_photos' => 'kptl_photos_remarks',
+                'site_photos' => 'site_photos_remarks'
+            ];
+            ?>
             <?php foreach ($photoFields as $field => $label): ?>
                 <?php if (!empty($survey[$field])): ?>
                     <?php $photos = json_decode($survey[$field], true); ?>
                     <?php if (!empty($photos) && is_array($photos)): ?>
                         <div class="mb-8">
-                            <h4 class="text-md font-medium text-gray-900 mb-4"><?php echo $label; ?></h4>
+                            <h4 class="text-md font-medium text-gray-900 mb-2"><?php echo $label; ?></h4>
+                            <?php 
+                            // Display remarks if available
+                            $remarksField = $photoRemarksMap[$field] ?? null;
+                            if ($remarksField && !empty($survey[$remarksField])): 
+                            ?>
+                                <div class="bg-blue-50 border-l-4 border-blue-400 p-3 mb-4">
+                                    <p class="text-sm text-blue-800"><strong>Remarks:</strong> <?php echo htmlspecialchars($survey[$remarksField]); ?></p>
+                                </div>
+                            <?php endif; ?>
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 <?php foreach ($photos as $photo): ?>
                                 <div class="relative group">

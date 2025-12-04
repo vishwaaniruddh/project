@@ -7,52 +7,58 @@ require_once __DIR__ . '/../models/SiteSurvey.php';
 // Require vendor authentication
 Auth::requireVendor();
 
-$delegationId = $_GET['delegation_id'] ?? null;
-if (!$delegationId) {
-    header('Location: sites/');
+$surveyId = $_GET['id'] ?? null;
+if (!$surveyId) {
+    header('Location: surveys.php');
     exit;
 }
 
 $vendorId = Auth::getVendorId();
-$siteModel = new Site();
-$delegationModel = new SiteDelegation();
 $surveyModel = new SiteSurvey();
 
-// Get delegation details
-$delegation = $delegationModel->find($delegationId);
-if (!$delegation || $delegation['vendor_id'] != $vendorId) {
-    header('Location: sites/');
+// Get survey details
+$survey = $surveyModel->findWithDetails($surveyId);
+if (!$survey || $survey['vendor_id'] != $vendorId) {
+    header('Location: surveys.php');
     exit;
 }
+
+// Only allow editing if status is pending or rejected
+if (!in_array($survey['survey_status'], ['pending', 'rejected'])) {
+    header('Location: ../shared/view-survey.php?id=' . $surveyId);
+    exit;
+}
+
+$siteModel = new Site();
+$delegationModel = new SiteDelegation();
 
 // Get site details
-$site = $siteModel->findWithRelations($delegation['site_id']);
+$site = $siteModel->findWithRelations($survey['site_id']);
 if (!$site) {
-    header('Location: sites/');
+    header('Location: surveys.php');
     exit;
 }
 
-// Check if survey already exists
-$existingSurveys = $surveyModel->findByDelegation($delegationId);
-$existingSurvey = !empty($existingSurveys) ? $existingSurveys[0] : null;
+// Get delegation details
+$delegation = $delegationModel->find($survey['delegation_id']);
 
-$title = 'Site Survey - ' . $site['site_id'];
+$title = 'Edit Survey - ' . $site['site_id'];
 ob_start();
 ?>
 
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
         <div class="flex-1">
-            <h1 class="text-3xl font-bold text-gray-900">Site Feasibility Survey</h1>
+            <h1 class="text-3xl font-bold text-gray-900">Edit Site Survey</h1>
             <p class="mt-2 text-lg text-gray-600">Site: <span class="font-semibold text-blue-600"><?php echo htmlspecialchars($site['site_id']); ?></span></p>
-            <p class="text-sm text-gray-500 mt-1">Complete comprehensive feasibility assessment for installation</p>
+            <p class="text-sm text-gray-500 mt-1">Update your site feasibility assessment</p>
         </div>
         <div class="mt-6 lg:mt-0 lg:ml-6">
-            <a href="sites/" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+            <a href="surveys.php" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"></path>
                 </svg>
-                Back to Sites
+                Back to Surveys
             </a>
         </div>
     </div>
@@ -85,34 +91,22 @@ ob_start();
     </div>
 </div>
 
-<?php if ($existingSurvey): ?>
-<div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+<?php if ($survey['survey_status'] === 'rejected' && !empty($survey['approval_remarks'])): ?>
+<div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
     <div class="flex items-start">
-        <svg class="w-6 h-6 text-blue-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+        <svg class="w-6 h-6 text-red-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
         </svg>
         <div class="flex-1">
-            <h4 class="text-lg font-medium text-blue-800">Survey Already Submitted</h4>
-            <p class="text-sm text-blue-600 mt-1">
-                You have already submitted a survey for this site on <?php echo isset($existingSurvey['submitted_date']) ? date('M d, Y', strtotime($existingSurvey['submitted_date'])) : 'Unknown date'; ?>.
-                Status: <span class="font-semibold"><?php echo isset($existingSurvey['survey_status']) ? ucfirst($existingSurvey['survey_status']) : 'Unknown'; ?></span>
+            <h4 class="text-lg font-medium text-red-800">Survey Rejected - Please Update</h4>
+            <p class="text-sm text-red-600 mt-1">
+                <strong>Rejection Remarks:</strong> <?php echo htmlspecialchars($survey['approval_remarks']); ?>
             </p>
-            <div class="mt-4">
-                <?php if (isset($existingSurvey['id'])): ?>
-                    <a href="../shared/view-survey.php?id=<?php echo $existingSurvey['id']; ?>" class="inline-flex items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100">
-                        View Survey Details
-                    </a>
-                    <?php if (isset($existingSurvey['survey_status']) && ($existingSurvey['survey_status'] === 'pending' || $existingSurvey['survey_status'] === 'rejected')): ?>
-                        <a href="edit-survey.php?id=<?php echo $existingSurvey['id']; ?>" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                            Edit Survey
-                        </a>
-                    <?php endif; ?>
-                <?php endif; ?>
-            </div>
+            <p class="text-sm text-red-600 mt-2">Please update the survey based on the feedback above and resubmit.</p>
         </div>
     </div>
 </div>
-<?php else: ?>
+<?php endif; ?>
 
 <style>
     .form-section {
@@ -186,9 +180,13 @@ ob_start();
         <p class="text-sm text-gray-500 mt-1">Complete the technical assessment for this installation site</p>
     </div>
     <div class="p-6">
-        <form id="surveyForm" action="process-survey-comprehensive.php" method="POST" enctype="multipart/form-data">
+        <form id="surveyForm" action="process-survey-update.php" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="survey_id" value="<?php echo $surveyId; ?>">
             <input type="hidden" name="site_id" value="<?php echo $site['id']; ?>">
-            <input type="hidden" name="delegation_id" value="<?php echo $delegationId; ?>">
+            <input type="hidden" name="delegation_id" value="<?php echo $survey['delegation_id']; ?>">
+            <input type="hidden" name="checkin_datetime" value="<?php echo htmlspecialchars($survey['checkin_datetime'] ?? ''); ?>">
+            <input type="hidden" name="checkout_datetime" value="<?php echo htmlspecialchars($survey['checkout_datetime'] ?? ''); ?>">
+            <input type="hidden" name="working_hours" value="<?php echo htmlspecialchars($survey['working_hours'] ?? ''); ?>">
             
             <div class="form-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white;">
                 <h4 style="color: white; font-size: 1.1rem; margin-bottom: 1rem;">⏱️ Check In & Start Survey Timer</h4>
@@ -225,7 +223,7 @@ ob_start();
                     </div>
                     <div class="form-group">
                         <label class="form-label">Store Model</label>
-                        <input type="text" name="store_model" class="form-input survey-field" placeholder="Enter store model" disabled required>
+                        <input type="text" name="store_model" class="form-input survey-field" placeholder="Enter store model" value="<?php echo htmlspecialchars($survey['store_model'] ?? ''); ?>" disabled required>
                     </div>
                 </div>
             </div>
@@ -235,35 +233,75 @@ ob_start();
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="form-group">
                         <label class="form-label">Floor Height (in feet)</label>
-                        <input type="number" step="0.1" name="floor_height" class="form-input survey-field" disabled required>
+                        <input type="number" step="0.1" name="floor_height" class="form-input survey-field" value="<?php echo htmlspecialchars($survey['floor_height'] ?? ''); ?>" disabled required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Floor Height Photos</label>
+                        <?php 
+                        $existingPhotos = !empty($survey['floor_height_photos']) ? json_decode($survey['floor_height_photos'], true) : [];
+                        if (!empty($existingPhotos) && is_array($existingPhotos)): 
+                        ?>
+                            <div class="existing-photos mb-3 p-3 bg-gray-50 rounded border border-gray-200">
+                                <p class="text-xs font-medium text-gray-700 mb-2">Existing Photos:</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <?php foreach ($existingPhotos as $photo): ?>
+                                        <div class="relative group">
+                                            <img src="../<?php echo htmlspecialchars($photo); ?>" alt="Floor Height" class="w-20 h-20 object-cover rounded border shadow-sm">
+                                            <a href="../<?php echo htmlspecialchars($photo); ?>" target="_blank" class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-white opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                         <input type="file" name="floor_height_photo[]" class="form-input image-input survey-field" accept="image/*" multiple disabled>
                         <div class="preview mt-2 flex flex-wrap gap-2"></div>
-                        <p class="text-xs text-gray-500 mt-1">Upload multiple photos showing floor height</p>
+                        <p class="text-xs text-gray-500 mt-1">Upload new photos or keep existing ones</p>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Floor Height Photo Remarks</label>
-                        <textarea name="floor_height_photo_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about floor height photos..." disabled></textarea>
+                        <textarea name="floor_height_photo_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about floor height photos..." disabled><?php echo htmlspecialchars($survey['floor_height_photo_remarks'] ?? ''); ?></textarea>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Type of Ceiling</label>
                         <select name="ceiling_type" class="form-select survey-field" disabled required>
                             <option value="">Select ceiling type</option>
-                            <option value="true">True Ceiling</option>
-                            <option value="false">False Ceiling</option>
+                            <option value="true" <?php echo ($survey['ceiling_type'] ?? '') === 'true' ? 'selected' : ''; ?>>True Ceiling</option>
+                            <option value="false" <?php echo ($survey['ceiling_type'] ?? '') === 'false' ? 'selected' : ''; ?>>False Ceiling</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Ceiling Photos</label>
+                        <?php 
+                        $existingPhotos = !empty($survey['ceiling_photos']) ? json_decode($survey['ceiling_photos'], true) : [];
+                        if (!empty($existingPhotos) && is_array($existingPhotos)): 
+                        ?>
+                            <div class="existing-photos mb-3 p-3 bg-gray-50 rounded border border-gray-200">
+                                <p class="text-xs font-medium text-gray-700 mb-2">Existing Photos:</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <?php foreach ($existingPhotos as $photo): ?>
+                                        <div class="relative group">
+                                            <img src="../<?php echo htmlspecialchars($photo); ?>" alt="Ceiling" class="w-20 h-20 object-cover rounded border shadow-sm">
+                                            <a href="../<?php echo htmlspecialchars($photo); ?>" target="_blank" class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-white opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                         <input type="file" name="ceiling_photo[]" class="form-input image-input survey-field" multiple accept="image/*" disabled>
                         <div class="preview mt-2 flex flex-wrap gap-2"></div>
-                        <p class="text-xs text-gray-500 mt-1">Upload photos showing ceiling structure</p>
+                        <p class="text-xs text-gray-500 mt-1">Upload new photos or keep existing ones</p>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Ceiling Photo Remarks</label>
-                        <textarea name="ceiling_photo_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about ceiling photos..." disabled></textarea>
+                        <textarea name="ceiling_photo_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about ceiling photos..." disabled><?php echo htmlspecialchars($survey['ceiling_photo_remarks'] ?? ''); ?></textarea>
                     </div>
                 </div>
             </div>
@@ -273,25 +311,45 @@ ob_start();
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="form-group">
                         <label class="form-label">Total Number of Cameras</label>
-                        <input type="number" name="total_cameras" class="form-input survey-field" disabled required>
+                        <input type="number" name="total_cameras" class="form-input survey-field" value="<?php echo htmlspecialchars($survey['total_cameras'] ?? ''); ?>" disabled required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Nos. of SLP Cameras</label>
-                        <input type="number" name="slp_cameras" class="form-input survey-field" disabled>
+                        <input type="number" name="slp_cameras" class="form-input survey-field" value="<?php echo htmlspecialchars($survey['slp_cameras'] ?? ''); ?>" disabled>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Nos. of Analytic Cameras</label>
-                        <input type="number" name="analytic_cameras" class="form-input survey-field" disabled>
+                        <input type="number" name="analytic_cameras" class="form-input survey-field" value="<?php echo htmlspecialchars($survey['analytic_cameras'] ?? ''); ?>" disabled>
                     </div>
                     <div class="form-group md:col-span-2">
                         <label class="form-label">Analytic Cameras - Snapshots (max 5)</label>
+                        <?php 
+                        $existingPhotos = !empty($survey['analytic_photos']) ? json_decode($survey['analytic_photos'], true) : [];
+                        if (!empty($existingPhotos) && is_array($existingPhotos)): 
+                        ?>
+                            <div class="existing-photos mb-3 p-3 bg-gray-50 rounded border border-gray-200">
+                                <p class="text-xs font-medium text-gray-700 mb-2">Existing Photos:</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <?php foreach ($existingPhotos as $photo): ?>
+                                        <div class="relative group">
+                                            <img src="../<?php echo htmlspecialchars($photo); ?>" alt="Analytic Camera" class="w-20 h-20 object-cover rounded border shadow-sm">
+                                            <a href="../<?php echo htmlspecialchars($photo); ?>" target="_blank" class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-white opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                         <input type="file" name="analytic_photos[]" class="form-input image-input survey-field" multiple accept="image/*" disabled>
                         <div class="preview mt-2 flex flex-wrap gap-2"></div>
-                        <p class="text-xs text-gray-500 mt-1">Upload snapshots of analytic camera positions</p>
+                        <p class="text-xs text-gray-500 mt-1">Upload new photos or keep existing ones</p>
                     </div>
                     <div class="form-group md:col-span-2">
                         <label class="form-label">Analytic Camera Photos Remarks</label>
-                        <textarea name="analytic_photos_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about analytic camera photos..." disabled></textarea>
+                        <textarea name="analytic_photos_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about analytic camera photos..." disabled><?php echo htmlspecialchars($survey['analytic_photos_remarks'] ?? ''); ?></textarea>
                     </div>
                 </div>
             </div>
@@ -301,49 +359,109 @@ ob_start();
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="form-group">
                         <label class="form-label">Existing POE Rack (count)</label>
-                        <input type="number" name="existing_poe_rack" class="form-input survey-field" disabled>
+                        <input type="number" name="existing_poe_rack" class="form-input survey-field" value="<?php echo htmlspecialchars($survey['existing_poe_rack'] ?? ''); ?>" disabled>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Existing POE Rack Photos (max 5)</label>
+                        <?php 
+                        $existingPhotos = !empty($survey['existing_poe_photos']) ? json_decode($survey['existing_poe_photos'], true) : [];
+                        if (!empty($existingPhotos) && is_array($existingPhotos)): 
+                        ?>
+                            <div class="existing-photos mb-3 p-3 bg-gray-50 rounded border border-gray-200">
+                                <p class="text-xs font-medium text-gray-700 mb-2">Existing Photos:</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <?php foreach ($existingPhotos as $photo): ?>
+                                        <div class="relative group">
+                                            <img src="../<?php echo htmlspecialchars($photo); ?>" alt="Existing POE Rack" class="w-20 h-20 object-cover rounded border shadow-sm">
+                                            <a href="../<?php echo htmlspecialchars($photo); ?>" target="_blank" class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-white opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                         <input type="file" name="existing_poe_photos[]" class="form-input image-input survey-field" multiple accept="image/*" disabled>
                         <div class="preview mt-2 flex flex-wrap gap-2"></div>
-                        <p class="text-xs text-gray-500 mt-1">Photos of existing POE rack setup</p>
+                        <p class="text-xs text-gray-500 mt-1">Upload new photos or keep existing ones</p>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Existing POE Rack Photo Remarks</label>
-                        <textarea name="existing_poe_photos_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about existing POE rack photos..." disabled></textarea>
+                        <textarea name="existing_poe_photos_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about existing POE rack photos..." disabled><?php echo htmlspecialchars($survey['existing_poe_photos_remarks'] ?? ''); ?></textarea>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Space for New Rack (Server Room)</label>
                         <select name="space_new_rack" class="form-select survey-field" disabled required>
                             <option value="">Select availability</option>
-                            <option value="Yes">Yes - Space available</option>
-                            <option value="No">No - No space available</option>
+                            <option value="Yes" <?php echo ($survey['space_new_rack'] ?? '') === 'Yes' ? 'selected' : ''; ?>>Yes - Space available</option>
+                            <option value="No" <?php echo ($survey['space_new_rack'] ?? '') === 'No' ? 'selected' : ''; ?>>No - No space available</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Server Room Photos (max 5)</label>
+                        <?php 
+                        $existingPhotos = !empty($survey['space_new_rack_photos']) ? json_decode($survey['space_new_rack_photos'], true) : [];
+                        if (!empty($existingPhotos) && is_array($existingPhotos)): 
+                        ?>
+                            <div class="existing-photos mb-3 p-3 bg-gray-50 rounded border border-gray-200">
+                                <p class="text-xs font-medium text-gray-700 mb-2">Existing Photos:</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <?php foreach ($existingPhotos as $photo): ?>
+                                        <div class="relative group">
+                                            <img src="../<?php echo htmlspecialchars($photo); ?>" alt="Server Room" class="w-20 h-20 object-cover rounded border shadow-sm">
+                                            <a href="../<?php echo htmlspecialchars($photo); ?>" target="_blank" class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-white opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                         <input type="file" name="space_new_rack_photo[]" class="form-input image-input survey-field" multiple accept="image/*" disabled>
                         <div class="preview mt-2 flex flex-wrap gap-2"></div>
-                        <p class="text-xs text-gray-500 mt-1">Photos showing available space for new rack</p>
+                        <p class="text-xs text-gray-500 mt-1">Upload new photos or keep existing ones</p>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Server Room Photo Remarks</label>
-                        <textarea name="space_new_rack_photo_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about server room photos..." disabled></textarea>
+                        <textarea name="space_new_rack_photo_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about server room photos..." disabled><?php echo htmlspecialchars($survey['space_new_rack_photo_remarks'] ?? ''); ?></textarea>
                     </div>
                     <div class="form-group">
                         <label class="form-label">New POE Rack Recommended (count)</label>
-                        <input type="number" name="new_poe_rack" class="form-input survey-field" disabled>
+                        <input type="number" name="new_poe_rack" class="form-input survey-field" value="<?php echo htmlspecialchars($survey['new_poe_rack'] ?? ''); ?>" disabled>
                     </div>
                     <div class="form-group">
                         <label class="form-label">New POE Rack Photos (max 5)</label>
+                        <?php 
+                        $existingPhotos = !empty($survey['new_poe_photos']) ? json_decode($survey['new_poe_photos'], true) : [];
+                        if (!empty($existingPhotos) && is_array($existingPhotos)): 
+                        ?>
+                            <div class="existing-photos mb-3 p-3 bg-gray-50 rounded border border-gray-200">
+                                <p class="text-xs font-medium text-gray-700 mb-2">Existing Photos:</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <?php foreach ($existingPhotos as $photo): ?>
+                                        <div class="relative group">
+                                            <img src="../<?php echo htmlspecialchars($photo); ?>" alt="New POE Rack" class="w-20 h-20 object-cover rounded border shadow-sm">
+                                            <a href="../<?php echo htmlspecialchars($photo); ?>" target="_blank" class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-white opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                         <input type="file" name="new_poe_photos[]" class="form-input image-input survey-field" multiple accept="image/*" disabled>
                         <div class="preview mt-2 flex flex-wrap gap-2"></div>
-                        <p class="text-xs text-gray-500 mt-1">Photos of recommended new POE rack locations</p>
+                        <p class="text-xs text-gray-500 mt-1">Upload new photos or keep existing ones</p>
                     </div>
                     <div class="form-group">
                         <label class="form-label">New POE Rack Photo Remarks</label>
-                        <textarea name="new_poe_photos_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about new POE rack photos..." disabled></textarea>
+                        <textarea name="new_poe_photos_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about new POE rack photos..." disabled><?php echo htmlspecialchars($survey['new_poe_photos_remarks'] ?? ''); ?></textarea>
                     </div>
                 </div>
             </div>
@@ -352,7 +470,7 @@ ob_start();
                 <h4>Zone Assessment</h4>
                 <div class="form-group">
                     <label class="form-label">Number of Zones Recommended</label>
-                    <input type="number" name="zones_recommended" class="form-input survey-field" disabled>
+                    <input type="number" name="zones_recommended" class="form-input survey-field" value="<?php echo htmlspecialchars($survey['zones_recommended'] ?? ''); ?>" disabled>
                     <p class="text-xs text-gray-500 mt-1">Recommended number of security zones for this site</p>
                 </div>
             </div>
@@ -364,37 +482,77 @@ ob_start();
                         <label class="form-label">RRL Materials Delivered?</label>
                         <select name="rrl_delivery_status" class="form-select survey-field" disabled>
                             <option value="">Select status</option>
-                            <option value="Yes">Yes - Materials delivered</option>
-                            <option value="No">No - Materials not delivered</option>
+                            <option value="Yes" <?php echo ($survey['rrl_delivery_status'] ?? '') === 'Yes' ? 'selected' : ''; ?>>Yes - Materials delivered</option>
+                            <option value="No" <?php echo ($survey['rrl_delivery_status'] ?? '') === 'No' ? 'selected' : ''; ?>>No - Materials not delivered</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">RRL Delivery Photos (max 5)</label>
+                        <?php 
+                        $existingPhotos = !empty($survey['rrl_photos']) ? json_decode($survey['rrl_photos'], true) : [];
+                        if (!empty($existingPhotos) && is_array($existingPhotos)): 
+                        ?>
+                            <div class="existing-photos mb-3 p-3 bg-gray-50 rounded border border-gray-200">
+                                <p class="text-xs font-medium text-gray-700 mb-2">Existing Photos:</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <?php foreach ($existingPhotos as $photo): ?>
+                                        <div class="relative group">
+                                            <img src="../<?php echo htmlspecialchars($photo); ?>" alt="RRL Materials" class="w-20 h-20 object-cover rounded border shadow-sm">
+                                            <a href="../<?php echo htmlspecialchars($photo); ?>" target="_blank" class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-white opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                         <input type="file" name="rrl_photos[]" class="form-input image-input survey-field" multiple accept="image/*" disabled>
                         <div class="preview mt-2 flex flex-wrap gap-2"></div>
-                        <p class="text-xs text-gray-500 mt-1">Photos of delivered RRL materials</p>
+                        <p class="text-xs text-gray-500 mt-1">Upload new photos or keep existing ones</p>
                     </div>
                     <div class="form-group">
                         <label class="form-label">RRL Delivery Photo Remarks</label>
-                        <textarea name="rrl_photos_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about RRL delivery photos..." disabled></textarea>
+                        <textarea name="rrl_photos_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about RRL delivery photos..." disabled><?php echo htmlspecialchars($survey['rrl_photos_remarks'] ?? ''); ?></textarea>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Space for KPTL Materials?</label>
                         <select name="kptl_space" class="form-select survey-field" disabled>
                             <option value="">Select availability</option>
-                            <option value="Yes">Yes - Space available</option>
-                            <option value="No">No - No space available</option>
+                            <option value="Yes" <?php echo ($survey['kptl_space'] ?? '') === 'Yes' ? 'selected' : ''; ?>>Yes - Space available</option>
+                            <option value="No" <?php echo ($survey['kptl_space'] ?? '') === 'No' ? 'selected' : ''; ?>>No - No space available</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">KPTL Material Photos (max 5)</label>
+                        <?php 
+                        $existingPhotos = !empty($survey['kptl_photos']) ? json_decode($survey['kptl_photos'], true) : [];
+                        if (!empty($existingPhotos) && is_array($existingPhotos)): 
+                        ?>
+                            <div class="existing-photos mb-3 p-3 bg-gray-50 rounded border border-gray-200">
+                                <p class="text-xs font-medium text-gray-700 mb-2">Existing Photos:</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <?php foreach ($existingPhotos as $photo): ?>
+                                        <div class="relative group">
+                                            <img src="../<?php echo htmlspecialchars($photo); ?>" alt="KPTL Materials" class="w-20 h-20 object-cover rounded border shadow-sm">
+                                            <a href="../<?php echo htmlspecialchars($photo); ?>" target="_blank" class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-white opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                         <input type="file" name="kptl_photos[]" class="form-input image-input survey-field" multiple accept="image/*" disabled>
                         <div class="preview mt-2 flex flex-wrap gap-2"></div>
-                        <p class="text-xs text-gray-500 mt-1">Photos showing space for KPTL materials</p>
+                        <p class="text-xs text-gray-500 mt-1">Upload new photos or keep existing ones</p>
                     </div>
                     <div class="form-group">
                         <label class="form-label">KPTL Material Photo Remarks</label>
-                        <textarea name="kptl_photos_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about KPTL material photos..." disabled></textarea>
+                        <textarea name="kptl_photos_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about KPTL material photos..." disabled><?php echo htmlspecialchars($survey['kptl_photos_remarks'] ?? ''); ?></textarea>
                     </div>
                 </div>
             </div>
@@ -406,56 +564,48 @@ ob_start();
                         <label class="form-label">Site Accessibility</label>
                         <select name="site_accessibility" class="form-select survey-field" disabled required>
                             <option value="">Select accessibility time</option>
-                            <option value="10AM-10PM">10AM - 10PM</option>
-                            <option value="10PM-10AM">10PM - 10AM</option>
-                            <option value="others">Others</option>
+                            <option value="10AM-10PM" <?php echo ($survey['site_accessibility'] ?? '') === '10AM-10PM' ? 'selected' : ''; ?>>10AM - 10PM</option>
+                            <option value="10PM-10AM" <?php echo ($survey['site_accessibility'] ?? '') === '10PM-10AM' ? 'selected' : ''; ?>>10PM - 10AM</option>
+                            <option value="others" <?php echo ($survey['site_accessibility'] ?? '') === 'others' ? 'selected' : ''; ?>>Others</option>
                         </select>
                     </div>
-                    <div class="form-group" id="site_accessibility_others_group" style="display:none;">
+                    <div class="form-group" id="site_accessibility_others_group" style="display:<?php echo ($survey['site_accessibility'] ?? '') === 'others' ? 'block' : 'none'; ?>;">
                         <label class="form-label">Site Accessibility (Others)</label>
-                        <input type="text" name="site_accessibility_others" class="form-input survey-field" placeholder="Specify accessibility time" disabled>
+                        <input type="text" name="site_accessibility_others" class="form-input survey-field" placeholder="Specify accessibility time" value="<?php echo htmlspecialchars($survey['site_accessibility_others'] ?? ''); ?>" disabled>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Power Availability</label>
                         <select name="power_availability" class="form-select survey-field" disabled required>
                             <option value="">Select power type</option>
-                            <option value="Raw Power">Raw Power</option>
-                            <option value="UPS Socket">UPS Socket</option>
+                            <option value="Raw Power" <?php echo ($survey['power_availability'] ?? '') === 'Raw Power' ? 'selected' : ''; ?>>Raw Power</option>
+                            <option value="UPS Socket" <?php echo ($survey['power_availability'] ?? '') === 'UPS Socket' ? 'selected' : ''; ?>>UPS Socket</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Network Connectivity</label>
                         <select name="network_connectivity" class="form-select survey-field" disabled required>
                             <option value="">Select connectivity level</option>
-                            <option value="excellent">Excellent - Strong signal</option>
-                            <option value="good">Good - Adequate signal</option>
-                            <option value="poor">Poor - Weak signal</option>
-                            <option value="none">None - No connectivity</option>
+                            <option value="excellent" <?php echo ($survey['network_connectivity'] ?? '') === 'excellent' ? 'selected' : ''; ?>>Excellent - Strong signal</option>
+                            <option value="good" <?php echo ($survey['network_connectivity'] ?? '') === 'good' ? 'selected' : ''; ?>>Good - Adequate signal</option>
+                            <option value="poor" <?php echo ($survey['network_connectivity'] ?? '') === 'poor' ? 'selected' : ''; ?>>Poor - Weak signal</option>
+                            <option value="none" <?php echo ($survey['network_connectivity'] ?? '') === 'none' ? 'selected' : ''; ?>>None - No connectivity</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Nos. of Ladder Required</label>
-                        <input type="number" name="nos_of_ladder" class="form-input survey-field" placeholder="Enter number of ladders" disabled>
+                        <input type="number" name="nos_of_ladder" class="form-input survey-field" placeholder="Enter number of ladders" value="<?php echo htmlspecialchars($survey['nos_of_ladder'] ?? ''); ?>" disabled>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Size of Ladder Required</label>
                         <select name="ladder_size" class="form-select survey-field" disabled>
                             <option value="">Select ladder height</option>
-                            <option value="6ft">6 ft</option>
-                            <option value="7ft">7 ft</option>
-                            <option value="8ft">8 ft</option>
-                            <option value="9ft">9 ft</option>
-                            <option value="10ft">10 ft</option>
-                            <option value="11ft">11 ft</option>
-                            <option value="12ft">12 ft</option>
-                            <option value="13ft">13 ft</option>
-                            <option value="14ft">14 ft</option>
-                            <option value="15ft">15 ft</option>
-                            <option value="16ft">16 ft</option>
-                            <option value="17ft">17 ft</option>
-                            <option value="18ft">18 ft</option>
-                            <option value="19ft">19 ft</option>
-                            <option value="20ft">20 ft</option>
+                            <?php 
+                            $ladderSizes = ['6ft', '7ft', '8ft', '9ft', '10ft', '11ft', '12ft', '13ft', '14ft', '15ft', '16ft', '17ft', '18ft', '19ft', '20ft'];
+                            foreach ($ladderSizes as $size) {
+                                $selected = ($survey['ladder_size'] ?? '') === $size ? 'selected' : '';
+                                echo "<option value=\"$size\" $selected>" . str_replace('ft', ' ft', $size) . "</option>";
+                            }
+                            ?>
                         </select>
                     </div>
                 </div>
@@ -466,36 +616,36 @@ ob_start();
                 <div class="space-y-6">
                     <div class="form-group">
                         <label class="form-label">Technical Remarks</label>
-                        <textarea name="technical_remarks" class="form-textarea survey-field" rows="4" placeholder="Detailed technical observations and findings..." disabled required></textarea>
+                        <textarea name="technical_remarks" class="form-textarea survey-field" rows="4" placeholder="Detailed technical observations and findings..." disabled required><?php echo htmlspecialchars($survey['technical_remarks'] ?? ''); ?></textarea>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Challenges Identified</label>
-                        <textarea name="challenges_identified" class="form-textarea survey-field" rows="3" placeholder="Any challenges or issues identified during the survey..." disabled></textarea>
+                        <textarea name="challenges_identified" class="form-textarea survey-field" rows="3" placeholder="Any challenges or issues identified during the survey..." disabled><?php echo htmlspecialchars($survey['challenges_identified'] ?? ''); ?></textarea>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Recommendations</label>
-                        <textarea name="recommendations" class="form-textarea survey-field" rows="3" placeholder="Your recommendations for successful installation..." disabled required></textarea>
+                        <textarea name="recommendations" class="form-textarea survey-field" rows="3" placeholder="Your recommendations for successful installation..." disabled required><?php echo htmlspecialchars($survey['recommendations'] ?? ''); ?></textarea>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Additional Equipment Needed</label>
-                        <textarea name="additional_equipment_needed" class="form-textarea survey-field" rows="3" placeholder="List any additional equipment or materials needed..." disabled></textarea>
+                        <textarea name="additional_equipment_needed" class="form-textarea survey-field" rows="3" placeholder="List any additional equipment or materials needed..." disabled><?php echo htmlspecialchars($survey['additional_equipment_needed'] ?? ''); ?></textarea>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="form-group">
                             <label class="form-label">Estimated Completion Days</label>
-                            <input type="number" name="estimated_completion_days" class="form-input survey-field" min="1" max="365" placeholder="Number of days estimated for completion" disabled>
+                            <input type="number" name="estimated_completion_days" class="form-input survey-field" min="1" max="365" placeholder="Number of days estimated for completion" value="<?php echo htmlspecialchars($survey['estimated_completion_days'] ?? ''); ?>" disabled>
                         </div>
                         <div class="space-y-2">
                             <label class="flex items-center">
-                                <input type="checkbox" name="electrical_work_required" value="1" class="mr-2 survey-field" disabled>
+                                <input type="checkbox" name="electrical_work_required" value="1" class="mr-2 survey-field" <?php echo !empty($survey['electrical_work_required']) ? 'checked' : ''; ?> disabled>
                                 <span class="text-sm font-medium text-gray-700">Electrical work required</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="checkbox" name="civil_work_required" value="1" class="mr-2 survey-field" disabled>
+                                <input type="checkbox" name="civil_work_required" value="1" class="mr-2 survey-field" <?php echo !empty($survey['civil_work_required']) ? 'checked' : ''; ?> disabled>
                                 <span class="text-sm font-medium text-gray-700">Civil work required</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="checkbox" name="network_work_required" value="1" class="mr-2 survey-field" disabled>
+                                <input type="checkbox" name="network_work_required" value="1" class="mr-2 survey-field" <?php echo !empty($survey['network_work_required']) ? 'checked' : ''; ?> disabled>
                                 <span class="text-sm font-medium text-gray-700">Network work required</span>
                             </label>
                         </div>
@@ -510,12 +660,33 @@ ob_start();
                 <h4>Site Photos (Optional)</h4>
                 <div class="form-group">
                     <label class="form-label">Upload Additional Site Photos</label>
+                    <?php 
+                    $existingPhotos = !empty($survey['site_photos']) ? json_decode($survey['site_photos'], true) : [];
+                    if (!empty($existingPhotos) && is_array($existingPhotos)): 
+                    ?>
+                        <div class="existing-photos mb-3 p-3 bg-gray-50 rounded border border-gray-200">
+                            <p class="text-xs font-medium text-gray-700 mb-2">Existing Photos:</p>
+                            <div class="flex flex-wrap gap-2">
+                                <?php foreach ($existingPhotos as $photo): ?>
+                                    <div class="relative group">
+                                        <img src="../<?php echo htmlspecialchars($photo); ?>" alt="Site Photo" class="w-20 h-20 object-cover rounded border shadow-sm">
+                                        <a href="../<?php echo htmlspecialchars($photo); ?>" target="_blank" class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded flex items-center justify-center">
+                                            <svg class="w-6 h-6 text-white opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                     <input type="file" name="site_photos[]" class="form-input survey-field" multiple accept="image/*" disabled>
-                    <p class="text-xs text-gray-500 mt-1">You can upload multiple photos. Max size: 5MB per file.</p>
+                    <div class="preview mt-2 flex flex-wrap gap-2"></div>
+                    <p class="text-xs text-gray-500 mt-1">Upload new photos or keep existing ones. Max size: 5MB per file.</p>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Site Photos Remarks</label>
-                    <textarea name="site_photos_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about site photos..." disabled></textarea>
+                    <textarea name="site_photos_remarks" class="form-textarea survey-field" rows="2" placeholder="Add remarks about site photos..." disabled><?php echo htmlspecialchars($survey['site_photos_remarks'] ?? ''); ?></textarea>
                 </div>
             </div>
 
@@ -535,14 +706,14 @@ ob_start();
                     </button>
                 </div>
                 <div class="flex space-x-4">
-                    <a href="sites/" class="inline-flex items-center px-6 py-3 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    <a href="surveys.php" class="inline-flex items-center px-6 py-3 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
                         Cancel
                     </a>
                     <button type="submit" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                         </svg>
-                        Submit Feasibility Survey
+                        Update Survey
                     </button>
                 </div>
             </div>
@@ -727,7 +898,7 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner mr-2"></span>Submitting Survey...';
         
-        fetch('process-survey-comprehensive.php', {
+        fetch('process-survey-update.php', {
             method: 'POST',
             body: formData
         })
@@ -737,7 +908,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (typeof showAlert === 'function') {
                 if (data.success) {
                     showAlert(data.message, 'success');
-                    setTimeout(() => window.location.href = 'sites/', 2000);
+                    setTimeout(() => window.location.href = 'surveys.php', 2000);
                 } else {
                     showAlert(data.message, 'error');
                 }
@@ -745,7 +916,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log(data.message);
                 if (data.success) {
                     alert(data.message);
-                    setTimeout(() => window.location.href = 'sites/', 2000);
+                    setTimeout(() => window.location.href = 'surveys.php', 2000);
                 } else {
                     alert('Error: ' + data.message);
                 }
@@ -909,8 +1080,6 @@ function createSampleImages() {
 
 
 </script>
-
-<?php endif; ?>
 
 <?php
 $content = ob_get_clean();

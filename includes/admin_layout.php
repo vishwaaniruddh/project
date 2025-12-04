@@ -793,7 +793,7 @@ $currentUser = Auth::getCurrentUser();
         }
         .modal-content {
             position: relative;
-            top: 5rem;
+            /* top: 5rem; */
             margin: 0 auto;
             padding: 1.25rem;
             border: 1px solid #e5e7eb;

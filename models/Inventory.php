@@ -11,32 +11,66 @@ class Inventory {
     
     // ==================== STOCK MANAGEMENT ====================
     
-    public function getStockOverview($search = '', $category = '', $lowStock = false) {
-        $whereClause = '';
+    public function getStockOverview($search = '', $category = '', $lowStock = false, $warehouseId = '') {
         $params = [];
         $conditions = [];
         
-        if (!empty($search)) {
-            $conditions[] = "(item_name LIKE ? OR item_code LIKE ?)";
-            $searchTerm = "%$search%";
-            $params = array_merge($params, [$searchTerm, $searchTerm]);
+        try {
+            // If warehouse filter is applied, use warehouse-specific query
+            if (!empty($warehouseId)) {
+                if (!empty($search)) {
+                    $conditions[] = "(item_name LIKE ? OR item_code LIKE ?)";
+                    $searchTerm = "%$search%";
+                    $params = array_merge($params, [$searchTerm, $searchTerm]);
+                }
+                
+                if (!empty($category)) {
+                    $conditions[] = "category = ?";
+                    $params[] = $category;
+                }
+                
+                $conditions[] = "warehouse_id = ?";
+                $params[] = $warehouseId;
+                
+                $whereClause = !empty($conditions) ? "WHERE " . implode(" AND ", $conditions) : "";
+                
+                // Use warehouse_stock_summary view for warehouse-specific data
+                $sql = "SELECT * FROM warehouse_stock_summary $whereClause ORDER BY item_name";
+            } else {
+                // Use global inventory summary
+                if (!empty($search)) {
+                    $conditions[] = "(item_name LIKE ? OR item_code LIKE ?)";
+                    $searchTerm = "%$search%";
+                    $params = array_merge($params, [$searchTerm, $searchTerm]);
+                }
+                
+                if (!empty($category)) {
+                    $conditions[] = "category = ?";
+                    $params[] = $category;
+                }
+                
+                $whereClause = !empty($conditions) ? "WHERE " . implode(" AND ", $conditions) : "";
+                
+                // Use the inventory_summary view for aggregated stock data across all warehouses
+                $sql = "SELECT *, 'All Warehouses' as warehouse_name FROM inventory_summary $whereClause ORDER BY item_name";
+            }
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Ensure warehouse_name exists in all results
+            foreach ($results as &$result) {
+                if (!isset($result['warehouse_name'])) {
+                    $result['warehouse_name'] = 'All Warehouses';
+                }
+            }
+            
+            return $results;
+        } catch (PDOException $e) {
+            error_log("Error in getStockOverview: " . $e->getMessage());
+            return [];
         }
-        
-        if (!empty($category)) {
-            $conditions[] = "category = ?";
-            $params[] = $category;
-        }
-        
-        if (!empty($conditions)) {
-            $whereClause = "WHERE " . implode(" AND ", $conditions);
-        }
-        
-        // Use the new inventory_summary view for aggregated stock data
-        $sql = "SELECT * FROM inventory_summary $whereClause ORDER BY item_name";
-        
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
     public function getAvailableStock($boqItemId, $requiredQuantity = null) {

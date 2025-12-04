@@ -11,7 +11,7 @@ site upload format need to add:
 
 https://project.sarsspl.com/admin/sites/delegate.php?id=7
 Delegation Date - Site Allocation date
-layout upload  - as an attachement
+layout upload  - as an attachement (Done)
 
 vendor part dispute comes .. 
 
@@ -73,7 +73,8 @@ https://project.sarsspl.com/admin/requests/view-request.php?id=5
     Required Date - ETA 
 
 
-    while accepting material frm vendors end he has has to upload THE LR Copy and receved materials
+    while accepting material frm vendors end he has has to upload 
+    THE LR Copy and receved materials
 
 
 https://project.sarsspl.com/vendor/manage-installation.php?id=4

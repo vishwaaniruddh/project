@@ -9,7 +9,7 @@ Auth::requireVendor();
 
 $delegationId = $_GET['delegation_id'] ?? null;
 if (!$delegationId) {
-    header('Location: sites/');
+    header('Location: surveys.php');
     exit;
 }
 
@@ -21,14 +21,14 @@ $surveyModel = new SiteSurvey();
 // Get delegation details
 $delegation = $delegationModel->find($delegationId);
 if (!$delegation || $delegation['vendor_id'] != $vendorId) {
-    header('Location: sites/');
+    header('Location: surveys.php');
     exit;
 }
 
 // Get site details
 $site = $siteModel->findWithRelations($delegation['site_id']);
 if (!$site) {
-    header('Location: sites/');
+    header('Location: surveys.php');
     exit;
 }
 
@@ -43,7 +43,7 @@ ob_start();
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
         <div class="flex-1">
-            <h1 class="text-3xl font-bold text-gray-900">Site Feasibility Survey</h1>
+            <h1 class="text-3xl font-bold text-gray-900">Edit Site Survey</h1>
             <p class="mt-2 text-lg text-gray-600">Site: <span class="font-semibold text-blue-600"><?php echo htmlspecialchars($site['site_id']); ?></span></p>
             <p class="text-sm text-gray-500 mt-1">Complete comprehensive feasibility assessment for installation</p>
         </div>
@@ -182,11 +182,11 @@ ob_start();
 
 <div class="professional-table bg-white">
     <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-900">Site Feasibility Survey</h3>
+        <h3 class="text-lg font-semibold text-gray-900">Edit Site Survey</h3>
         <p class="text-sm text-gray-500 mt-1">Complete the technical assessment for this installation site</p>
     </div>
     <div class="p-6">
-        <form id="surveyForm" action="process-survey-comprehensive.php" method="POST" enctype="multipart/form-data">
+        <form id="surveyForm" action="process-survey-update.php" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="site_id" value="<?php echo $site['id']; ?>">
             <input type="hidden" name="delegation_id" value="<?php echo $delegationId; ?>">
             

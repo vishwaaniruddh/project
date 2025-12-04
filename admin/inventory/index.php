@@ -9,17 +9,23 @@ Auth::requireRole(ADMIN_ROLE);
 $inventoryModel = new Inventory();
 $boqModel = new BoqItem();
 
+// Include Warehouse model
+require_once __DIR__ . '/../../models/Warehouse.php';
+$warehouseModel = new Warehouse();
+
 // Get inventory statistics
 $stats = $inventoryModel->getInventoryStats();
 
 // Handle filters
 $search = $_GET['search'] ?? '';
 $category = $_GET['category'] ?? '';
+$warehouseId = $_GET['warehouse_id'] ?? '';
 $lowStock = isset($_GET['low_stock']);
 
 // Get stock overview
-$stockItems = $inventoryModel->getStockOverview($search, $category, $lowStock);
+$stockItems = $inventoryModel->getStockOverview($search, $category, $lowStock, $warehouseId);
 $categories = $boqModel->getCategories();
+$warehouses = $warehouseModel->getAll('', 'active');
 
 $title = 'Inventory Management';
 ob_start();
@@ -170,7 +176,7 @@ ob_start();
 <!-- Search and Filters -->
 <div class="card mb-6">
     <div class="card-body">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div class="lg:col-span-2">
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -180,6 +186,16 @@ ob_start();
                     </div>
                     <input type="text" id="searchInput" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Search items..." value="<?php echo htmlspecialchars($search); ?>">
                 </div>
+            </div>
+            <div>
+                <select id="warehouseFilter" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <option value="">All Warehouses</option>
+                    <?php foreach ($warehouses as $wh): ?>
+                        <option value="<?php echo $wh['id']; ?>" <?php echo $warehouseId == $wh['id'] ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($wh['name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
             <div>
                 <select id="categoryFilter" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
@@ -226,6 +242,7 @@ ob_start();
                     <tr>
                         <th>Item Details</th>
                         <th>Category</th>
+                        <th>Warehouse</th>
                         <th>Total Stock</th>
                         <th>Available</th>
                         <th>Dispatched</th>
@@ -242,7 +259,7 @@ ob_start();
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-10 w-10">
                                     <div class="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                                        <i class="<?php echo $item['icon_class'] ?: 'fas fa-cube'; ?> text-blue-600"></i>
+                                        <!-- <i class="<?php echo $item['icon_class'] ?: 'fas fa-cube'; ?> text-blue-600"></i> -->
                                     </div>
                                 </div>
                                 <div class="ml-4">
@@ -256,6 +273,18 @@ ob_start();
                                 <?php echo htmlspecialchars($item['category'] ?: 'Uncategorized'); ?>
                             </span>
                         </td>
+                        <td>
+                            <div class="flex items-center">
+                                <svg class="w-4 h-4 text-gray-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span class="text-sm text-gray-900">
+                                    <?php 
+                                    $warehouseName = isset($item['warehouse_name']) ? $item['warehouse_name'] : 'All Warehouses';
+                                    echo htmlspecialchars($warehouseName); 
+                                    ?>
+                                </span>
+                           
                         <td>
                             <div class="text-sm text-gray-900"><?php echo number_format($item['total_stock'] ?? 0); ?> <?php echo htmlspecialchars($item['unit']); ?></div>
                         </td>
@@ -369,11 +398,13 @@ document.getElementById('searchInput').addEventListener('keyup', debounce(functi
 }, 500));
 
 // Filter functionality
+document.getElementById('warehouseFilter').addEventListener('change', applyFilters);
 document.getElementById('categoryFilter').addEventListener('change', applyFilters);
 document.getElementById('lowStockFilter').addEventListener('change', applyFilters);
 
 function applyFilters() {
     const searchTerm = document.getElementById('searchInput').value;
+    const warehouseId = document.getElementById('warehouseFilter').value;
     const category = document.getElementById('categoryFilter').value;
     const lowStock = document.getElementById('lowStockFilter').checked;
     
@@ -381,6 +412,9 @@ function applyFilters() {
     
     if (searchTerm) url.searchParams.set('search', searchTerm);
     else url.searchParams.delete('search');
+    
+    if (warehouseId) url.searchParams.set('warehouse_id', warehouseId);
+    else url.searchParams.delete('warehouse_id');
     
     if (category) url.searchParams.set('category', category);
     else url.searchParams.delete('category');
