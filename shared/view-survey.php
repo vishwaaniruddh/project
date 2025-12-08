@@ -491,24 +491,141 @@ foreach ($photoFields as $field => $label) {
 </div>
 
 <?php if ($isAdmin): ?>
-<!-- Admin Survey Action Modal -->
+<!-- Admin Survey Action Modal with Disclaimer -->
 <div id="surveyActionModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h3 id="actionModalTitle" class="text-lg font-semibold text-gray-900"></h3>
+    <div class="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
+        <!-- Modal Header -->
+        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <div class="flex items-center justify-between">
+                <h3 id="actionModalTitle" class="text-xl font-semibold text-gray-900"></h3>
+                <button type="button" onclick="closeSurveyActionModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
         </div>
+        
         <form id="surveyActionForm">
-            <div class="p-6">
-                <input type="hidden" id="actionSurveyId" name="survey_id">
-                <input type="hidden" id="actionType" name="action">
-                <div class="mb-4">
-                    <label for="actionRemarks" class="block text-sm font-medium text-gray-700 mb-2">Remarks (Optional)</label>
-                    <textarea id="actionRemarks" name="remarks" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Add any remarks or feedback..."></textarea>
+            <div class="flex flex-col md:flex-row">
+                <!-- Left Side: Disclaimer (50%) -->
+                <div class="w-full md:w-1/2 p-6 bg-blue-50 border-r border-gray-200 overflow-y-auto max-h-[calc(90vh-180px)]">
+                    <div class="flex items-center mb-4">
+                        <svg class="w-6 h-6 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                        </svg>
+                        <h4 class="text-lg font-semibold text-blue-900">Important Disclaimer</h4>
+                    </div>
+                    
+                    <div class="space-y-4 text-sm text-gray-700">
+                        <div class="bg-white p-4 rounded-lg border border-blue-200">
+                            <h5 class="font-semibold text-gray-900 mb-2">Survey Verification</h5>
+                            <p>By approving or rejecting this survey, you confirm that you have:</p>
+                            <ul class="list-disc list-inside mt-2 space-y-1 text-gray-600">
+                                <li>Reviewed all submitted information thoroughly</li>
+                                <li>Verified the accuracy of site details and measurements</li>
+                                <li>Examined all uploaded photographs and documents</li>
+                                <li>Assessed the feasibility of installation at this location</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded-lg border border-blue-200">
+                            <h5 class="font-semibold text-gray-900 mb-2">Approval Implications</h5>
+                            <p class="text-gray-600">Approving this survey indicates that:</p>
+                            <ul class="list-disc list-inside mt-2 space-y-1 text-gray-600">
+                                <li>The site meets all technical requirements</li>
+                                <li>Installation can proceed as per the survey details</li>
+                                <li>All necessary permissions and clearances are in order</li>
+                                <li>The vendor can begin procurement and installation planning</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded-lg border border-blue-200">
+                            <h5 class="font-semibold text-gray-900 mb-2">Rejection Implications</h5>
+                            <p class="text-gray-600">Rejecting this survey indicates that:</p>
+                            <ul class="list-disc list-inside mt-2 space-y-1 text-gray-600">
+                                <li>The survey contains inaccurate or incomplete information</li>
+                                <li>The site does not meet technical or safety requirements</li>
+                                <li>Additional information or corrections are required</li>
+                                <li>The vendor must resubmit with necessary modifications</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-300">
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-yellow-600 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div>
+                                    <h5 class="font-semibold text-yellow-900 mb-1">Important Note</h5>
+                                    <p class="text-sm text-yellow-800">This action cannot be undone. Please ensure you have reviewed all details carefully before proceeding.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Side: Remarks Form (50%) -->
+                <div class="w-full md:w-1/2 p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+                    <input type="hidden" id="actionSurveyId" name="survey_id">
+                    <input type="hidden" id="actionType" name="action">
+                    
+                    <div class="mb-6">
+                        <label for="actionRemarks" class="block text-sm font-semibold text-gray-900 mb-2">
+                            Remarks / Feedback
+                            <span class="text-red-500">*</span>
+                        </label>
+                        <p class="text-xs text-gray-500 mb-3">Please provide detailed remarks explaining your decision. This will be shared with the vendor.</p>
+                        <textarea 
+                            id="actionRemarks" 
+                            name="remarks" 
+                            rows="12" 
+                            required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none" 
+                            placeholder="Enter your remarks here...&#10;&#10;For Approval:&#10;- Confirm all requirements are met&#10;- Note any special instructions&#10;&#10;For Rejection:&#10;- Specify what needs to be corrected&#10;- List missing information&#10;- Provide clear guidance for resubmission"></textarea>
+                        <p class="text-xs text-gray-500 mt-2">
+                            <span id="remarksCharCount">0</span> characters
+                        </p>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h5 class="font-semibold text-gray-900 mb-2 text-sm">Action Summary</h5>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Survey ID:</span>
+                                <span class="font-medium text-gray-900"><?php echo htmlspecialchars($survey['id']); ?></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Site:</span>
+                                <span class="font-medium text-gray-900"><?php echo htmlspecialchars($survey['site_code'] ?? $survey['site_id'] ?? 'N/A'); ?></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Vendor:</span>
+                                <span class="font-medium text-gray-900"><?php echo htmlspecialchars($survey['vendor_name'] ?? 'N/A'); ?></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Submitted:</span>
+                                <span class="font-medium text-gray-900"><?php echo date('d M Y', strtotime($survey['submitted_date'] ?? 'now')); ?></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
-                <button type="button" onclick="closeSurveyActionModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
-                <button type="submit" id="actionSubmitBtn" class="px-4 py-2 text-sm font-medium text-white rounded-md"></button>
+            
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center">
+                <div class="flex items-center text-sm text-gray-600">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>Action by: <strong><?php echo htmlspecialchars($currentUser['name'] ?? 'Admin'); ?></strong></span>
+                </div>
+                <div class="flex space-x-3">
+                    <button type="button" onclick="closeSurveyActionModal()" class="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                        Cancel
+                    </button>
+                    <button type="submit" id="actionSubmitBtn" class="px-5 py-2 text-sm font-medium text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2"></button>
+                </div>
             </div>
         </form>
     </div>
@@ -567,7 +684,13 @@ function rejectSurvey(surveyId) {
 function closeSurveyActionModal() {
     document.getElementById('surveyActionModal').classList.add('hidden');
     document.getElementById('surveyActionForm').reset();
+    document.getElementById('remarksCharCount').textContent = '0';
 }
+
+// Character counter for remarks
+document.getElementById('actionRemarks').addEventListener('input', function() {
+    document.getElementById('remarksCharCount').textContent = this.value.length;
+});
 
 document.getElementById('surveyActionForm').addEventListener('submit', function(e) {
     e.preventDefault();
