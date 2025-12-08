@@ -392,3 +392,10 @@
 {"timestamp":"2025-12-04 16:45:29","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
 {"timestamp":"2025-12-04 17:56:51","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
 {"timestamp":"2025-12-04 18:57:06","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-05 01:59:11","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-05 02:38:12","level":"INFO","message":"User logout","user_id":1,"ip_address":"::1","context":{"username":"admin"}}
+{"timestamp":"2025-12-05 02:39:16","level":"INFO","message":"User login successful","user_id":9,"ip_address":"::1","context":{"username":"ganesh@gmail.com","success":true}}
+{"timestamp":"2025-12-08 08:01:17","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-08 12:58:31","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-08 13:58:41","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2025-12-08 15:00:30","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}

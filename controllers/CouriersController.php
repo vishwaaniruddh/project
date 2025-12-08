@@ -13,7 +13,7 @@ class CouriersController extends BaseMasterController {
     
     protected function checkDependencies($id) {
         // Check if courier is used in material dispatches
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM material_dispatches WHERE courier_name = (SELECT courier_name FROM couriers WHERE id = ?)");
+        $stmt = $this->db->prepare("SELECT courier_name as name FROM couriers WHERE status = 'active')");
         $stmt->execute([$id]);
         $count = $stmt->fetchColumn();
         

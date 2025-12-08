@@ -24,15 +24,42 @@ $isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP
           (isset($_POST['ajax']) && $_POST['ajax'] === '1');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAjax) {
+    // Start output buffering to catch any stray output
+    ob_start();
+    
+    // Suppress deprecation warnings from appearing in output
+    $oldErrorReporting = error_reporting();
+    error_reporting(E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR);
+    ini_set('display_errors', '0');
+    ini_set('log_errors', '1');
+    
+    // Set up custom error handler for AJAX that outputs JSON
+    set_error_handler(function($errno, $errstr, $errfile, $errline) {
+        // Don't output anything, just log it
+        error_log("PHP Error [$errno]: $errstr in $errfile on line $errline");
+        return true; // Suppress the error
+    });
+    
+    // Register shutdown function to catch fatal errors
+    register_shutdown_function(function() use (&$oldErrorReporting) {
+        $error = error_get_last();
+        if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+            error_log("Fatal error: " . $error['message'] . " in " . $error['file'] . " on line " . $error['line']);
+            ob_end_clean();
+            error_reporting($oldErrorReporting);
+            echo json_encode([
+                'success' => false,
+                'message' => 'A fatal error occurred during upload processing. Please check the error logs.'
+            ]);
+        }
+    });
+    
     header('Content-Type: application/json');
     
-    // Log the request for debugging
+    // Log the request for debugging (minimal logging to avoid output issues)
     error_log("Bulk upload AJAX request received");
     error_log("Request method: " . $_SERVER['REQUEST_METHOD']);
     error_log("Content type: " . ($_SERVER['CONTENT_TYPE'] ?? 'Not set'));
-    error_log("Files received: " . print_r($_FILES, true));
-    error_log("POST data: " . print_r($_POST, true));
-    error_log("Raw input: " . file_get_contents('php://input'));
 
     try {
         // Debug mode - add debug info to response
@@ -82,18 +109,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAjax) {
             throw new Exception('The uploaded file is empty. Please select a valid file.');
         }
         
-        $allowedTypes = [
-            'application/vnd.ms-excel', 
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'text/csv',
-            'application/csv'
-        ];
-        
         $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        $allowedExtensions = ['xlsx', 'xls', 'csv'];
+        $allowedExtensions = ['xlsx', 'xls'];
         
         if (!in_array($fileExtension, $allowedExtensions)) {
-            throw new Exception('Invalid file type. Please upload an Excel file (.xlsx, .xls) or CSV file (.csv)');
+            throw new Exception('Invalid file type. Please upload an Excel file (.xlsx or .xls only)');
+        }
+        
+        // Check if PhpSpreadsheet is available
+        if (!$phpSpreadsheetAvailable) {
+            throw new Exception('Excel file processing requires PhpSpreadsheet library. Please contact administrator to install dependencies.');
         }
         
         // Check file size against server limits
@@ -108,8 +133,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAjax) {
             throw new Exception("File size too large. Maximum size is {$maxFileSizeFormatted}");
         }
         
-        // Load PhpSpreadsheet library (you'll need to install this via Composer)
-        // For now, we'll use a simple CSV-like approach
         $uploadDir = __DIR__ . '/../../uploads/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
@@ -127,7 +150,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAjax) {
         // Clean up uploaded file
         unlink($uploadPath);
         
-        // Always return detailed results
+        // Clean output buffer and return detailed results
+        ob_end_clean();
+        error_reporting($oldErrorReporting);
+        
         echo json_encode([
             'success' => $results['success'],
             'message' => generateSummaryMessage($results),
@@ -143,6 +169,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAjax) {
         ]);
         
     } catch (Exception $e) {
+        // Clean output buffer on error
+        ob_end_clean();
+        error_reporting($oldErrorReporting);
+        
         echo json_encode([
             'success' => false,
             'message' => $e->getMessage()
@@ -182,18 +212,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('The uploaded file is empty. Please select a valid file.');
         }
         
-        $allowedTypes = [
-            'application/vnd.ms-excel', 
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'text/csv',
-            'application/csv'
-        ];
-        
         $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        $allowedExtensions = ['xlsx', 'xls', 'csv'];
+        $allowedExtensions = ['xlsx', 'xls'];
         
         if (!in_array($fileExtension, $allowedExtensions)) {
-            throw new Exception('Invalid file type. Please upload an Excel file (.xlsx, .xls) or CSV file (.csv)');
+            throw new Exception('Invalid file type. Please upload an Excel file (.xlsx or .xls only)');
+        }
+        
+        // Check if PhpSpreadsheet is available
+        if (!$phpSpreadsheetAvailable) {
+            throw new Exception('Excel file processing requires PhpSpreadsheet library. Please contact administrator to install dependencies.');
         }
         
         // Check file size against server limits
@@ -246,7 +274,7 @@ ob_start();
 <div class="flex justify-between items-center mb-6">
     <div>
         <h1 class="text-2xl font-semibold text-gray-900">Bulk Upload Sites</h1>
-        <p class="mt-2 text-sm text-gray-700">Upload multiple sites using Excel or CSV file</p>
+        <p class="mt-2 text-sm text-gray-700">Upload multiple sites using Excel file</p>
     </div>
     <div class="flex space-x-2">
         <a href="download_template.php" class="btn btn-secondary">
@@ -332,7 +360,7 @@ ob_start();
             <div>
                 <h4 class="font-medium text-gray-900 mb-2">File Requirements</h4>
                 <ul class="text-sm text-gray-600 space-y-1">
-                    <li>• Supported formats: Excel (.xlsx, .xls) or CSV (.csv)</li>
+                    <li>• Supported formats: Excel (.xlsx, .xls) only</li>
                     <li>• Maximum file size: <?php 
                         $maxSize = min(
                             parseSize(ini_get('upload_max_filesize')),
@@ -395,7 +423,7 @@ ob_start();
         
         <form method="POST" enctype="multipart/form-data" id="uploadForm">
             <div class="form-group">
-                <label for="excel_file" class="form-label">Select Excel or CSV File *</label>
+                <label for="excel_file" class="form-label">Select Excel File *</label>
                 <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors" id="dropZone">
                     <div class="space-y-1 text-center">
                         <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
@@ -404,11 +432,11 @@ ob_start();
                         <div class="flex text-sm text-gray-600">
                             <label for="excel_file" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
                                 <span>Upload a file</span>
-                                <input id="excel_file" name="excel_file" type="file" class="sr-only" accept=".xlsx,.xls,.csv" required>
+                                <input id="excel_file" name="excel_file" type="file" class="sr-only" accept=".xlsx,.xls" required>
                             </label>
                             <p class="pl-1">or drag and drop</p>
                         </div>
-                        <p class="text-xs text-gray-500">Excel (.xlsx, .xls) or CSV files up to <?php 
+                        <p class="text-xs text-gray-500">Excel (.xlsx, .xls) files up to <?php 
                             $maxSize = min(
                                 parseSize(ini_get('upload_max_filesize')),
                                 parseSize(ini_get('post_max_size')),
@@ -443,15 +471,15 @@ ob_start();
         
         <!-- Detailed Results Table -->
         <div id="detailedResults" class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+            <table class="min-w-full divide-y divide-gray-200 text-sm">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Row</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Site ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">Row</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Site ID</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider max-w-xs">Location</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Action</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Status</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
                     </tr>
                 </thead>
                 <tbody id="resultsTableBody" class="bg-white divide-y divide-gray-200">
@@ -589,20 +617,39 @@ if (uploadForm) {
             
             return response.text().then(text => {
                 console.log('Raw response:', text);
+                console.log('Response length:', text.length);
+                
+                // Show the raw response in an alert for debugging
+                if (text.length === 0) {
+                    alert('ERROR: Server returned empty response!\n\nCheck browser console and server logs for details.');
+                    throw new Error('Empty response from server');
+                }
+                
                 try {
                     return JSON.parse(text);
                 } catch (e) {
                     console.error('JSON parse error:', e);
+                    // Show the actual response in an alert
+                    alert('ERROR: Invalid JSON response from server!\n\nRaw response:\n' + text.substring(0, 500));
                     throw new Error('Invalid JSON response: ' + text.substring(0, 200));
                 }
             });
         })
         .then(data => {
             console.log('Parsed response:', data);
+            console.log('Errors:', data.errors);
+            console.log('Rows:', data.rows);
+            
             if (data.debug) {
                 // Show debug information
                 alert('Debug Info:\n' + JSON.stringify(data, null, 2));
             }
+            
+            // Show detailed errors if any
+            if (data.errors && data.errors.length > 0) {
+                console.error('Upload errors:', data.errors);
+            }
+            
             displayResults(data);
         })
         .catch(error => {
@@ -651,24 +698,35 @@ function displayResults(data) {
         </div>
     `;
     
+    // Show error alert if there are failures
+    if (data.summary && data.summary.failed > 0 && data.errors && data.errors.length > 0) {
+        const errorList = data.errors.slice(0, 5).join('\n');
+        const moreErrors = data.errors.length > 5 ? `\n... and ${data.errors.length - 5} more errors` : '';
+        alert('Upload completed with errors:\n\n' + errorList + moreErrors + '\n\nCheck the detailed results table below for more information.');
+    }
+    
     // Display detailed results
     if (data.rows && data.rows.length > 0) {
         tableBody.innerHTML = data.rows.map(row => {
             const statusClass = getStatusClass(row.status);
             const actionBadge = getActionBadge(row.action);
             
+            // Truncate location if too long
+            const location = row.location || '-';
+            const truncatedLocation = location.length > 50 ? location.substring(0, 50) + '...' : location;
+            
             return `
                 <tr class="${row.status === 'failed' ? 'bg-red-50' : ''}">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.row}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.site_id || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.location || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${actionBadge}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">${row.row}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900 font-medium">${row.site_id || '-'}</td>
+                    <td class="px-3 py-2 text-sm text-gray-900 max-w-xs truncate" title="${location}">${truncatedLocation}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">${actionBadge}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
                             ${row.status}
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-900">
+                    <td class="px-3 py-2 text-sm text-gray-900">
                         ${row.message}
                         ${row.errors && row.errors.length > 0 ? `
                             <div class="mt-1 text-xs text-red-600">
@@ -680,7 +738,7 @@ function displayResults(data) {
             `;
         }).join('');
     } else {
-        tableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No data to display</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" class="px-3 py-2 text-center text-gray-500">No data to display</td></tr>';
     }
 }
 
@@ -753,14 +811,8 @@ function processSitesExcel($filePath) {
     ];
     
     try {
-        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
-        
-        if ($extension === 'csv') {
-            $data = readCSVFile($filePath);
-        } else {
-            // Use PhpSpreadsheet for Excel files
-            $data = readExcelFile($filePath);
-        }
+        // Only Excel files are supported
+        $data = readExcelFile($filePath);
         
         $siteModel = new Site();
         $rowNumber = 1; // Start from 1 (header is row 1, data starts from row 2)
@@ -804,41 +856,52 @@ function processSitesExcel($filePath) {
                     continue;
                 }
                 
-                // Check if site exists
-                $existingSite = $siteModel->findBySiteId($siteData['data']['site_id']);
+                // Check if site_id already exists
+                $existingSiteBySiteId = $siteModel->findBySiteId($siteData['data']['site_id']);
                 
-                if ($existingSite) {
-                    // Update existing site
-                    $rowResult['action'] = 'update';
-                    $success = $siteModel->update($existingSite['id'], $siteData['data']);
+                if ($existingSiteBySiteId) {
+                    // Reject duplicate site_id
+                    $rowResult['status'] = 'failed';
+                    $rowResult['action'] = 'rejected';
+                    $rowResult['message'] = "Site ID '{$siteData['data']['site_id']}' already exists in database";
+                    $rowResult['errors'][] = 'Duplicate Site ID';
+                    $results['failed']++;
+                    $results['errors'][] = "Row {$rowNumber}: Site ID '{$siteData['data']['site_id']}' already exists";
+                    $results['rows'][] = $rowResult;
+                    continue;
+                }
+                
+                // Check if store_id already exists (if provided)
+                if (!empty($siteData['data']['store_id'])) {
+                    $existingSiteByStoreId = $siteModel->findByStoreId($siteData['data']['store_id']);
                     
-                    if ($success) {
-                        $rowResult['status'] = 'success';
-                        $rowResult['message'] = 'Site updated successfully';
-                        $results['updated']++;
-                    } else {
+                    if ($existingSiteByStoreId) {
+                        // Reject duplicate store_id
                         $rowResult['status'] = 'failed';
-                        $rowResult['message'] = 'Failed to update site in database';
-                        $rowResult['errors'][] = 'Database update failed';
+                        $rowResult['action'] = 'rejected';
+                        $rowResult['message'] = "Store ID '{$siteData['data']['store_id']}' already exists in database";
+                        $rowResult['errors'][] = 'Duplicate Store ID';
                         $results['failed']++;
-                        $results['errors'][] = "Row {$rowNumber}: Failed to update site {$siteData['data']['site_id']}";
+                        $results['errors'][] = "Row {$rowNumber}: Store ID '{$siteData['data']['store_id']}' already exists";
+                        $results['rows'][] = $rowResult;
+                        continue;
                     }
+                }
+                
+                // Create new site (no duplicates found)
+                $rowResult['action'] = 'create';
+                $siteId = $siteModel->create($siteData['data']);
+                
+                if ($siteId) {
+                    $rowResult['status'] = 'success';
+                    $rowResult['message'] = 'Site created successfully';
+                    $results['created']++;
                 } else {
-                    // Create new site
-                    $rowResult['action'] = 'create';
-                    $siteId = $siteModel->create($siteData['data']);
-                    
-                    if ($siteId) {
-                        $rowResult['status'] = 'success';
-                        $rowResult['message'] = 'Site created successfully';
-                        $results['created']++;
-                    } else {
-                        $rowResult['status'] = 'failed';
-                        $rowResult['message'] = 'Failed to create site in database';
-                        $rowResult['errors'][] = 'Database insert failed';
-                        $results['failed']++;
-                        $results['errors'][] = "Row {$rowNumber}: Failed to create site {$siteData['data']['site_id']}";
-                    }
+                    $rowResult['status'] = 'failed';
+                    $rowResult['message'] = 'Failed to create site in database';
+                    $rowResult['errors'][] = 'Database insert failed';
+                    $results['failed']++;
+                    $results['errors'][] = "Row {$rowNumber}: Failed to create site {$siteData['data']['site_id']}";
                 }
                 
                 // Add row result to results
@@ -891,30 +954,12 @@ function generateSummaryMessage($results) {
     }
 }
 
-function readCSVFile($filePath) {
-    $data = [];
-    if (($handle = fopen($filePath, "r")) !== FALSE) {
-        $header = fgetcsv($handle); // Skip header row
-        while (($row = fgetcsv($handle)) !== FALSE) {
-            $data[] = $row;
-        }
-        fclose($handle);
-    }
-    return $data;
-}
-
 function readExcelFile($filePath) {
     global $phpSpreadsheetAvailable;
     
     // Check if PhpSpreadsheet is available
     if (!$phpSpreadsheetAvailable || !class_exists('\PhpOffice\PhpSpreadsheet\IOFactory')) {
-        // Fallback to CSV reading for Excel files
-        $fileExtension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
-        if ($fileExtension === 'csv') {
-            return readCSVFile($filePath);
-        } else {
-            throw new Exception('Excel file processing requires PhpSpreadsheet library. Please upload a CSV file instead, or install Composer dependencies.');
-        }
+        throw new Exception('Excel file processing requires PhpSpreadsheet library. Please contact administrator to install dependencies.');
     }
     
     try {
