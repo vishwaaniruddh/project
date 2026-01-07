@@ -816,6 +816,7 @@ function processSitesExcel($filePath) {
         
         $siteModel = new Site();
         $rowNumber = 1; // Start from 1 (header is row 1, data starts from row 2)
+        $lastTicketNumber = $siteModel->getLastTicketSequence();    // fetch last genertated siteticket id
         
         foreach ($data as $row) {
             $rowNumber++;
@@ -887,6 +888,19 @@ function processSitesExcel($filePath) {
                         continue;
                     }
                 }
+                
+                
+                 // then increase a number for ticket id
+                $lastTicketNumber++;
+
+                $ticketId = 'KARVY-' . date('Y') . '-' . str_pad(
+                    $lastTicketNumber,
+                    6,
+                    '0',
+                    STR_PAD_LEFT
+                );
+                $siteData['data']['site_ticket_id'] = $ticketId;
+                
                 
                 // Create new site (no duplicates found)
                 $rowResult['action'] = 'create';

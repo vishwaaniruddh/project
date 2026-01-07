@@ -204,6 +204,16 @@ class Vendor extends BaseModel {
         return $stats;
     }
     
+    
+    public function findById($id) {
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch();
+    }
+
+    
+    
+    
     public function getVendorDelegations($vendorId, $status = null) {
         $sql = "
             SELECT sd.*, s.site_id, s.location, s.city, s.state, u.username as delegated_by_name

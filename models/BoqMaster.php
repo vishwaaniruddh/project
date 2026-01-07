@@ -122,6 +122,65 @@ class BoqMaster extends BaseMaster {
         ];
     }
     
+    public function getAllWithItemCount($page = 1, $limit = 20, $search = '', $status = '') {
+        $offset = ($page - 1) * $limit;
+        
+        $whereClause = '';
+        $params = [];
+        $conditions = [];
+        
+        // Search functionality
+        if (!empty($search)) {
+            $conditions[] = "b.boq_name LIKE ?";
+            $params[] = "%$search%";
+        }
+        
+        // Filter by status
+        if (!empty($status)) {
+            $conditions[] = "b.status = ?";
+            $params[] = $status;
+        }
+        
+        if (!empty($conditions)) {
+            $whereClause = "WHERE " . implode(" AND ", $conditions);
+        }
+        
+        // Get total count
+        $countSql = "SELECT COUNT(*) FROM {$this->table} b $whereClause";
+        $stmt = $this->db->prepare($countSql);
+        $stmt->execute($params);
+        $total = $stmt->fetchColumn();
+        
+        // Get paginated results with user information and item count
+        $sql = "SELECT b.*, 
+                       cu.username as created_by_name,
+                       uu.username as updated_by_name,
+                       COALESCE(item_counts.item_count, 0) as item_count
+                FROM {$this->table} b 
+                LEFT JOIN users cu ON b.created_by = cu.id 
+                LEFT JOIN users uu ON b.updated_by = uu.id 
+                LEFT JOIN (
+                    SELECT boq_master_id, COUNT(*) as item_count 
+                    FROM boq_master_items 
+                    WHERE status = 'active' 
+                    GROUP BY boq_master_id
+                ) item_counts ON b.boq_id = item_counts.boq_master_id
+                $whereClause 
+                ORDER BY b.boq_name ASC 
+                LIMIT $limit OFFSET $offset";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $records = $stmt->fetchAll();
+        
+        return [
+            'records' => $records,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'pages' => ceil($total / $limit)
+        ];
+    }
+    
     public function toggleStatus($id) {
         $record = $this->find($id);
         if (!$record) {
@@ -199,5 +258,38 @@ class BoqMaster extends BaseMaster {
         $stats['recent'] = $stmt->fetchColumn();
         
         return $stats;
+    }
+    
+    public function getWithItems($boqId) {
+        // First get the BOQ master details
+        $boqMaster = $this->find($boqId);
+        if (!$boqMaster) {
+            return null;
+        }
+        
+        // Get associated items with details from boq_items table
+        $sql = "SELECT bmi.*, 
+                       bi.item_name,
+                       bi.item_code,
+                       bi.description as item_description,
+                       bi.unit,
+                       bi.category,
+                       bi.icon_class,
+                       bi.need_serial_number,
+                       bi.status as item_status
+                FROM boq_master_items bmi
+                INNER JOIN boq_items bi ON bmi.boq_item_id = bi.id
+                WHERE bmi.boq_master_id = ? AND bmi.status = 'active'
+                ORDER BY bmi.sort_order ASC, bi.item_name ASC";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$boqId]);
+        $items = $stmt->fetchAll();
+        
+        // Add items to the BOQ master data
+        $boqMaster['items'] = $items;
+        $boqMaster['item_count'] = count($items);
+        
+        return $boqMaster;
     }
 }

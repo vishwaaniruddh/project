@@ -183,6 +183,111 @@ class Inventory {
         return $result;
     }
     
+    
+    public function inventoryAuditLogging($itemId){
+        
+        
+    }
+    
+    // public function deleteIndividualStock($itemId){
+        
+    //     // update Inventory activity_status = deleted
+        
+    //      $sql = "UPDATE inventory_stock 
+    //                 SET activity_status="deleted"
+    //                 WHERE id=".$itemId."";
+        
+    //     // make a new table inventory_audit 
+        
+        
+        
+    // }
+
+
+    // public function deleteIndividualStock($itemId)
+    // {
+    //     $currentUser = Auth::getCurrentUser();
+    
+    //     $sql = "UPDATE inventory_stock
+    //             SET activity_status = 'deleted', item_status = 'deleted',
+    //                 updated_by = ?
+    //             WHERE id = ?";
+    
+    //     $stmt = $this->db->prepare($sql);
+    //     return $stmt->execute([
+    //         $currentUser['id'],
+    //         $itemId
+    //     ]);
+    // }
+
+
+   public function deleteIndividualStock($itemId, $remark)
+    {
+        $currentUser = Auth::getCurrentUser();
+    
+        $sql = "
+            UPDATE inventory_stock
+            SET activity_status = 'deleted',
+                item_status = 'deleted',
+                delete_remark = ?,
+                updated_by = ?
+            WHERE id = ?
+        ";
+    
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            $remark,
+            $currentUser['id'],
+            $itemId
+        ]);
+    }
+
+
+
+
+    
+    
+    public function updateStockLevelsNew($boqItemId, $minStock, $maxStock, $unitCost, $stockQuantity) {
+        $currentUser = Auth::getCurrentUser();
+        
+        // In the new schema, we don't have min/max stock per item
+        // This method is now primarily for updating unit costs
+        if ($unitCost > 0) {
+            $sql = "UPDATE inventory_stock 
+                    SET unit_cost = ?, updated_by = ?
+                    WHERE boq_item_id = ? AND CAST(item_status AS CHAR) = CAST('available' AS CHAR)";
+            
+            $stmt = $this->db->prepare($sql);
+            $result = $stmt->execute([$unitCost, $currentUser['id'], $boqItemId]);
+            
+             $sql_stock = "UPDATE inventory_summary 
+                    SET available_stock = ?
+                    WHERE boq_item_id = ?";
+            
+            $stmt_stock = $this->db->prepare($sql_stock);
+            $result_stock = $stmt->execute([$stockQuantity, $boqItemId]);
+            
+        } else {
+            // Just update the updated_by field to mark as processed
+            $sql = "UPDATE inventory_stock 
+                    SET updated_by = ?
+                    WHERE boq_item_id = ?";
+            
+            $stmt = $this->db->prepare($sql);
+            $result = $stmt->execute([$currentUser['id'], $boqItemId]);
+            
+            $sql_stock = "UPDATE inventory_summary 
+                    SET available_stock = ?
+                    WHERE boq_item_id = ?";
+            
+            $stmt_stock = $this->db->prepare($sql_stock);
+            $result_stock = $stmt->execute([$stockQuantity, $boqItemId]);
+            
+        }
+        
+        return $result;
+    }
+    
     public function addIndividualStockEntry($data) {
         $currentUser = Auth::getCurrentUser();
         $userId = $currentUser ? $currentUser['id'] : null;
@@ -1047,14 +1152,30 @@ class Inventory {
     }
 
     public function getStockSummaryByItem($boqItemId) {
-        $sql = "SELECT 
-                    COUNT(*) as total_stock,
-                    SUM(CASE WHEN CAST(item_status AS CHAR) = CAST('available' AS CHAR) THEN 1 ELSE 0 END) as available_stock,
-                    SUM(CASE WHEN CAST(item_status AS CHAR) = CAST('dispatched' AS CHAR) THEN 1 ELSE 0 END) as dispatched_stock,
-                    AVG(unit_cost) as avg_unit_cost,
-                    SUM(unit_cost) as total_value
-                FROM inventory_stock 
-                WHERE boq_item_id = ?";
+        // $sql = "SELECT 
+        //             COUNT(*) as total_stock,
+        //             SUM(CASE WHEN CAST(item_status AS CHAR) = CAST('available' AS CHAR) THEN 1 ELSE 0 END) as available_stock,
+        //             SUM(CASE WHEN CAST(item_status AS CHAR) = CAST('dispatched' AS CHAR) THEN 1 ELSE 0 END) as dispatched_stock,
+        //             AVG(unit_cost) as avg_unit_cost,
+        //             SUM(unit_cost) as total_value
+        //         FROM inventory_stock 
+        //         WHERE boq_item_id = ?";
+        
+        
+            $sql ="SELECT 
+                            COUNT(*) as total_stock,
+                            SUM( CASE 
+            WHEN item_status = 'available' 
+                 AND activity_status = 'active'
+            THEN 1 
+            ELSE 0 
+          END) as available_stock,
+                            SUM(CASE WHEN CAST(item_status AS CHAR) = CAST('dispatched' AS CHAR) THEN 1 ELSE 0 END) as dispatched_stock,
+                            AVG(unit_cost) as avg_unit_cost,
+                            SUM(unit_cost) as total_value
+                        FROM inventory_stock 
+                        WHERE boq_item_id = ?";
+        
         
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$boqItemId]);

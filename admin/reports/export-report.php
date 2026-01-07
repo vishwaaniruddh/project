@@ -56,14 +56,14 @@ function exportSitesReport($output) {
     $headers = [
         'Site ID',
         'Location',
-        'Address',
+        'PO Number',
+        'Site Ticket Id',
         'City',
         'State', 
         'Country',
         'Customer',
-        'Bank',
         'Vendor',
-        'Status',
+        'Delegation Status',
         'Survey Status',
         'Created Date',
         'Updated Date'
@@ -75,20 +75,45 @@ function exportSitesReport($output) {
     $sites = $result['sites'];
     
     foreach ($sites as $site) {
+        if($site['is_delegate']==0){
+            $site_delegate_status = 'Not Delegate';
+        }else{
+            $site_delegate_status = 'Delegated';
+        }
+        
         $row = [
-            $site['site_id'] ?? '',
-            $site['location'] ?? '',
-            $site['address'] ?? '',
-            $site['city_name'] ?? '',
-            $site['state_name'] ?? '',
-            $site['country_name'] ?? '',
-            $site['customer_name'] ?? '',
-            $site['bank_name'] ?? '',
-            $site['vendor_name'] ?? '',
-            $site['status'] ?? '',
-            $site['actual_survey_status'] ?? 'No Survey',
-            $site['created_at'] ?? '',
-            $site['updated_at'] ?? ''
+            // $site['site_id'] ?? '',
+            // $site['location'] ?? '',
+            // $site['address'] ?? '',
+            // $site['city_name'] ?? '',
+            // $site['state_name'] ?? '',
+            // $site['country_name'] ?? '',
+            // $site['customer_name'] ?? '',
+            // $site['bank_name'] ?? '',
+            // $site['vendor_name'] ?? '',
+            // $site['status'] ?? '',
+            // $site['actual_survey_status'] ?? 'No Survey',
+            // $site['created_at'] ?? '',
+            // $site['updated_at'] ?? ''
+            // $site['delegated_vendor_name'] ?? '',
+            // $site['delegation_status'] ?? '',
+            
+            
+        $site['site_id'] ?? '',
+        $site['location'] ?? '',
+        $site['po_number'] ?? '',
+        $site['site_ticket_id'] ?? '',
+        $site['city'] ?? '',
+        $site['state'] ?? '',
+        $site['country'] ?? '',
+        $site['customer'] ?? '',
+        $site['delegated_vendor'] ?? '',
+        $site_delegate_status,
+        $site['actual_survey_status'] ?? 'No Survey',
+        $site['created_at'] ?? '',
+        $site['updated_at'] ?? ''
+            
+            
         ];
         fputcsv($output, $row);
     }
@@ -102,6 +127,8 @@ function exportSurveysReport($output) {
         'Survey ID',
         'Site ID',
         'Site Location',
+         'PO Number',
+        'Site Ticket Id',
         'Vendor Name',
         'Survey Status',
         'Submitted Date',
@@ -118,24 +145,29 @@ function exportSurveysReport($output) {
     
     foreach ($surveys as $survey) {
         // Parse survey data if it's JSON
-        $surveyData = '';
-        if ($survey['survey_data']) {
-            $data = json_decode($survey['survey_data'], true);
-            if ($data) {
-                $surveyData = json_encode($data, JSON_UNESCAPED_UNICODE);
-            }
-        }
+        // $surveyData = '';
+        // if ($survey['survey_data']) {
+        //     $data = json_decode($survey['survey_data'], true);
+        //     if ($data) {
+        //         $surveyData = json_encode($data, JSON_UNESCAPED_UNICODE);
+        //     }
+        // }
+        
+        // $survey['vendor_name'] ?? '',
         
         $row = [
             $survey['id'] ?? '',
             $survey['site_id'] ?? '',
             $survey['location'] ?? '',
-            $survey['vendor_name'] ?? '',
+             $survey['po_number'] ?? '',
+        $survey['site_ticket_id'] ?? '',
+            $survey['delegated_vendor'] ?? '',
             $survey['survey_status'] ?? '',
             $survey['submitted_date'] ?? '',
             $survey['approved_date'] ?? '',
             $survey['approved_by_name'] ?? '',
-            $surveyData,
+            // $surveyData,
+            $survey['survey_data'] ?? '',
             $survey['notes'] ?? '',
             $survey['created_at'] ?? ''
         ];
@@ -151,6 +183,8 @@ function exportMaterialsReport($output) {
         'Request ID',
         'Site ID',
         'Site Location',
+         'PO Number',
+        'Site Ticket Id',
         'Vendor Name',
         'Request Status',
         'Request Date',
@@ -192,6 +226,8 @@ function exportMaterialsReport($output) {
             $request['id'] ?? '',
             $request['site_id'] ?? '',
             $request['location'] ?? '',
+              $request['po_number'] ?? '',
+        $request['site_ticket_id'] ?? '',
             $request['vendor_name'] ?? '',
             $request['status'] ?? '',
             $request['request_date'] ?? '',
@@ -219,6 +255,8 @@ function exportInstallationsReport($output) {
         'Installation ID',
         'Site ID',
         'Site Location',
+         'PO Number',
+        'Site Ticket Id',
         'Vendor Name',
         'Installation Status',
         'Progress Percentage',
@@ -247,18 +285,20 @@ function exportInstallationsReport($output) {
         }
         
         // Format material usage
-        $materialUsage = '';
-        if ($installation['material_usage']) {
-            $usage = json_decode($installation['material_usage'], true);
-            if ($usage && is_array($usage)) {
-                $materialUsage = count($usage) . ' items used';
-            }
-        }
+        // $materialUsage = '';
+        // if ($installation['material_usage']) {
+        //     $usage = json_decode($installation['material_usage'], true);
+        //     if ($usage && is_array($usage)) {
+        //         $materialUsage = count($usage) . ' items used';
+        //     }
+        // }
         
         $row = [
             $installation['id'] ?? '',
             $installation['site_id'] ?? '',
             $installation['location'] ?? '',
+            $installation['po_number'] ?? '',
+             $installation['site_ticket_id'] ?? '',
             $installation['vendor_name'] ?? '',
             $installation['status'] ?? '',
             $installation['progress_percentage'] ?? '0',
@@ -266,7 +306,7 @@ function exportInstallationsReport($output) {
             $installation['expected_completion_date'] ?? '',
             $installation['actual_completion_date'] ?? '',
             $installation['notes'] ?? '',
-            $materialUsage,
+            $installation['material_usage'] ?? '',
             $filesCount . ' files',
             $installation['created_at'] ?? '',
             $installation['updated_at'] ?? ''

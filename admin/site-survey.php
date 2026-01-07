@@ -19,7 +19,8 @@ $delegationModel = new SiteDelegation();
 $surveyModel = new SiteSurvey();
 
 // Get delegation details
-$delegationId = $delegationModel->findDelegationId($siteId);
+$delegationId = $_REQUEST['delegation_id'];
+// $delegationModel->findDelegationId($siteId);
 //echo '<pre>';print_r($delegation);echo '</pre>';die;
 
 // $delegation = $delegationModel->find($delegationId);

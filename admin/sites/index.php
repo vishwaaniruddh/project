@@ -8,86 +8,181 @@ $title = 'Sites Management';
 ob_start();
 ?>
 
-<div class="flex justify-between items-center mb-6">
-    <div>
-        <p class="mt-2 text-sm text-gray-700">Manage installation sites and track progress</p>
-    </div>
-    <div class="flex space-x-2">
-        <div class="relative inline-block">
-
-            <a href="bulk_upload.php" class="btn btn-secondary">
-                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                </svg> Upload Sites In Bulk
-            </a>
-
-
-
-
-            <div id="bulkUploadMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
-                <div class="py-1">
-                </div>
+<!-- Stats Cards - Row 1 -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3" id="statsContainer">
+    <div onclick="filterByStatus('all')" class="stat-card bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-sm p-4 border border-blue-200 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200 group">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-blue-600 font-medium uppercase tracking-wide">Total Sites</p>
+                <p class="text-2xl font-bold text-blue-700 mt-1" id="statTotal">-</p>
+            </div>
+            <div class="p-3 bg-blue-500 rounded-xl shadow-sm group-hover:bg-blue-600 transition-colors">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                </svg>
             </div>
         </div>
-        <button onclick="openModal('createSiteModal')" class="btn btn-primary" title="Add New Site">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>
-            </svg>
-        </button>
+    </div>
+    <div onclick="filterByStatus('survey_pending')" class="stat-card bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl shadow-sm p-4 border border-yellow-200 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200 group">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-yellow-600 font-medium uppercase tracking-wide">Survey Pending</p>
+                <p class="text-2xl font-bold text-yellow-700 mt-1" id="statSurveyPending">-</p>
+            </div>
+            <div class="p-3 bg-yellow-500 rounded-xl shadow-sm group-hover:bg-yellow-600 transition-colors">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div onclick="filterByStatus('survey_done')" class="stat-card bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-sm p-4 border border-green-200 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200 group">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-green-600 font-medium uppercase tracking-wide">Survey Done</p>
+                <p class="text-2xl font-bold text-green-700 mt-1" id="statSurveyDone">-</p>
+            </div>
+            <div class="p-3 bg-green-500 rounded-xl shadow-sm group-hover:bg-green-600 transition-colors">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div onclick="filterByStatus('install_pending')" class="stat-card bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl shadow-sm p-4 border border-orange-200 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200 group">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-orange-600 font-medium uppercase tracking-wide">Install Pending</p>
+                <p class="text-2xl font-bold text-orange-700 mt-1" id="statInstallPending">-</p>
+            </div>
+            <div class="p-3 bg-orange-500 rounded-xl shadow-sm group-hover:bg-orange-600 transition-colors">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards - Row 2 -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+    <div onclick="filterByStatus('install_done')" class="stat-card bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl shadow-sm p-4 border border-emerald-200 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200 group">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-emerald-600 font-medium uppercase tracking-wide">Install Done</p>
+                <p class="text-2xl font-bold text-emerald-700 mt-1" id="statInstallDone">-</p>
+            </div>
+            <div class="p-3 bg-emerald-500 rounded-xl shadow-sm group-hover:bg-emerald-600 transition-colors">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div onclick="filterByStatus('vendor_assigned')" class="stat-card bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl shadow-sm p-4 border border-indigo-200 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200 group">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-indigo-600 font-medium uppercase tracking-wide">Vendor Assigned</p>
+                <p class="text-2xl font-bold text-indigo-700 mt-1" id="statVendorAssigned">-</p>
+            </div>
+            <div class="p-3 bg-indigo-500 rounded-xl shadow-sm group-hover:bg-indigo-600 transition-colors">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div onclick="filterByStatus('delegated')" class="stat-card bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-sm p-4 border border-purple-200 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200 group">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-purple-600 font-medium uppercase tracking-wide">Delegated</p>
+                <p class="text-2xl font-bold text-purple-700 mt-1" id="statDelegated">-</p>
+            </div>
+            <div class="p-3 bg-purple-500 rounded-xl shadow-sm group-hover:bg-purple-600 transition-colors">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div onclick="filterByStatus('material_pending')" class="stat-card bg-gradient-to-br from-red-50 to-red-100 rounded-xl shadow-sm p-4 border border-red-200 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200 group">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-red-600 font-medium uppercase tracking-wide">Material Pending</p>
+                <p class="text-2xl font-bold text-red-700 mt-1" id="statMaterialPending">-</p>
+            </div>
+            <div class="p-3 bg-red-500 rounded-xl shadow-sm group-hover:bg-red-600 transition-colors">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Header Actions -->
+<div class="mb-4">
+    <div class="flex justify-between items-center gap-3">
+        <p class="text-xs text-gray-500">Manage installation sites and track progress</p>
+        <div class="flex items-center gap-2">
+            <a href="bulk_upload.php" class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                Bulk Upload
+            </a>
+            <a href="vendor_assign_bulk_upload.php" class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                Vendor Bulk
+            </a>
+            <button onclick="openModal('createSiteModal')" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>
+                </svg>
+                Add Site
+            </button>
+        </div>
     </div>
 </div>
 
 <!-- Search and Filters -->
-<div class="card mb-6">
-    <div class="card-body">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+<div class="card mb-4">
+    <div class="card-body p-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
             <div class="lg:col-span-2">
                 <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
                         </svg>
                     </div>
-                    <input type="text" id="searchInput" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Search sites..." value="<?php echo htmlspecialchars($data['search']); ?>">
+                    <input type="text" id="searchInput" class="block w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" placeholder="Search sites..." value="">
                 </div>
             </div>
             <div>
-                <select id="cityFilter" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <select id="cityFilter" class="block w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
                     <option value="">All Cities</option>
-                    <?php foreach ($data['filter_options']['cities'] as $city): ?>
-                        <option value="<?php echo htmlspecialchars($city); ?>" <?php echo $data['filters']['city'] === $city ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($city); ?>
-                        </option>
-                    <?php endforeach; ?>
                 </select>
             </div>
             <div>
-                <select id="stateFilter" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <select id="stateFilter" class="block w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
                     <option value="">All States</option>
-                    <?php foreach ($data['filter_options']['states'] as $state): ?>
-                        <option value="<?php echo htmlspecialchars($state); ?>" <?php echo $data['filters']['state'] === $state ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($state); ?>
-                        </option>
-                    <?php endforeach; ?>
                 </select>
             </div>
             <div>
-                <select id="statusFilter" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <select id="statusFilter" class="block w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
                     <option value="">All Status</option>
-                    <?php foreach ($data['filter_options']['activity_statuses'] as $status): ?>
-                        <option value="<?php echo htmlspecialchars($status); ?>" <?php echo $data['filters']['activity_status'] === $status ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($status); ?>
-                        </option>
-                    <?php endforeach; ?>
                 </select>
             </div>
             <div>
-                <select id="surveyStatusFilter" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                    <option value="">All Survey Status</option>
-                    <option value="pending" <?php echo ($data['filters']['survey_status'] ?? '') === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                    <option value="submitted" <?php echo ($data['filters']['survey_status'] ?? '') === 'submitted' ? 'selected' : ''; ?>>Submitted</option>
-                    <option value="approved" <?php echo ($data['filters']['survey_status'] ?? '') === 'approved' ? 'selected' : ''; ?>>Approved</option>
-                    <option value="rejected" <?php echo ($data['filters']['survey_status'] ?? '') === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
+                <select id="surveyStatusFilter" class="block w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <option value="">All Survey</option>
+                    <option value="pending">Pending</option>
+                    <option value="submitted">Submitted</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
                 </select>
             </div>
         </div>
@@ -96,209 +191,45 @@ ob_start();
 
 <!-- Sites Table -->
 <div class="card">
-    <div class="card-body">
+    <div class="card-body p-4">
         <div class="overflow-x-auto">
-            <table class="data-table" id="sitesTable">
+            <table class="data-table text-xs" id="sitesTable">
                 <thead>
                     <tr>
-                        <th>Site Details</th>
-                        <th>Location</th>
-                        <th>Customer/Contact</th>
-                        <th>Vendor</th>
-                        <th>Status</th>
-                        <th>Progress</th>
-                        <th>Actions</th>
+                        <th class="px-2 py-2 text-xs">#</th>
+                        <th class="px-2 py-2 text-xs">Actions</th>
+                        <th class="px-2 py-2 text-xs">Site Details</th>
+                        <th class="px-2 py-2 text-xs">Location</th>
+                        <th class="px-2 py-2 text-xs">Customer/Contact</th>
+                        <th class="px-2 py-2 text-xs">Vendor</th>
+                        <th class="px-2 py-2 text-xs">Status</th>
+                        <th class="px-2 py-2 text-xs">Progress</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <?php foreach ($data['sites'] as $site):
-
-                        // echo '<pre>';
-                        // var_dump($site);
-                        // echo '</pre>';
-
-                    ?>
-                        <tr>
-                            <td>
-                                <div>
-                                    <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($site['site_id'] ?? ''); ?></div>
-                                    <?php if ($site['store_id']): ?>
-                                        <div class="text-sm text-gray-500">Store: <?php echo htmlspecialchars($site['store_id'] ?? ''); ?></div>
-                                    <?php endif; ?>
-                                    <?php if ($site['po_number']): ?>
-                                        <div class="text-sm text-gray-500">PO: <?php echo htmlspecialchars($site['po_number'] ?? ''); ?></div>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="text-sm text-gray-900"><?php echo htmlspecialchars($site['city'] ?? ''); ?>, <?php echo htmlspecialchars($site['state'] ?? ''); ?></div>
-                                <div class="text-sm text-gray-500"><?php echo htmlspecialchars($site['country'] ?? ''); ?></div>
-                                <?php if ($site['zone']): ?>
-                                    <div class="text-sm text-gray-500">Zone: <?php echo htmlspecialchars($site['zone']); ?></div>
-                                <?php endif; ?>
-                                <?php if ($site['pincode']): ?>
-                                    <div class="text-sm text-gray-500">PIN: <?php echo htmlspecialchars($site['pincode']); ?></div>
-                                <?php endif; ?>
-                                <?php if ($site['branch']): ?>
-                                    <div class="text-sm text-gray-500">Branch: <?php echo htmlspecialchars($site['branch'] ?? ''); ?></div>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if ($site['customer']): ?>
-                                    <div class="text-sm text-gray-900"><?php echo htmlspecialchars($site['customer'] ?? ''); ?></div>
-                                <?php endif; ?>
-                                <?php if ($site['contact_person_name']): ?>
-                                    <div class="text-sm text-gray-600 mt-1">
-                                        <strong>Contact:</strong> <?php echo htmlspecialchars($site['contact_person_name']); ?>
-                                    </div>
-                                    <?php if ($site['contact_person_number']): ?>
-                                        <div class="text-xs text-gray-500">
-                                            📞 <?php echo htmlspecialchars($site['contact_person_number']); ?>
-                                        </div>
-                                    <?php endif; ?>
-                                    <?php if ($site['contact_person_email']): ?>
-                                        <div class="text-xs text-gray-500">
-                                            ✉️ <?php echo htmlspecialchars($site['contact_person_email']); ?>
-                                        </div>
-                                    <?php endif; ?>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if ($site['vendor']): ?>
-                                    <div class="text-sm text-gray-900"><?php echo htmlspecialchars($site['vendor'] ?? ''); ?></div>
-                                <?php endif; ?>
-                                <?php if ($site['delegation_status'] === 'active' && $site['delegated_vendor_name']): ?>
-                                    <div class="flex items-center space-x-2">
-                                        <span class="badge badge-warning">Delegated</span>
-                                        <span class="text-sm text-orange-600"><?php echo htmlspecialchars($site['delegated_vendor_name'] ?? ''); ?></span>
-                                    </div>
-                                    <div class="text-xs text-gray-500 mt-1">
-                                        Since: <?php echo date('M d, Y', strtotime($site['delegation_date'])); ?>
-                                    </div>
-                                <?php elseif (!$site['vendor']): ?>
-                                    <span class="text-sm text-gray-400">No vendor assigned</span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if ($site['activity_status']): ?>
-                                    <span class="badge badge-info"><?php echo htmlspecialchars($site['activity_status'] ?? ''); ?></span>
-                                <?php else: ?>
-                                    <span class="badge badge-secondary">No Status</span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <div class="space-y-1">
-                                    <div class="flex items-center">
-                                        <span class="text-xs text-gray-500 w-16">Survey:</span>
-                                        <?php if ($site['has_survey_submitted']): ?>
-                                            <?php if ($site['actual_survey_status'] === 'approved'): ?>
-                                                <span class="badge badge-success">Approved</span>
-                                            <?php elseif ($site['actual_survey_status'] === 'rejected'): ?>
-                                                <span class="badge badge-danger">Rejected</span>
-                                            <?php else: ?>
-                                                <span class="badge badge-info">Submitted</span>
-                                            <?php endif; ?>
-                                        <?php else: ?>
-                                            <span class="badge badge-warning">Pending</span>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <span class="text-xs text-gray-500 w-16">Install:</span>
-                                        <span class="badge <?php echo $site['installation_status'] ? 'badge-success' : 'badge-warning'; ?>">
-                                            <?php echo $site['installation_status'] ? 'Done' : 'Pending'; ?>
-                                        </span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="flex items-center space-x-2">
-                                    <button onclick="viewSite(<?php echo $site['id']; ?>)" class="btn btn-sm btn-secondary" title="View">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
-                                        </svg>
-                                    </button>
-
-                                    <button onclick="editSite(<?php echo $site['id']; ?>)" class="btn btn-sm btn-primary" title="Edit">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
-                                        </svg>
-                                    </button>
-                                    <?php if ($site['has_survey_submitted']): ?>
-                                        <button onclick="viewSiteSurvey(<?php echo $site['survey_id']; ?>)" class="btn btn-sm btn-success" title="View Site Survey">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"></path>
-                                            </svg>
-                                        </button>
-                                    <?php else: ?>
-                                        <button onclick="delegateSite(<?php echo $site['id']; ?>)" class="btn btn-sm btn-info" title="Delegate Site">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd"></path>
-                                            </svg>
-                                        </button>
-                                    <?php endif; ?>
-                                    <button onclick="deleteSite(<?php echo $site['id']; ?>)" class="btn btn-sm btn-danger" title="Delete">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"></path>
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 012 0v4a1 1 0 11-2 0V7zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V7a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                        </svg>
-                                    </button>
-                                    
-                                    <?php if (!$site['has_survey_submitted']): ?>
-                                    <button onclick="conductSurvey(<?php echo $site['id']; ?>)" 
-                                            class="group relative inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-lg hover:shadow-xl transition-all duration-200" 
-                                            title="Conduct Site Survey">
-                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
-                                        </svg>
-                                        Survey
-                                    </button>
-                                    <?php endif; ?>
-                                    
-                                    <?php if (in_array($site['actual_survey_status'], ['completed', 'approved'])): ?>
-                                        <!-- Material Request Button -->
-                                        <button onclick="conductMaterials(<?php echo $site['id']; ?>,<?php echo $site['survey_id']; ?>)" 
-                                        
-                                           class="group relative inline-flex items-center justify-center px-4 py-2 border border-green-300 text-sm font-medium rounded-lg text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200" 
-                                           title="Generate Material Request">
-                                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zM8 6a2 2 0 114 0v1H8V6zM6 9a1 1 0 012 0v1a1 1 0 11-2 0V9zm8 0a1 1 0 012 0v1a1 1 0 11-2 0V9z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            Materials
-                                        </button>    
-                                        <!--</a>-->
-                                    <?php endif; ?>
-                                    
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
+                <tbody id="sitesTableBody">
+                    <tr>
+                        <td colspan="8" class="text-center py-8 text-gray-500">
+                            <div class="flex flex-col items-center">
+                                <svg class="w-8 h-8 text-gray-300 mb-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Loading sites...
+                            </div>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
 
         <!-- Pagination -->
-        <?php if ($data['pagination']['total_pages'] > 1): ?>
-            <div class="pagination">
-                <div class="pagination-info">
-                    Showing <?php echo (($data['pagination']['current_page'] - 1) * $data['pagination']['limit']) + 1; ?> to
-                    <?php echo min($data['pagination']['current_page'] * $data['pagination']['limit'], $data['pagination']['total_records']); ?> of
-                    <?php echo $data['pagination']['total_records']; ?> results
-                </div>
-                <div class="pagination-nav-desktop">
-                    <nav class="flex space-x-2">
-                        <?php for ($i = 1; $i <= $data['pagination']['total_pages']; $i++): ?>
-                            <a href="?page=<?php echo $i; ?><?php echo !empty($data['search']) ? '&search=' . urlencode($data['search']) : ''; ?>"
-                                class="pagination-btn <?php echo $i === $data['pagination']['current_page'] ? 'active' : ''; ?>">
-                                <?php echo $i; ?>
-                            </a>
-                        <?php endfor; ?>
-                    </nav>
-                </div>
-            </div>
-        <?php endif; ?>
+        <div class="flex items-center justify-between border-t border-gray-200 bg-white px-3 py-2 mt-3" id="paginationContainer" style="display: none;">
+            <div class="text-xs text-gray-700" id="paginationInfo"></div>
+            <nav class="flex space-x-1" id="paginationNav"></nav>
+        </div>
     </div>
 </div>
+
 
 <!-- Create Site Modal -->
 <div id="createSiteModal" class="modal">
@@ -306,312 +237,104 @@ ob_start();
         <div class="modal-header-fixed">
             <h3 class="modal-title">Add New Site</h3>
             <button type="button" class="modal-close" onclick="closeModal('createSiteModal')">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                 </svg>
             </button>
         </div>
         <form id="createSiteForm" action="create.php" method="POST">
             <div class="modal-body-scrollable">
-                <!-- Basic Information Section -->
                 <div class="form-section">
-                    <h4 class="form-section-title">Basic Information</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <h4 class="form-section-title text-sm">Basic Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div class="form-group">
-                            <label for="site_id" class="form-label">Site ID *</label>
-                            <input type="text" id="site_id" name="site_id" class="form-input" required>
+                            <label for="site_id" class="form-label text-xs">Site ID *</label>
+                            <input type="text" id="site_id" name="site_id" class="form-input text-xs" required>
                         </div>
                         <div class="form-group">
-                            <label for="store_id" class="form-label">Store ID</label>
-                            <input type="text" id="store_id" name="store_id" class="form-input">
+                            <label for="store_id" class="form-label text-xs">Store ID</label>
+                            <input type="text" id="store_id" name="store_id" class="form-input text-xs">
                         </div>
                         <div class="form-group md:col-span-2">
-                            <label class="form-label">Location & Pincode *</label>
+                            <label class="form-label text-xs">Location & Pincode *</label>
                             <div class="flex gap-2">
-                                <input type="text" id="location" name="location" class="form-input" style="width: 70%;" placeholder="Enter location address" required>
-                                <input type="text" id="pincode" name="pincode" class="form-input" style="width: 30%;" placeholder="Pincode" maxlength="6" pattern="[0-9]{6}">
+                                <input type="text" id="location" name="location" class="form-input text-xs" style="width: 70%;" placeholder="Enter location" required>
+                                <input type="text" id="pincode" name="pincode" class="form-input text-xs" style="width: 30%;" placeholder="Pincode" maxlength="6">
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Location Details Section -->
                 <div class="form-section">
-                    <h4 class="form-section-title">Location Details</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <h4 class="form-section-title text-sm">Location Details</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
                         <div class="form-group">
-                            <label for="country_id" class="form-label">Country *</label>
-                            <select id="country_id" name="country_id" class="form-select" required onchange="loadStatesForSite(this.value)">
-                                <option value="">Select Country</option>
+                            <label for="country_id" class="form-label text-xs">Country *</label>
+                            <select id="country_id" name="country_id" class="form-select text-xs" required onchange="loadStatesForSite(this.value)">
+                                <option value="">Select</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="state_id" class="form-label">State *</label>
-                            <select id="state_id" name="state_id" class="form-select" required onchange="loadCitiesForSite(this.value)">
-                                <option value="">Select State</option>
+                            <label for="state_id" class="form-label text-xs">State *</label>
+                            <select id="state_id" name="state_id" class="form-select text-xs" required onchange="loadCitiesForSite(this.value)">
+                                <option value="">Select</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="city_id" class="form-label">City *</label>
-                            <select id="city_id" name="city_id" class="form-select" required>
-                                <option value="">Select City</option>
+                            <label for="city_id" class="form-label text-xs">City *</label>
+                            <select id="city_id" name="city_id" class="form-select text-xs" required>
+                                <option value="">Select</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="zone" class="form-label">Zone</label>
-                            <input type="text" id="zone" name="zone" class="form-input" placeholder="e.g. West Zone">
+                            <label for="zone" class="form-label text-xs">Zone</label>
+                            <input type="text" id="zone" name="zone" class="form-input text-xs">
                         </div>
                         <div class="form-group">
-                            <label for="branch" class="form-label">Branch</label>
-                            <input type="text" id="branch" name="branch" class="form-input">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Purchase Order Section -->
-                <div class="form-section">
-                    <h4 class="form-section-title">Purchase Order Details</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="form-group">
-                            <label for="po_number" class="form-label">PO Number</label>
-                            <input type="text" id="po_number" name="po_number" class="form-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="po_date" class="form-label">PO Date</label>
-                            <input type="date" id="po_date" name="po_date" class="form-input">
+                            <label for="branch" class="form-label text-xs">Branch</label>
+                            <input type="text" id="branch" name="branch" class="form-input text-xs">
                         </div>
                     </div>
                 </div>
-
-                <!-- Client Information Section -->
                 <div class="form-section">
-                    <h4 class="form-section-title">Client Information</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <h4 class="form-section-title text-sm">PO & Customer</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <div class="form-group">
-                            <label for="customer_id" class="form-label">Customer</label>
-                            <select id="customer_id" name="customer_id" class="form-select">
-                                <option value="">Select Customer</option>
+                            <label for="po_number" class="form-label text-xs">PO Number</label>
+                            <input type="text" id="po_number" name="po_number" class="form-input text-xs">
+                        </div>
+                        <div class="form-group">
+                            <label for="po_date" class="form-label text-xs">PO Date</label>
+                            <input type="date" id="po_date" name="po_date" class="form-input text-xs">
+                        </div>
+                        <div class="form-group">
+                            <label for="customer_id" class="form-label text-xs">Customer</label>
+                            <select id="customer_id" name="customer_id" class="form-select text-xs">
+                                <option value="">Select</option>
                             </select>
                         </div>
-
                     </div>
                 </div>
-
-                <!-- Contact Information  -->
                 <div class="form-section">
-                    <h4 class="form-section-title">Contact Information</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <h4 class="form-section-title text-sm">Contact Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <div class="form-group">
-                            <label for="contact_person_name" class="form-label">Contact Person Name</label>
-                            <input type="text" name="contact_person_name" id="contact_person_name" class="form-input" placeholder="Enter contact person name">
+                            <label for="contact_person_name" class="form-label text-xs">Contact Name</label>
+                            <input type="text" name="contact_person_name" id="contact_person_name" class="form-input text-xs">
                         </div>
                         <div class="form-group">
-                            <label for="contact_person_number" class="form-label">Contact Person Number</label>
-                            <input type="tel" name="contact_person_number" id="contact_person_number" class="form-input" placeholder="+91-9876543210">
+                            <label for="contact_person_number" class="form-label text-xs">Contact Number</label>
+                            <input type="tel" name="contact_person_number" id="contact_person_number" class="form-input text-xs">
                         </div>
                         <div class="form-group">
-                            <label for="contact_person_email" class="form-label">Contact Person Email</label>
-                            <input type="email" name="contact_person_email" id="contact_person_email" class="form-input" placeholder="contact@example.com">
+                            <label for="contact_person_email" class="form-label text-xs">Contact Email</label>
+                            <input type="email" name="contact_person_email" id="contact_person_email" class="form-input text-xs">
                         </div>
                     </div>
                 </div>
-
             </div>
             <div class="modal-footer-fixed">
-                <button type="button" onclick="closeModal('createSiteModal')" class="btn btn-secondary">Cancel</button>
-                <button type="submit" class="btn btn-primary">Create Site</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Edit Site Modal -->
-<div id="editSiteModal" class="modal">
-    <div class="modal-content-large">
-        <div class="modal-header-fixed">
-            <h3 class="modal-title">Edit Site</h3>
-            <button type="button" class="modal-close" onclick="closeModal('editSiteModal')">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                </svg>
-            </button>
-        </div>
-        <form id="editSiteForm" method="POST">
-            <div class="modal-body-scrollable">
-                <!-- Same structure as create form but with edit_ prefixed IDs -->
-                <!-- Basic Information Section -->
-                <div class="form-section">
-                    <h4 class="form-section-title">Basic Information</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="form-group">
-                            <label for="edit_site_id" class="form-label">Site ID *</label>
-                            <input type="text" id="edit_site_id" name="site_id" class="form-input" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_store_id" class="form-label">Store ID</label>
-                            <input type="text" id="edit_store_id" name="store_id" class="form-input">
-                        </div>
-                        <div class="form-group md:col-span-2">
-                            <label class="form-label">Location & Pincode *</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="edit_location" name="location" class="form-input" style="width: 70%;" placeholder="Enter location address" required>
-                                <input type="text" id="edit_pincode" name="pincode" class="form-input" style="width: 30%;" placeholder="Pincode" maxlength="6" pattern="[0-9]{6}">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Location Details Section -->
-                <div class="form-section">
-                    <h4 class="form-section-title">Location Details</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                        <div class="form-group">
-                            <label for="edit_country_id" class="form-label">Country *</label>
-                            <select id="edit_country_id" name="country_id" class="form-select" required onchange="loadStatesForSite(this.value, 'edit_state_id')">
-                                <option value="">Select Country</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_state_id" class="form-label">State *</label>
-                            <select id="edit_state_id" name="state_id" class="form-select" required onchange="loadCitiesForSite(this.value, 'edit_city_id')">
-                                <option value="">Select State</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_city_id" class="form-label">City *</label>
-                            <select id="edit_city_id" name="city_id" class="form-select" required>
-                                <option value="">Select City</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_zone" class="form-label">Zone</label>
-                            <input type="text" id="edit_zone" name="zone" class="form-input" placeholder="e.g. West Zone">
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_branch" class="form-label">Branch</label>
-                            <input type="text" id="edit_branch" name="branch" class="form-input">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Purchase Order Section -->
-                <div class="form-section">
-                    <h4 class="form-section-title">Purchase Order Details</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="form-group">
-                            <label for="edit_po_number" class="form-label">PO Number</label>
-                            <input type="text" id="edit_po_number" name="po_number" class="form-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_po_date" class="form-label">PO Date</label>
-                            <input type="date" id="edit_po_date" name="po_date" class="form-input">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Client Information Section -->
-                <div class="form-section">
-                    <h4 class="form-section-title">Client Information</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="form-group">
-                            <label for="edit_customer_id" class="form-label">Customer</label>
-                            <select id="edit_customer_id" name="customer_id" class="form-select">
-                                <option value="">Select Customer</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_vendor" class="form-label">Vendor</label>
-                            <input type="text" id="edit_vendor" name="vendor" class="form-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_delegated_vendor" class="form-label">Delegated Vendor</label>
-                            <input type="text" id="edit_delegated_vendor" name="delegated_vendor" class="form-input">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Contact Information -->
-                <div class="form-section">
-                    <h4 class="form-section-title">Contact Information</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="form-group">
-                            <label for="edit_contact_person_name" class="form-label">Contact Person Name</label>
-                            <input type="text" name="contact_person_name" id="edit_contact_person_name" class="form-input" placeholder="Enter contact person name">
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_contact_person_number" class="form-label">Contact Person Number</label>
-                            <input type="tel" name="contact_person_number" id="edit_contact_person_number" class="form-input" placeholder="+91-9876543210">
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_contact_person_email" class="form-label">Contact Person Email</label>
-                            <input type="email" name="contact_person_email" id="edit_contact_person_email" class="form-input" placeholder="contact@example.com">
-                        </div>
-                    </div>
-                </div>
-
-
-                <!-- Status Information Section -->
-                <div class="form-section">
-                    <h4 class="form-section-title">Status Information</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="form-group">
-                            <label for="edit_activity_status" class="form-label">Activity Status</label>
-                            <select id="edit_activity_status" name="activity_status" class="form-select">
-                                <option value="">Select Status</option>
-                                <option value="Pending">Pending</option>
-                                <option value="In Progress">In Progress</option>
-                                <option value="Completed">Completed</option>
-                                <option value="On Hold">On Hold</option>
-                                <option value="Cancelled">Cancelled</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Progress Flags</label>
-                            <div class="space-y-2">
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="edit_is_delegate" name="is_delegate" class="mr-2">
-                                    <label for="edit_is_delegate" class="text-sm">Is Delegated</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="edit_survey_status" name="survey_status" class="mr-2">
-                                    <label for="edit_survey_status" class="text-sm">Survey Completed</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="edit_installation_status" name="installation_status" class="mr-2">
-                                    <label for="edit_installation_status" class="text-sm">Installation Done</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="edit_is_material_request_generated" name="is_material_request_generated" class="mr-2">
-                                    <label for="edit_is_material_request_generated" class="text-sm">Material Request Generated</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Additional Information Section -->
-                <div class="form-section">
-                    <h4 class="form-section-title">Additional Information</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="form-group">
-                            <label for="edit_survey_submission_date" class="form-label">Survey Submission Date</label>
-                            <input type="datetime-local" id="edit_survey_submission_date" name="survey_submission_date" class="form-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_installation_date" class="form-label">Installation Date</label>
-                            <input type="datetime-local" id="edit_installation_date" name="installation_date" class="form-input">
-                        </div>
-                        <div class="form-group md:col-span-2">
-                            <label for="edit_remarks" class="form-label">Remarks</label>
-                            <textarea id="edit_remarks" name="remarks" class="form-textarea" rows="3"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-            <div class="modal-footer-fixed">
-                <button type="button" onclick="closeModal('editSiteModal')" class="btn btn-secondary">Cancel</button>
-                <button type="submit" class="btn btn-primary">Update Site</button>
+                <button type="button" onclick="closeModal('createSiteModal')" class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Cancel</button>
+                <button type="submit" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">Create Site</button>
             </div>
         </form>
     </div>
@@ -623,454 +346,392 @@ ob_start();
         <div class="modal-header-fixed">
             <h3 class="modal-title">Site Details</h3>
             <button type="button" class="modal-close" onclick="closeModal('viewSiteModal')">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                 </svg>
             </button>
         </div>
-        <div class="modal-body-scrollable">
-            <!-- Basic Information Section -->
-            <div class="form-section">
-                <h4 class="form-section-title">Basic Information</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Site ID</label>
-                        <p id="view_site_id" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Store ID</label>
-                        <p id="view_store_id" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                        <p id="view_location" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Pincode</label>
-                        <p id="view_pincode" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Location Details Section -->
-            <div class="form-section">
-                <h4 class="form-section-title">Location Details</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
-                        <p id="view_city" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
-                        <p id="view_state" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                        <p id="view_country" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Zone</label>
-                        <p id="view_zone" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Branch</label>
-                        <p id="view_branch" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Purchase Order Section -->
-            <div class="form-section">
-                <h4 class="form-section-title">Purchase Order Details</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">PO Number</label>
-                        <p id="view_po_number" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">PO Date</label>
-                        <p id="view_po_date" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Client Information Section -->
-            <div class="form-section">
-                <h4 class="form-section-title">Client Information</h4>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Customer</label>
-                        <p id="view_customer" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Vendor</label>
-                        <p id="view_vendor" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Delegated Vendor</label>
-                        <p id="view_delegated_vendor" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contact Information Section -->
-            <div class="form-section">
-                <h4 class="form-section-title">Contact Information</h4>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Contact Person Name</label>
-                        <p id="view_contact_person_name" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Contact Person Number</label>
-                        <p id="view_contact_person_number" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Contact Person Email</label>
-                        <p id="view_contact_person_email" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- Status Information Section -->
-            <div class="form-section">
-                <h4 class="form-section-title">Status Information</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Activity Status</label>
-                        <p id="view_activity_status" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Progress Flags</label>
-                        <div id="view_progress_flags" class="text-sm text-gray-900 bg-gray-50 p-2 rounded space-y-1"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Additional Information Section -->
-            <div class="form-section">
-                <h4 class="form-section-title">Additional Information</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Survey Submission Date</label>
-                        <p id="view_survey_submission_date" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Installation Date</label>
-                        <p id="view_installation_date" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Created By</label>
-                        <p id="view_created_by" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Updated By</label>
-                        <p id="view_updated_by" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Created At</label>
-                        <p id="view_created_at" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Updated At</label>
-                        <p id="view_updated_at" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
-                        <p id="view_remarks" class="text-sm text-gray-900 bg-gray-50 p-2 rounded min-h-[60px]"></p>
-                    </div>
-                </div>
-            </div>
+        <div class="modal-body-scrollable" id="viewSiteContent">
+            <p class="text-center text-gray-500">Loading...</p>
         </div>
         <div class="modal-footer-fixed">
-            <button type="button" onclick="closeModal('viewSiteModal')" class="btn btn-secondary">Close</button>
-            <button type="button" onclick="editSiteFromView()" class="btn btn-primary">Edit Site</button>
+            <button type="button" onclick="closeModal('viewSiteModal')" class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Close</button>
         </div>
+    </div>
+</div>
+
+<!-- Edit Site Modal -->
+<div id="editSiteModal" class="modal">
+    <div class="modal-content-large">
+        <div class="modal-header-fixed">
+            <h3 class="modal-title">Edit Site</h3>
+            <button type="button" class="modal-close" onclick="closeModal('editSiteModal')">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
+        <form id="editSiteForm" method="POST">
+            <div class="modal-body-scrollable" id="editSiteContent">
+                <p class="text-center text-gray-500">Loading...</p>
+            </div>
+            <div class="modal-footer-fixed">
+                <button type="button" onclick="closeModal('editSiteModal')" class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Cancel</button>
+                <button type="submit" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">Update Site</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delegate Site Modal -->
+<div id="delegateSiteModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+            <h3 class="modal-title text-sm">Delegate Site</h3>
+            <button type="button" class="modal-close" onclick="closeModal('delegateSiteModal')">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
+        <form id="delegateSiteForm" method="POST">
+            <input type="hidden" id="delegate_site_id" name="site_id">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="delegate_vendor_id" class="form-label text-xs">Select Vendor *</label>
+                    <select id="delegate_vendor_id" name="vendor_id" class="form-select text-xs" required>
+                        <option value="">Choose Vendor</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal('delegateSiteModal')" class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Cancel</button>
+                <button type="submit" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">Delegate</button>
+            </div>
+        </form>
     </div>
 </div>
 
 
 <script>
-    
-    const BASE_URL = '<?php echo BASE_URL; ?>';
-    
-    console.log('Sites page script loaded');
+    // Global variables
+    let currentPage = 1;
+    let currentFilters = {};
+    let debounceTimer = null;
+    let activeStatFilter = null;
 
-    // Test if basic JavaScript is working
-    console.log('JavaScript execution test: OK');
-
-    // Load dropdown data when page loads
+    // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
-        loadCountriesForSite();
-        loadCustomersForSite();
-        loadBanksForSite();
+        loadStats();
+        loadSites();
+        setupEventListeners();
     });
 
-    // Load countries for site form
-    async function loadCountriesForSite(targetSelectId = 'country_id') {
-        try {
-            const response = await fetch('../../api/masters.php?path=countries');
-            const data = await response.json();
-
-            if (data.success) {
-                const select = document.getElementById(targetSelectId);
-                if (select) {
-                    select.innerHTML = '<option value="">Select Country</option>';
-                    data.data.records.forEach(country => {
-                        select.innerHTML += `<option value="${country.id}">${country.name}</option>`;
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('Error loading countries:', error);
-        }
-    }
-
-    // Load states for site form
-    async function loadStatesForSite(countryId, targetSelectId = 'state_id') {
-        const stateSelect = document.getElementById(targetSelectId);
-        const citySelectId = targetSelectId.replace('state_id', 'city_id');
-        const citySelect = document.getElementById(citySelectId);
-
-        if (!stateSelect) return;
-
-        // Clear existing options
-        stateSelect.innerHTML = '<option value="">Loading...</option>';
-        if (citySelect) {
-            citySelect.innerHTML = '<option value="">Select City</option>';
-        }
-
-        if (!countryId) {
-            stateSelect.innerHTML = '<option value="">Select State</option>';
-            return;
-        }
-
-        try {
-            const response = await fetch(`../../api/states.php?action=getByCountry&country_id=${countryId}`);
-            const data = await response.json();
-
-            if (data.success) {
-                stateSelect.innerHTML = '<option value="">Select State</option>';
-                data.data.forEach(state => {
-                    stateSelect.innerHTML += `<option value="${state.id}">${state.name}</option>`;
-                });
-            } else {
-                stateSelect.innerHTML = '<option value="">Error loading states</option>';
-            }
-        } catch (error) {
-            stateSelect.innerHTML = '<option value="">Error loading states</option>';
-            console.error('Error loading states:', error);
-        }
-    }
-
-    // Load cities for site form
-    async function loadCitiesForSite(stateId, targetSelectId = 'city_id') {
-        const citySelect = document.getElementById(targetSelectId);
-
-        if (!citySelect) return;
-
-        // Clear existing options
-        citySelect.innerHTML = '<option value="">Loading...</option>';
-
-        if (!stateId) {
-            citySelect.innerHTML = '<option value="">Select City</option>';
-            return;
-        }
-
-        try {
-            const response = await fetch(`../../api/cities.php?action=getByState&state_id=${stateId}`);
-            const data = await response.json();
-
-            if (data.success) {
-                citySelect.innerHTML = '<option value="">Select City</option>';
-                data.data.forEach(city => {
-                    citySelect.innerHTML += `<option value="${city.id}">${city.name}</option>`;
-                });
-            } else {
-                citySelect.innerHTML = '<option value="">Error loading cities</option>';
-            }
-        } catch (error) {
-            citySelect.innerHTML = '<option value="">Error loading cities</option>';
-            console.error('Error loading cities:', error);
-        }
-    }
-
-    // Load customers for site form
-    async function loadCustomersForSite(targetSelectId = 'customer_id') {
-        try {
-            const response = await fetch('../../api/masters.php?path=customers');
-            const data = await response.json();
-
-            if (data.success) {
-                const select = document.getElementById(targetSelectId);
-                if (select) {
-                    select.innerHTML = '<option value="">Select Customer</option>';
-                    data.data.records.forEach(customer => {
-                        select.innerHTML += `<option value="${customer.id}">${customer.name}</option>`;
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('Error loading customers:', error);
-        }
-    }
-
-    // Load banks for site form
-    async function loadBanksForSite(targetSelectId = 'bank_id') {
-        try {
-            const response = await fetch('../../api/masters.php?path=banks');
-            const data = await response.json();
-
-            if (data.success) {
-                const select = document.getElementById(targetSelectId);
-                if (select) {
-                    select.innerHTML = '<option value="">Select Bank</option>';
-                    data.data.records.forEach(bank => {
-                        select.innerHTML += `<option value="${bank.id}">${bank.name}</option>`;
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('Error loading banks:', error);
-        }
-    }
-
-    // Wait for DOM to be ready
-    document.addEventListener('DOMContentLoaded', function() {
-        // Search functionality
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.addEventListener('keyup', debounce(function() {
-                applyFilters();
-            }, 500));
-        }
-
-        // Filter functionality
-        const cityFilter = document.getElementById('cityFilter');
-        const stateFilter = document.getElementById('stateFilter');
-        const statusFilter = document.getElementById('statusFilter');
-        const surveyStatusFilter = document.getElementById('surveyStatusFilter');
-
-        if (cityFilter) cityFilter.addEventListener('change', applyFilters);
-        if (stateFilter) stateFilter.addEventListener('change', applyFilters);
-        if (statusFilter) statusFilter.addEventListener('change', applyFilters);
-        if (surveyStatusFilter) surveyStatusFilter.addEventListener('change', applyFilters);
-    });
-
-    function applyFilters() {
-        try {
-            const searchInput = document.getElementById('searchInput');
-            const cityFilter = document.getElementById('cityFilter');
-            const stateFilter = document.getElementById('stateFilter');
-            const statusFilter = document.getElementById('statusFilter');
-            const surveyStatusFilter = document.getElementById('surveyStatusFilter');
-
-            const searchTerm = searchInput ? searchInput.value : '';
-            const city = cityFilter ? cityFilter.value : '';
-            const state = stateFilter ? stateFilter.value : '';
-            const status = statusFilter ? statusFilter.value : '';
-            const surveyStatus = surveyStatusFilter ? surveyStatusFilter.value : '';
-
-            console.log('Applying filters:', {
-                searchTerm,
-                city,
-                state,
-                status,
-                surveyStatus
-            });
-
-            const url = new URL(window.location);
-
-            if (searchTerm) url.searchParams.set('search', searchTerm);
-            else url.searchParams.delete('search');
-
-            if (city) url.searchParams.set('city', city);
-            else url.searchParams.delete('city');
-
-            if (state) url.searchParams.set('state', state);
-            else url.searchParams.delete('state');
-
-            if (status) url.searchParams.set('activity_status', status);
-            else url.searchParams.delete('activity_status');
-
-            if (surveyStatus) url.searchParams.set('survey_status', surveyStatus);
-            else url.searchParams.delete('survey_status');
-
-            url.searchParams.delete('page');
-
-            console.log('Redirecting to:', url.toString());
-            window.location.href = url.toString();
-        } catch (error) {
-            console.error('Error in applyFilters:', error);
-        }
-    }
-
-    // Create site form submission
-    document.getElementById('createSiteForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        submitForm('createSiteForm', function(data) {
-            closeModal('createSiteModal');
-            showAlert('Site created successfully!', 'success');
-            setTimeout(() => location.reload(), 1500);
+    // Filter by clicking stat cards
+    function filterByStatus(status) {
+        // Remove active state from all cards
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.classList.remove('ring-2', 'ring-offset-2');
         });
-    });
+        
+        // Reset filters first
+        document.getElementById('searchInput').value = '';
+        document.getElementById('cityFilter').value = '';
+        document.getElementById('stateFilter').value = '';
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('surveyStatusFilter').value = '';
+        
+        if (status === 'all' || status === activeStatFilter) {
+            activeStatFilter = null;
+            loadSites(1);
+            return;
+        }
+        
+        activeStatFilter = status;
+        
+        // Add active state to clicked card
+        event.currentTarget.classList.add('ring-2', 'ring-offset-2');
+        
+        // Set appropriate filter based on status
+        switch(status) {
+            case 'survey_pending':
+                document.getElementById('surveyStatusFilter').value = 'pending';
+                break;
+            case 'survey_done':
+                document.getElementById('surveyStatusFilter').value = 'approved';
+                break;
+            case 'install_pending':
+                document.getElementById('statusFilter').value = 'installation_pending';
+                break;
+            case 'install_done':
+                document.getElementById('statusFilter').value = 'installation_done';
+                break;
+            case 'vendor_assigned':
+                document.getElementById('statusFilter').value = 'vendor_assigned';
+                break;
+            case 'delegated':
+                document.getElementById('statusFilter').value = 'delegated';
+                break;
+            case 'material_pending':
+                document.getElementById('statusFilter').value = 'material_pending';
+                break;
+        }
+        
+        loadSites(1);
+    }
 
-    // Site management functions
+    // Load statistics
+    function loadStats() {
+        fetch('../../api/sites.php?action=stats')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('statTotal').textContent = data.data.total_sites;
+                    document.getElementById('statSurveyPending').textContent = data.data.survey_pending;
+                    document.getElementById('statSurveyDone').textContent = data.data.survey_completed;
+                    document.getElementById('statInstallPending').textContent = data.data.installation_pending;
+                    document.getElementById('statInstallDone').textContent = data.data.installation_done;
+                    document.getElementById('statVendorAssigned').textContent = data.data.vendor_assigned;
+                    document.getElementById('statDelegated').textContent = data.data.delegated_sites;
+                    document.getElementById('statMaterialPending').textContent = data.data.material_pending;
+                }
+            })
+            .catch(error => console.error('Error loading stats:', error));
+    }
+
+    // Load sites with filters
+    function loadSites(page = 1) {
+        currentPage = page;
+        const params = new URLSearchParams();
+        params.append('action', 'list');
+        params.append('page', page);
+        
+        const search = document.getElementById('searchInput').value;
+        if (search) params.append('search', search);
+        
+        const city = document.getElementById('cityFilter').value;
+        if (city) params.append('city', city);
+        
+        const state = document.getElementById('stateFilter').value;
+        if (state) params.append('state', state);
+        
+        const status = document.getElementById('statusFilter').value;
+        if (status) params.append('activity_status', status);
+        
+        const surveyStatus = document.getElementById('surveyStatusFilter').value;
+        if (surveyStatus) params.append('survey_status', surveyStatus);
+
+        document.getElementById('sitesTableBody').innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-8 text-gray-500">
+                    <div class="flex flex-col items-center">
+                        <svg class="w-8 h-8 text-gray-300 mb-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading...
+                    </div>
+                </td>
+            </tr>`;
+
+        fetch('../../api/sites.php?' + params.toString())
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    renderSites(data.data.sites, data.data.pagination);
+                    populateFilters(data.data.filter_options);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading sites:', error);
+                document.getElementById('sitesTableBody').innerHTML = `
+                    <tr><td colspan="8" class="text-center py-8 text-red-500">Error loading sites</td></tr>`;
+            });
+    }
+
+    // Render sites table
+    function renderSites(sites, pagination) {
+        const tbody = document.getElementById('sitesTableBody');
+        
+        if (!sites || sites.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-gray-500">No sites found</td></tr>`;
+            document.getElementById('paginationContainer').style.display = 'none';
+            return;
+        }
+
+        let html = '';
+        let serialNo = ((pagination.current_page - 1) * pagination.limit) + 1;
+
+        sites.forEach(site => {
+            const surveyBadge = site.has_survey_submitted 
+                ? (site.actual_survey_status === 'approved' 
+                    ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Approved</span>'
+                    : site.actual_survey_status === 'rejected'
+                        ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">Rejected</span>'
+                        : '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">Submitted</span>')
+                : '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>';
+
+            const installBadge = site.installation_status 
+                ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Done</span>'
+                : '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>';
+
+            html += `
+                <tr>
+                    <td class="px-2 py-2 text-xs text-gray-500 font-medium">${serialNo++}</td>
+                    <td class="px-2 py-2">
+                        <div class="flex items-center space-x-1 flex-wrap gap-1">
+                            <button onclick="viewSite(${site.id})" class="p-1 text-blue-600 hover:bg-blue-50 rounded" title="View">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path></svg>
+                            </button>
+                            <button onclick="editSite(${site.id})" class="p-1 text-green-600 hover:bg-green-50 rounded" title="Edit">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path></svg>
+                            </button>
+                            ${!site.has_survey_submitted ? `
+                                <button onclick="delegateSite(${site.id})" class="p-1 text-indigo-600 hover:bg-indigo-50 rounded" title="Delegate">
+                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd"></path></svg>
+                                </button>
+                            ` : ''}
+                            <button onclick="deleteSite(${site.id})" class="p-1 text-red-600 hover:bg-red-50 rounded" title="Delete">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                            </button>
+                            ${!site.has_survey_submitted ? `<button onclick="conductSurvey(${site.id})" class="px-2 py-0.5 text-xs font-medium rounded text-white bg-green-500 hover:bg-green-600">Survey</button>` : ''}
+                            ${site.actual_survey_status === 'approved' && site.survey_id ? `<button onclick="viewSurvey(${site.survey_id})" class="px-2 py-0.5 text-xs font-medium rounded text-white bg-purple-500 hover:bg-purple-600" title="View Survey">View Survey</button>` : ''}
+                        </div>
+                    </td>
+                    <td class="px-2 py-2">
+                        <div class="text-xs font-medium text-gray-900">${site.site_id || ''}</div>
+                        ${site.store_id ? `<div class="text-xs text-gray-500">Store: ${site.store_id}</div>` : ''}
+                        ${site.po_number ? `<div class="text-xs text-gray-500">PO: ${site.po_number}</div>` : ''}
+                    </td>
+                    <td class="px-2 py-2">
+                        <div class="text-xs text-gray-900">${site.city || ''}, ${site.state || ''}</div>
+                        <div class="text-xs text-gray-500">${site.country || ''}</div>
+                        ${site.pincode ? `<div class="text-xs text-gray-500">PIN: ${site.pincode}</div>` : ''}
+                    </td>
+                    <td class="px-2 py-2">
+                        ${site.customer ? `<div class="text-xs text-gray-900">${site.customer}</div>` : ''}
+                        ${site.contact_person_name ? `<div class="text-xs text-gray-600">${site.contact_person_name}</div>` : ''}
+                        ${site.contact_person_number ? `<div class="text-xs text-gray-500">📞 ${site.contact_person_number}</div>` : ''}
+                    </td>
+                    <td class="px-2 py-2">
+                        ${site.vendor ? `<div class="text-xs text-gray-900">${site.vendor}</div>` : '<span class="text-xs text-gray-400">No vendor</span>'}
+                        ${site.delegation_status === 'active' && site.delegated_vendor_name ? `
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Delegated</span>
+                            <div class="text-xs text-orange-600">${site.delegated_vendor_name}</div>
+                        ` : ''}
+                    </td>
+                    <td class="px-2 py-2">
+                        ${site.activity_status 
+                            ? `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">${site.activity_status}</span>`
+                            : '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">No Status</span>'}
+                    </td>
+                    <td class="px-2 py-2">
+                        <div class="space-y-0.5">
+                            <div class="flex items-center"><span class="text-xs text-gray-500 w-10">Survey:</span>${surveyBadge}</div>
+                            <div class="flex items-center"><span class="text-xs text-gray-500 w-10">Install:</span>${installBadge}</div>
+                        </div>
+                    </td>
+                </tr>`;
+        });
+
+        tbody.innerHTML = html;
+        renderPagination(pagination);
+    }
+
+    // Render pagination
+    function renderPagination(pagination) {
+        const container = document.getElementById('paginationContainer');
+        const info = document.getElementById('paginationInfo');
+        const nav = document.getElementById('paginationNav');
+
+        if (pagination.total_pages <= 1) {
+            container.style.display = 'none';
+            return;
+        }
+
+        container.style.display = 'flex';
+        
+        const start = ((pagination.current_page - 1) * pagination.limit) + 1;
+        const end = Math.min(pagination.current_page * pagination.limit, pagination.total_records);
+        info.textContent = `Showing ${start} to ${end} of ${pagination.total_records} results`;
+
+        let navHtml = '';
+        for (let i = 1; i <= pagination.total_pages; i++) {
+            const activeClass = i === pagination.current_page 
+                ? 'bg-blue-600 text-white' 
+                : 'text-gray-600 bg-white border border-gray-300 hover:bg-gray-50';
+            navHtml += `<button onclick="loadSites(${i})" class="px-2.5 py-1 text-xs font-medium rounded ${activeClass}">${i}</button>`;
+        }
+        nav.innerHTML = navHtml;
+    }
+
+    // Populate filter dropdowns
+    function populateFilters(options) {
+        if (options.cities) {
+            const citySelect = document.getElementById('cityFilter');
+            const currentCity = citySelect.value;
+            citySelect.innerHTML = '<option value="">All Cities</option>';
+            options.cities.forEach(city => {
+                if (city) citySelect.innerHTML += `<option value="${city}" ${city === currentCity ? 'selected' : ''}>${city}</option>`;
+            });
+        }
+        if (options.states) {
+            const stateSelect = document.getElementById('stateFilter');
+            const currentState = stateSelect.value;
+            stateSelect.innerHTML = '<option value="">All States</option>';
+            options.states.forEach(state => {
+                if (state) stateSelect.innerHTML += `<option value="${state}" ${state === currentState ? 'selected' : ''}>${state}</option>`;
+            });
+        }
+        if (options.activity_statuses) {
+            const statusSelect = document.getElementById('statusFilter');
+            const currentStatus = statusSelect.value;
+            statusSelect.innerHTML = '<option value="">All Status</option>';
+            options.activity_statuses.forEach(status => {
+                if (status) statusSelect.innerHTML += `<option value="${status}" ${status === currentStatus ? 'selected' : ''}>${status}</option>`;
+            });
+        }
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            if (debounceTimer) clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => loadSites(1), 500);
+        });
+
+        ['cityFilter', 'stateFilter', 'statusFilter', 'surveyStatusFilter'].forEach(id => {
+            document.getElementById(id).addEventListener('change', () => loadSites(1));
+        });
+    }
+
+    // Site actions
     function viewSite(id) {
         fetch(`view.php?id=${id}`)
             .then(response => response.json())
-            .then(data => { debugger;
+            .then(data => {
                 if (data.success) {
                     const site = data.site;
-                    populateViewModal(site);
+                    document.getElementById('viewSiteContent').innerHTML = `
+                        <div class="grid grid-cols-2 gap-4 text-xs">
+                            <div><label class="font-medium text-gray-700">Site ID</label><p class="bg-gray-50 p-2 rounded">${site.site_id || '-'}</p></div>
+                            <div><label class="font-medium text-gray-700">Store ID</label><p class="bg-gray-50 p-2 rounded">${site.store_id || '-'}</p></div>
+                            <div class="col-span-2"><label class="font-medium text-gray-700">Location</label><p class="bg-gray-50 p-2 rounded">${site.location || '-'}</p></div>
+                            <div><label class="font-medium text-gray-700">City</label><p class="bg-gray-50 p-2 rounded">${site.city || '-'}</p></div>
+                            <div><label class="font-medium text-gray-700">State</label><p class="bg-gray-50 p-2 rounded">${site.state || '-'}</p></div>
+                            <div><label class="font-medium text-gray-700">Country</label><p class="bg-gray-50 p-2 rounded">${site.country || '-'}</p></div>
+                            <div><label class="font-medium text-gray-700">Pincode</label><p class="bg-gray-50 p-2 rounded">${site.pincode || '-'}</p></div>
+                            <div><label class="font-medium text-gray-700">Customer</label><p class="bg-gray-50 p-2 rounded">${site.customer || '-'}</p></div>
+                            <div><label class="font-medium text-gray-700">Vendor</label><p class="bg-gray-50 p-2 rounded">${site.vendor || '-'}</p></div>
+                            <div><label class="font-medium text-gray-700">Activity Status</label><p class="bg-gray-50 p-2 rounded">${site.activity_status || '-'}</p></div>
+                            <div><label class="font-medium text-gray-700">Survey Status</label><p class="bg-gray-50 p-2 rounded">${site.survey_status ? 'Completed' : 'Pending'}</p></div>
+                        </div>`;
                     openModal('viewSiteModal');
                 } else {
                     showAlert(data.message, 'error');
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                showAlert('Failed to load site data', 'error');
-            });
-    }
-
-    function populateViewModal(site) {
-        document.getElementById('view_site_id').textContent = site.site_id || 'N/A';
-        document.getElementById('view_store_id').textContent = site.store_id || 'N/A';
-        document.getElementById('view_location').textContent = site.location || 'N/A';
-        document.getElementById('view_city').textContent = site.city_name || site.city || 'N/A';
-        document.getElementById('view_state').textContent = site.state_name || site.state || 'N/A';
-        document.getElementById('view_country').textContent = site.country_name || site.country || 'N/A';
-        document.getElementById('view_branch').textContent = site.branch || 'N/A';
-        document.getElementById('view_po_number').textContent = site.po_number || 'N/A';
-        document.getElementById('view_po_date').textContent = site.po_date || 'N/A';
-        document.getElementById('view_customer').textContent = site.customer_name || site.customer || 'N/A';
-       // document.getElementById('view_bank').textContent = site.bank_name || site.bank || 'N/A';
-        document.getElementById('view_vendor').textContent = site.vendor || 'N/A';
-        document.getElementById('view_delegated_vendor').textContent = site.delegated_vendor || 'N/A';
-        document.getElementById('view_activity_status').textContent = site.activity_status || 'N/A';
-        document.getElementById('view_survey_submission_date').textContent = site.survey_submission_date ? formatDateTime(site.survey_submission_date) : 'N/A';
-        document.getElementById('view_installation_date').textContent = site.installation_date ? formatDateTime(site.installation_date) : 'N/A';
-        document.getElementById('view_created_by').textContent = site.created_by || 'N/A';
-        document.getElementById('view_updated_by').textContent = site.updated_by || 'N/A';
-        document.getElementById('view_created_at').textContent = formatDateTime(site.created_at);
-        document.getElementById('view_updated_at').textContent = formatDateTime(site.updated_at);
-        document.getElementById('view_remarks').textContent = site.remarks || 'No remarks';
-
-        // Progress flags
-        const progressFlags = [];
-        if (site.is_delegate == 1) progressFlags.push('✓ Delegated');
-        if (site.survey_status == 1) progressFlags.push('✓ Survey Completed');
-        if (site.installation_status == 1) progressFlags.push('✓ Installation Done');
-        if (site.is_material_request_generated == 1) progressFlags.push('✓ Material Request Generated');
-
-        document.getElementById('view_progress_flags').innerHTML = progressFlags.length > 0 ?
-            progressFlags.map(flag => `<div>${flag}</div>`).join('') :
-            '<div class="text-gray-500">No progress flags set</div>';
-
-        // Store site ID for edit function
-        window.currentViewingSiteId = site.id;
+            .catch(error => showAlert('Failed to load site', 'error'));
     }
 
     function editSite(id) {
@@ -1078,353 +739,81 @@ ob_start();
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    const site = data.site;
-                    populateEditModal(site);
-                    document.getElementById('editSiteForm').action = `edit.php?id=${id}`;
-                    openModal('editSiteModal');
+                    // Redirect to edit page or populate modal
+                    window.location.href = `edit.php?id=${id}`;
                 } else {
                     showAlert(data.message, 'error');
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                showAlert('Failed to load site data', 'error');
-            });
-    }
-
-    async function populateEditModal(site) {
-        document.getElementById('edit_site_id').value = site.site_id || '';
-        document.getElementById('edit_store_id').value = site.store_id || '';
-        document.getElementById('edit_location').value = site.location || '';
-        document.getElementById('edit_branch').value = site.branch || '';
-        document.getElementById('edit_po_number').value = site.po_number || '';
-        document.getElementById('edit_po_date').value = site.po_date || '';
-        document.getElementById('edit_activity_status').value = site.activity_status || '';
-        document.getElementById('edit_survey_submission_date').value = site.survey_submission_date ? site.survey_submission_date.replace(' ', 'T') : '';
-        document.getElementById('edit_installation_date').value = site.installation_date ? site.installation_date.replace(' ', 'T') : '';
-        document.getElementById('edit_remarks').value = site.remarks || '';
-
-        // Load dropdowns for edit form
-        await loadCountriesForSite('edit_country_id');
-        await loadCustomersForSite('edit_customer_id');
-        await loadBanksForSite('edit_bank_id');
-
-        // Set selected values after loading dropdowns
-        setTimeout(() => {
-            if (site.country_id) {
-                document.getElementById('edit_country_id').value = site.country_id;
-                loadStatesForSite(site.country_id, 'edit_state_id').then(() => {
-                    if (site.state_id) {
-                        document.getElementById('edit_state_id').value = site.state_id;
-                        loadCitiesForSite(site.state_id, 'edit_city_id').then(() => {
-                            if (site.city_id) {
-                                document.getElementById('edit_city_id').value = site.city_id;
-                            }
-                        });
-                    }
-                });
-            }
-
-            if (site.customer_id) {
-                document.getElementById('edit_customer_id').value = site.customer_id;
-            }
-
-            if (site.bank_id) {
-                document.getElementById('edit_bank_id').value = site.bank_id;
-            }
-        }, 500);
-
-        // Set vendor fields
-        document.getElementById('edit_vendor').value = site.vendor || '';
-        document.getElementById('edit_delegated_vendor').value = site.delegated_vendor || '';
-
-        // Checkboxes
-        document.getElementById('edit_is_delegate').checked = site.is_delegate == 1;
-        document.getElementById('edit_survey_status').checked = site.survey_status == 1;
-        document.getElementById('edit_installation_status').checked = site.installation_status == 1;
-        document.getElementById('edit_is_material_request_generated').checked = site.is_material_request_generated == 1;
-    }
-
-    function editSiteFromView() {
-        if (window.currentViewingSiteId) {
-            closeModal('viewSiteModal');
-            editSite(window.currentViewingSiteId);
-        }
-    }
-
-    function viewSurvey(surveyId) {
-        // Redirect to the unified survey view page
-        window.open(`../../shared/view-survey.php?id=${surveyId}`, '_blank');
-    }
-
-    function viewSiteSurvey(surveyId) {
-        // Redirect to the unified survey view page
-        window.open(`../../shared/view-survey.php?id=${surveyId}`, '_blank');
+            .catch(error => showAlert('Failed to load site', 'error'));
     }
 
     function deleteSite(id) {
-        confirmAction('Are you sure you want to delete this site? This action cannot be undone.', function() {
-            fetch(`delete.php?id=${id}`, {
-                    method: 'POST'
-                })
+        if (confirm('Are you sure you want to delete this site?')) {
+            fetch(`delete.php?id=${id}`, { method: 'POST' })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         showAlert(data.message, 'success');
-                        setTimeout(() => location.reload(), 1500);
+                        loadSites(currentPage);
+                        loadStats();
                     } else {
                         showAlert(data.message, 'error');
                     }
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showAlert('Failed to delete site', 'error');
-                });
-        });
+                .catch(error => showAlert('Failed to delete site', 'error'));
+        }
     }
 
-    // Utility function to format dates
-    function formatDateTime(dateString) {
-        if (!dateString) return 'N/A';
-        const date = new Date(dateString);
-        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    function delegateSite(id) {
+        document.getElementById('delegate_site_id').value = id;
+        loadVendorsForDelegate();
+        openModal('delegateSiteModal');
     }
 
-    // Clear form when modal is closed
-    function clearCreateForm() {
-        document.getElementById('createSiteForm').reset();
-
-        // Reset dropdowns to default state
-        document.getElementById('country_id').innerHTML = '<option value="">Select Country</option>';
-        document.getElementById('state_id').innerHTML = '<option value="">Select State</option>';
-        document.getElementById('city_id').innerHTML = '<option value="">Select City</option>';
-        document.getElementById('customer_id').innerHTML = '<option value="">Select Customer</option>';
-        document.getElementById('bank_id').innerHTML = '<option value="">Select Bank</option>';
-
-        // Reload dropdown data
-        loadCountriesForSite();
-        loadCustomersForSite();
-        loadBanksForSite();
-    }
-
-    // File upload handling - wrapped in DOMContentLoaded to ensure elements exist
-    document.addEventListener('DOMContentLoaded', function() {
-
-        const fileInput = document.getElementById('excel_file');
-        if (!fileInput) {
-            console.error('File input not found');
-        } else {
-
-            // Simple file validation
-            fileInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const allowedTypes = ['xlsx', 'xls', 'csv'];
-                    const fileExtension = file.name.split('.').pop().toLowerCase();
-
-                    if (!allowedTypes.includes(fileExtension)) {
-                        alert('Please select a valid Excel (.xlsx, .xls) or CSV (.csv) file.');
-                        this.value = ''; // Clear the input
-                        return;
-                    }
-
-                    // Check file size (max 10MB)
-                    if (file.size > 10 * 1024 * 1024) {
-                        alert('File size too large. Maximum size is 10MB.');
-                        this.value = ''; // Clear the input
-                        return;
-                    }
-
-                    console.log('File selected:', file.name);
-                }
-            });
-
-        } // End else block for fileInput check
-
-        // Bulk upload form submission
-        const bulkUploadForm = document.getElementById('bulkUploadForm');
-        if (!bulkUploadForm) {
-            console.error('Bulk upload form not found');
-        } else {
-
-            bulkUploadForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                const formData = new FormData(this);
-
-                // Check if file is selected
-                if (!fileInput.files.length) {
-                    alert('Please select a file to upload');
-                    return;
-                }
-
-                const uploadBtn = document.getElementById('upload-btn');
-                const progressDiv = document.getElementById('upload-progress');
-                const progressBar = document.getElementById('progress-bar');
-                const progressText = document.getElementById('progress-text');
-                const resultsDiv = document.getElementById('upload-results');
-
-                // Show progress
-                uploadBtn.disabled = true;
-                uploadBtn.textContent = 'Uploading...';
-                progressDiv.classList.remove('hidden');
-                resultsDiv.classList.add('hidden');
-
-                // Simulate progress (since we can't track real progress easily)
-                let progress = 0;
-                const progressInterval = setInterval(() => {
-                    progress += Math.random() * 15;
-                    if (progress > 90) progress = 90;
-                    progressBar.style.width = progress + '%';
-                    progressText.textContent = `Processing... ${Math.round(progress)}%`;
-                }, 200);
-
-                fetch('bulk_upload.php', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        clearInterval(progressInterval);
-                        progressBar.style.width = '100%';
-                        progressText.textContent = 'Complete!';
-
-                        setTimeout(() => {
-                            progressDiv.classList.add('hidden');
-                            resultsDiv.classList.remove('hidden');
-
-                            if (data.success) {
-                                document.getElementById('success-results').classList.remove('hidden');
-                                document.getElementById('error-results').classList.add('hidden');
-                                document.getElementById('success-message').textContent = data.message;
-
-                                setTimeout(() => {
-                                    closeModal('bulkUploadModal');
-                                    location.reload();
-                                }, 2000);
-                            } else {
-                                document.getElementById('success-results').classList.add('hidden');
-                                document.getElementById('error-results').classList.remove('hidden');
-
-                                let errorHtml = '<ul class="list-disc list-inside">';
-                                if (data.errors && Array.isArray(data.errors)) {
-                                    data.errors.forEach(error => {
-                                        errorHtml += `<li>${error}</li>`;
-                                    });
-                                } else {
-                                    errorHtml += `<li>${data.message || 'Unknown error occurred'}</li>`;
-                                }
-                                errorHtml += '</ul>';
-
-                                document.getElementById('error-list').innerHTML = errorHtml;
-                            }
-
-                            uploadBtn.disabled = false;
-                            uploadBtn.textContent = 'Upload Sites';
-                        }, 500);
-                    })
-                    .catch(error => {
-                        clearInterval(progressInterval);
-                        progressDiv.classList.add('hidden');
-                        resultsDiv.classList.remove('hidden');
-
-                        document.getElementById('success-results').classList.add('hidden');
-                        document.getElementById('error-results').classList.remove('hidden');
-                        document.getElementById('error-list').innerHTML = `<p>Network error: ${error.message}</p>`;
-
-                        uploadBtn.disabled = false;
-                        uploadBtn.textContent = 'Upload Sites';
+    function loadVendorsForDelegate() {
+        fetch('../../api/masters.php?path=vendors&status=active&limit=1000')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data && data.data.records) {
+                    const select = document.getElementById('delegate_vendor_id');
+                    select.innerHTML = '<option value="">Choose Vendor</option>';
+                    data.data.records.forEach(vendor => {
+                        select.innerHTML += `<option value="${vendor.id}">${vendor.name}</option>`;
                     });
-            }); // End addEventListener for bulkUploadForm
-        } // End else block for bulkUploadForm check
-
-    }); // End bulk upload DOMContentLoaded wrapper
-
-
-    // Edit site form submission - moved outside DOMContentLoaded to ensure it's available
-    document.addEventListener('DOMContentLoaded', function() {
-        const editSiteForm = document.getElementById('editSiteForm');
-        if (editSiteForm) {
-            editSiteForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                submitForm('editSiteForm', function(data) {
-                    closeModal('editSiteModal');
-                    showAlert('Site updated successfully!', 'success');
-                    setTimeout(() => location.reload(), 1500);
-                });
-            });
-        }
-    });
-
-    // Delegation functions
-    function delegateSite(siteId) {
-        window.location.href = `delegate.php?id=${siteId}`;
+                }
+            })
+            .catch(error => console.error('Error loading vendors:', error));
     }
 
-    function viewDelegation(siteId) {
-        window.location.href = `delegate.php?id=${siteId}`;
+    function conductSurvey(id) {
+        window.location.href = `../site-survey/create.php?site_id=${id}`;
     }
 
-    // Download template function
-    function downloadTemplate() {
-        window.open('download_template.php', '_blank');
-    }
-    
-    function conductSurvey(delegationId) { debugger;
-        var url = `${BASE_URL}/admin/site-survey.php?delegation_id=${delegationId}`;
-        //alert(url);
-        window.location.href = `${BASE_URL}/admin/site-survey.php?delegation_id=${delegationId}`;
+    function conductMaterials(siteId, surveyId) {
+        window.location.href = `../material-request.php?site_id=${siteId}&survey_id=${surveyId}`;
     }
 
-    function conductMaterials(siteId,surveyId) { debugger;
-        var url = `${BASE_URL}/admin/material-request.php?site_id=${siteId}&survey_id=${surveyId}`;
-        //alert(url);
-        window.location.href = `${BASE_URL}/admin/material-request.php?site_id=${siteId}&survey_id=${surveyId}`;
+    function viewSiteSurvey(surveyId) {
+        window.location.href = `../site-survey/view.php?id=${surveyId}`;
     }
 
-    // Override modal close to clear forms
-    const originalCloseModal = window.closeModal;
-    window.closeModal = function(modalId) {
-        if (modalId === 'createSiteModal') {
-            clearCreateForm();
-        } else if (modalId === 'bulkUploadModal') {
-            // Reset bulk upload form
-            document.getElementById('bulkUploadForm').reset();
-            document.getElementById('upload-progress').classList.add('hidden');
-            document.getElementById('upload-results').classList.add('hidden');
-            document.getElementById('success-results').classList.add('hidden');
-            document.getElementById('error-results').classList.add('hidden');
-        }
-        originalCloseModal(modalId);
-    };
-
-    // Functions are now properly defined
-
-    // Bulk upload dropdown menu functions
-    function toggleBulkUploadMenu() {
-        const menu = document.getElementById('bulkUploadMenu');
-        menu.classList.toggle('hidden');
+    function viewSurvey(surveyId) {
+        window.location.href = `../surveys/view-survey.php?id=${surveyId}`;
     }
 
-    function closeBulkUploadMenu() {
-        const menu = document.getElementById('bulkUploadMenu');
-        menu.classList.add('hidden');
+    // Alert function
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `fixed top-4 right-4 z-50 p-3 rounded-md shadow-lg text-sm ${
+            type === 'success' ? 'bg-green-100 border border-green-400 text-green-700' :
+            type === 'error' ? 'bg-red-100 border border-red-400 text-red-700' :
+            'bg-blue-100 border border-blue-400 text-blue-700'
+        }`;
+        alertDiv.textContent = message;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 3000);
     }
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-        const menu = document.getElementById('bulkUploadMenu');
-        const button = event.target.closest('.relative');
-
-        if (!button || !button.contains(event.target)) {
-            menu.classList.add('hidden');
-        }
-    });
 </script>
 
 <?php

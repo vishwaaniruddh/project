@@ -126,6 +126,7 @@ console.log('Dispatch functions loaded:', {
             <table class="data-table">
                 <thead>
                     <tr>
+                        <th>Actions</th>
                         <th>Dispatch Details</th>
                         <th>Destination</th>
                         <th>Contact Person</th>
@@ -133,7 +134,6 @@ console.log('Dispatch functions loaded:', {
                         <th>Items/Value</th>
                         <th>Status</th>
                         <th>Tracking</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -150,6 +150,30 @@ console.log('Dispatch functions loaded:', {
                     <?php else: ?>
                         <?php foreach ($dispatches as $dispatch): ?>
                         <tr>
+                            
+                             <td>
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="viewDispatch(<?php echo $dispatch['id']; ?>)" class="btn btn-sm btn-secondary" title="View Details">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </button>
+                                    <?php if ($dispatch['dispatch_status'] !== 'delivered'): ?>
+                                        <button onclick="updateDispatchStatus(<?php echo $dispatch['id']; ?>)" class="btn btn-sm btn-primary" title="Update Status">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
+                                            </svg>
+                                        </button>
+                                    <?php endif; ?>
+                                    <button onclick="printDispatch(<?php echo $dispatch['id']; ?>)" class="btn btn-sm btn-secondary" title="Print Dispatch">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                            
                             <td>
                                 <div>
                                     <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($dispatch['dispatch_number']); ?></div>
@@ -211,28 +235,7 @@ console.log('Dispatch functions loaded:', {
                                     <span class="text-sm text-gray-500">No tracking</span>
                                 <?php endif; ?>
                             </td>
-                            <td>
-                                <div class="flex items-center space-x-2">
-                                    <button onclick="viewDispatch(<?php echo $dispatch['id']; ?>)" class="btn btn-sm btn-secondary" title="View Details">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
-                                        </svg>
-                                    </button>
-                                    <?php if ($dispatch['dispatch_status'] !== 'delivered'): ?>
-                                        <button onclick="updateDispatchStatus(<?php echo $dispatch['id']; ?>)" class="btn btn-sm btn-primary" title="Update Status">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
-                                            </svg>
-                                        </button>
-                                    <?php endif; ?>
-                                    <button onclick="printDispatch(<?php echo $dispatch['id']; ?>)" class="btn btn-sm btn-secondary" title="Print Dispatch">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </td>
+                           
                         </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>

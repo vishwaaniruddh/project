@@ -475,15 +475,15 @@ $currentUser = Auth::getCurrentUser();
         .sidebar-item {
             display: flex;
             align-items: center;
-            padding: 8px 16px;
-            margin: 1px 8px;
-            border-radius: 8px;
+            padding: 6px 12px;
+            margin: 1px 6px;
+            border-radius: 6px;
             transition: all 0.2s ease;
             text-decoration: none;
-            min-height: 40px;
-            color: #e5e7eb !important;
+            min-height: 32px;
+            color: #d1d5db !important;
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 0.75rem;
         }
         
         .sidebar-item:hover {
@@ -493,32 +493,32 @@ $currentUser = Auth::getCurrentUser();
         }
         
         .sidebar-item.active {
-            background-color: transparent;
-            color: #6366f1 !important;
+            background-color: rgba(99, 102, 241, 0.15);
+            color: #818cf8 !important;
             font-weight: 600;
-            border-left: 3px solid #6366f1;
-            padding-left: 13px;
+            border-left: 2px solid #6366f1;
+            padding-left: 10px;
         }
         
         .sidebar-item svg {
             flex-shrink: 0;
-            width: 20px;
-            height: 20px;
-            margin-right: 12px;
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
             color: inherit;
         }
         
         .sidebar-subitem {
             display: flex;
             align-items: center;
-            padding: 6px 10px;
-            margin: 1px 12px;
+            padding: 5px 8px;
+            margin: 1px 8px;
             text-decoration: none;
-            border-radius: 6px;
-            font-size: 0.8rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
             transition: all 0.2s;
-            min-height: 32px;
-            color: #d1d5db !important;
+            min-height: 26px;
+            color: #9ca3af !important;
             font-weight: 400;
         }
         
@@ -530,15 +530,15 @@ $currentUser = Auth::getCurrentUser();
         
         .sidebar-subitem.active {
             background-color: transparent;
-            color: #6366f1 !important;
+            color: #818cf8 !important;
             font-weight: 600;
         }
         
         .sidebar-subitem svg {
             flex-shrink: 0;
-            width: 16px;
-            height: 16px;
-            margin-right: 10px;
+            width: 12px;
+            height: 12px;
+            margin-right: 6px;
             color: inherit;
         }
         
@@ -560,20 +560,20 @@ $currentUser = Auth::getCurrentUser();
         /* Large device improvements */
         @media (min-width: 1024px) {
             .sidebar-item {
-                margin: 1px 8px;
-                padding: 8px 16px;
-                font-size: 0.9rem;
+                margin: 1px 6px;
+                padding: 6px 12px;
+                font-size: 0.75rem;
             }
             
             [id$="-submenu"] {
-                margin: 4px 8px;
+                margin: 2px 6px 2px 24px;
                 padding: 4px 0;
             }
             
             [id$="-submenu"] .sidebar-subitem {
-                margin: 1px 12px;
-                padding: 6px 10px;
-                font-size: 0.8rem;
+                margin: 1px 8px;
+                padding: 5px 10px;
+                font-size: 0.7rem;
             }
         }
         
@@ -605,26 +605,26 @@ $currentUser = Auth::getCurrentUser();
             }
             
             .sidebar-item {
-                padding: 8px 12px;
-                font-size: 0.9rem;
-                margin: 1px 6px;
+                padding: 6px 10px;
+                font-size: 0.75rem;
+                margin: 1px 4px;
             }
             
             [id$="-submenu"] {
-                margin: 3px 6px;
+                margin: 2px 4px 2px 20px;
                 padding: 3px 0;
             }
             
             [id$="-submenu"] .sidebar-subitem {
-                margin: 1px 10px;
-                padding: 4px 6px;
-                font-size: 0.75rem;
+                margin: 1px 8px;
+                padding: 5px 8px;
+                font-size: 0.68rem;
             }
             
             [id$="-submenu"] .sidebar-subitem svg {
-                width: 12px;
-                height: 12px;
-                margin-right: 6px;
+                width: 10px;
+                height: 10px;
+                margin-right: 5px;
             }
             
             /* Make sure overlay doesn't interfere with sidebar clicks */
@@ -933,6 +933,8 @@ $currentUser = Auth::getCurrentUser();
         [id^="submenu-"]:not(.hidden), #inventory-submenu:not(.hidden), #admin-submenu:not(.hidden) {
             opacity: 1;
             max-height: 500px;
+            margin-left: 0.5rem;
+
         }
         
         /* Arrow transitions */
@@ -964,38 +966,38 @@ $currentUser = Auth::getCurrentUser();
         
         /* Submenu container styling */
         [id$="-submenu"] {
-            background: #374151;
-            border-radius: 8px;
-            margin: 4px 8px;
+            background: rgba(55, 65, 81, 0.5);
+            border-radius: 6px;
+            margin: 2px 6px 2px 24px;
             padding: 4px 0;
-            border-left: 3px solid #6366f1;
+            border-left: 2px solid #4f46e5;
         }
         
         [id$="-submenu"] .sidebar-subitem {
-            margin: 1px 12px;
-            padding: 6px 10px;
-            font-size: 0.8rem;
+            margin: 1px 8px;
+            padding: 5px 10px;
+            font-size: 0.7rem;
         }
         
         [id$="-submenu"] .sidebar-subitem svg {
-            width: 14px;
-            height: 14px;
-            margin-right: 8px;
+            width: 11px;
+            height: 11px;
+            margin-right: 6px;
         }
         
         /* Menu section headers */
         .menu-section-header {
-            color: #9ca3af !important;
-            font-size: 0.75rem;
-            font-weight: 600;
+            color: #6b7280 !important;
+            font-size: 0.65rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 12px 16px 6px 16px;
-            margin-top: 16px;
+            letter-spacing: 0.08em;
+            padding: 8px 12px 4px 12px;
+            margin-top: 10px;
         }
         
         .menu-section-header:first-child {
-            margin-top: 6px;
+            margin-top: 4px;
         }
         .form-input, .form-select,.form-textarea,.search-input {
             background-color: #f9fafb;
@@ -1164,23 +1166,23 @@ $currentUser = Auth::getCurrentUser();
     <div class="admin-sidebar w-64 shadow-lg">
         <div class="flex flex-col h-full">
             <!-- Logo -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-600">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-600">
                 <a href="<?php echo url('/admin/dashboard.php'); ?>" class="flex items-center hover:opacity-80 transition-opacity">
                     <div class="sidebar-text">
-                        <h1 class="text-lg font-bold text-white karvy-brand">Karvy Technologies</h1>
-                        <p class="text-xs text-gray-300 karvy-subtitle">Pvt Ltd</p>
+                        <h1 class="text-sm font-bold text-white karvy-brand">Karvy Technologies</h1>
+                        <p class="text-xs text-gray-400 karvy-subtitle">Pvt Ltd</p>
                     </div>
                 </a>
                 <!-- Hamburger menu for large devices -->
-                <button id="sidebarToggle" class="hidden lg:block p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button id="sidebarToggle" class="hidden lg:block p-1.5 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
                 </button>
             </div>
             
             <!-- Real-time Date/Time Display -->
-              <a class="nav-link" href="#" style="color:white;text-align: center;margin: 5px;">
+              <a class="nav-link" href="#" style="color:#9ca3af;text-align: center;margin: 3px;font-size: 0.7rem;">
                     <span class="menu-title" id="clock" class="clock"></span>
                 </a>
 
@@ -1190,7 +1192,7 @@ $currentUser = Auth::getCurrentUser();
             </div> -->
 
             <!-- Navigation -->
-            <nav class="flex-1 px-2 py-2 space-y-1 overflow-y-auto">
+            <nav class="flex-1 px-1 py-1 space-y-0.5 overflow-y-auto">
                 <?php 
                 try {
                     require_once __DIR__ . '/dynamic_sidebar.php';
@@ -1610,7 +1612,10 @@ $currentUser = Auth::getCurrentUser();
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
+                modal.classList.remove('hidden');
                 modal.style.display = 'flex';
+                modal.style.alignItems = 'center';
+                modal.style.justifyContent = 'center';
                 document.body.style.overflow = 'hidden';
             }
         }
@@ -1618,6 +1623,7 @@ $currentUser = Auth::getCurrentUser();
         function closeModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
+                modal.classList.add('hidden');
                 modal.style.display = 'none';
                 document.body.style.overflow = 'auto';
             }

@@ -8,40 +8,88 @@ $title = 'Users Management';
 ob_start();
 ?>
 
-<div class="mb-6">
-    <h1 class="text-2xl font-semibold text-gray-900 mb-2">Users Management</h1>
-
-    <div class="flex justify-between items-center">
-        <div class="flex gap-3">
-            <button onclick="exportUsersData()" class="btn btn-secondary">Export</button>
-            <button onclick="resetCreateUserForm(); openModal('createUserModal')" class="btn btn-primary">Add User</button>
+<div class="mb-4">
+    <div class="flex justify-between items-center gap-3">
+        <div class="flex items-center gap-2">
+            <button onclick="exportUsersData()" class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                Export
+            </button>
+            <button onclick="resetCreateUserForm(); openModal('createUserModal')" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
+                Add User
+            </button>
+            <a href="bulk_upload.php" class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                Bulk Upload
+            </a>
         </div>
-
-        <p class="text-sm text-gray-600">Manage system users and their permissions</p>
+        <p class="text-xs text-gray-500">Manage system users and their permissions</p>
     </div>
 </div>
 
+
+
+<!--<div class="mb-6">-->
+<!--    <h1 class="text-2xl font-semibold text-gray-900 mb-2">Users Management</h1>-->
+
+<!--    <div class="flex justify-between items-center">-->
+<!--        <div class="flex gap-3">-->
+<!--            <button onclick="exportUsersData()" class="btn btn-secondary">Export</button>-->
+<!--            <button onclick="resetCreateUserForm(); openModal('createUserModal')" class="btn btn-primary">Add User</button>-->
+<!--        </div>-->
+        
+        
+<!--         <div class="relative inline-block">-->
+
+<!--            <a href="bulk_upload.php" class="btn btn-secondary">-->
+<!--                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">-->
+<!--                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>-->
+<!--                </svg> Upload Sites In Bulk-->
+<!--            </a>-->
+
+
+
+
+<!--            <div id="bulkUploadMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">-->
+<!--                <div class="py-1">-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+        
+<!--        <br>-->
+
+<!--        <p class="text-sm text-gray-600">Manage system users and their permissions</p>-->
+<!--    </div>-->
+    
+   
+    
+    
+    
+    
+<!--</div>-->
+
 <!-- Search and Filters -->
-<div class="card mb-6">
-    <div class="card-body">
-        <div class="flex flex-col sm:flex-row gap-4">
+<div class="card mb-4">
+    <div class="card-body p-3">
+        <div class="flex flex-col sm:flex-row gap-3">
             <div class="flex-1">
                 <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
                         </svg>
                     </div>
-                    <input type="text" id="searchInput" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" value="<?php echo htmlspecialchars($data['search']); ?>" onkeyup="filterUsersTable()">
+                    <input type="text" id="searchInput" placeholder="Search users..." class="block w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" value="<?php echo htmlspecialchars($data['search']); ?>" onkeyup="filterUsersTable()">
                 </div>
             </div>
             <div class="flex gap-2">
-                <select id="roleFilter" class="form-select" onchange="filterUsersTable()">
+                <select id="roleFilter" class="text-xs border border-gray-300 rounded py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-blue-500" onchange="filterUsersTable()">
                     <option value="">All Roles</option>
                     <option value="admin">Admin</option>
                     <option value="vendor">Vendor</option>
                 </select>
-                <select id="statusFilter" class="form-select" onchange="filterUsersTable()">
+                <select id="statusFilter" class="text-xs border border-gray-300 rounded py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-blue-500" onchange="filterUsersTable()">
                     <option value="">All Status</option>
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -53,113 +101,110 @@ ob_start();
 
 <!-- Users Table -->
 <div class="card">
-    <div class="card-body">
+    <div class="card-body p-4">
         <div class="overflow-x-auto">
-            <table class="data-table" id="usersTable">
+            <table class="data-table text-xs" id="usersTable">
                 <thead>
                     <tr>
-                        <th>User</th>
-                        <th>Contact</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Created</th>
-                        <th>Actions</th>
+                        <th class="px-3 py-2 text-xs">#</th>
+                        <th class="px-3 py-2 text-xs">Actions</th>
+                        <th class="px-3 py-2 text-xs">User</th>
+                        <th class="px-3 py-2 text-xs">Contact</th>
+                        <th class="px-3 py-2 text-xs">Role</th>
+                        <th class="px-3 py-2 text-xs">Status</th>
+                        <th class="px-3 py-2 text-xs">Created</th>
                     </tr>
                 </thead>
                 <tbody id="usersTableBody">
-                    <?php foreach ($data['users'] as $user): ?>
+                    <?php 
+                    $serialNo = (($data['pagination']['current_page'] - 1) * $data['pagination']['limit']) + 1;
+                    foreach ($data['users'] as $user): 
+                    ?>
                         <tr>
-                            <td>
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white font-medium mr-3">
-                                        <?php echo strtoupper(substr($user['username'], 0, 1)); ?>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($user['username']); ?></div>
-                                        <div class="text-sm text-gray-500">ID: <?php echo $user['id']; ?></div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="text-sm text-gray-900"><?php echo htmlspecialchars($user['email']); ?></div>
-                                <div class="text-sm text-gray-500"><?php echo htmlspecialchars($user['phone'] ?? 'N/A'); ?></div>
-                            </td>
-                            <td>
-                                <span class="badge <?php echo $user['role'] === 'admin' ? 'badge-info' : 'badge-secondary'; ?>">
-                                    <?php echo ucfirst($user['role']); ?>
-                                </span>
-                                <?php if ($user['role'] === 'vendor' && !empty($user['vendor_name'])): ?>
-                                    <div class="text-xs text-gray-500 mt-1">
-                                        <?php echo htmlspecialchars($user['vendor_name']); ?>
-                                    </div>
-                                <?php elseif ($user['role'] === 'vendor' && !empty($user['vendor_id'])): ?>
-                                    <div class="text-xs text-gray-500 mt-1">
-                                        Vendor ID: <?php echo $user['vendor_id']; ?>
-                                    </div>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <span class="badge <?php echo $user['status'] === 'active' ? 'badge-success' : 'badge-danger'; ?>">
-                                    <?php echo ucfirst($user['status']); ?>
-                                </span>
-                            </td>
-                            <td class="text-sm text-gray-500">
-                                <?php echo date('M j, Y', strtotime($user['created_at'])); ?>
-                            </td>
-                            <td>
-                                <div class="flex items-center space-x-2">
-                                    <button onclick="viewUser(<?php echo $user['id']; ?>)" class="btn btn-sm btn-secondary" title="View">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <td class="px-3 py-2 text-xs text-gray-500 font-medium"><?php echo $serialNo++; ?></td>
+                             <td class="px-3 py-2">
+                                <div class="flex items-center space-x-1">
+                                    <button onclick="viewUser(<?php echo $user['id']; ?>)" class="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded" title="View">
+                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
                                             <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
                                         </svg>
                                     </button>
-                                    <button onclick="editUser(<?php echo $user['id']; ?>)" class="btn btn-sm btn-primary" title="Edit">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <button onclick="editUser(<?php echo $user['id']; ?>)" class="p-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded" title="Edit">
+                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
                                         </svg>
                                     </button>
 
-
-                                    <?php
-
-                                    if ($user['role'] == 'vendor') { ?>
-
-                                        <a href="<?php echo BASE_URL; ?>/admin/users/menu-permissions2.php?user_id=<?php echo $user['id']; ?>" class="btn btn-sm btn-info" title="Menu Permissions">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <?php if ($user['role'] == 'vendor') { ?>
+                                        <a href="<?php echo BASE_URL; ?>/admin/users/menu-permissions2.php?user_id=<?php echo $user['id']; ?>" class="p-1.5 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded" title="Menu Permissions">
+                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
                                             </svg>
                                         </a>
-
                                     <?php } else { ?>
-
-                                        <a href="<?php echo BASE_URL; ?>/admin/users/menu-permissions.php?user_id=<?php echo $user['id']; ?>" class="btn btn-sm btn-info" title="Menu Permissions">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <a href="<?php echo BASE_URL; ?>/admin/users/menu-permissions.php?user_id=<?php echo $user['id']; ?>" class="p-1.5 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded" title="Menu Permissions">
+                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
                                             </svg>
                                         </a>
-
                                     <?php } ?>
 
-
-                                    <button onclick="toggleUserStatus(<?php echo $user['id']; ?>)" class="btn btn-sm <?php echo $user['status'] === 'active' ? 'btn-warning' : 'btn-success'; ?>" title="<?php echo $user['status'] === 'active' ? 'Deactivate' : 'Activate'; ?>">
+                                    <button onclick="toggleUserStatus(<?php echo $user['id']; ?>)" class="p-1.5 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50 rounded" title="<?php echo $user['status'] === 'active' ? 'Deactivate' : 'Activate'; ?>">
                                         <?php if ($user['status'] === 'active'): ?>
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"></path>
                                             </svg>
                                         <?php else: ?>
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                             </svg>
                                         <?php endif; ?>
                                     </button>
-                                    <button onclick="deleteUser(<?php echo $user['id']; ?>)" class="btn btn-sm btn-danger" title="Delete">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"></path>
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 012 0v4a1 1 0 11-2 0V7zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V7a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    <button onclick="deleteUser(<?php echo $user['id']; ?>)" class="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded" title="Delete">
+                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
                                         </svg>
                                     </button>
                                 </div>
+                            </td>
+                            
+                            <td class="px-3 py-2">
+                                <div class="flex items-center">
+                                    <div class="w-7 h-7 bg-primary-600 rounded-full flex items-center justify-center text-white text-xs font-medium mr-2">
+                                        <?php echo strtoupper(substr($user['username'], 0, 1)); ?>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs font-medium text-gray-900"><?php echo htmlspecialchars($user['username']); ?></div>
+                                        <div class="text-xs text-gray-500">ID: <?php echo $user['id']; ?></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-3 py-2">
+                                <div class="text-xs text-gray-900"><?php echo htmlspecialchars($user['email']); ?></div>
+                                <div class="text-xs text-gray-500"><?php echo htmlspecialchars($user['phone'] ?? 'N/A'); ?></div>
+                            </td>
+                            <td class="px-3 py-2">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium <?php echo $user['role'] === 'admin' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'; ?>">
+                                    <?php echo ucfirst($user['role']); ?>
+                                </span>
+                                <?php if ($user['role'] === 'vendor' && !empty($user['vendor_name'])): ?>
+                                    <div class="text-xs text-gray-500 mt-0.5">
+                                        <?php echo htmlspecialchars($user['vendor_name']); ?>
+                                    </div>
+                                <?php elseif ($user['role'] === 'vendor' && !empty($user['vendor_id'])): ?>
+                                    <div class="text-xs text-gray-500 mt-0.5">
+                                        Vendor ID: <?php echo $user['vendor_id']; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </td>
+                            <td class="px-3 py-2">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium <?php echo $user['status'] === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?>">
+                                    <?php echo ucfirst($user['status']); ?>
+                                </span>
+                            </td>
+                            <td class="px-3 py-2 text-xs text-gray-500">
+                                <?php echo date('M j, Y', strtotime($user['created_at'])); ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -169,22 +214,24 @@ ob_start();
 
         <!-- Pagination -->
         <?php if ($data['pagination']['total_pages'] > 1): ?>
-            <div class="pagination">
-                <div class="pagination-info">
+            <div class="flex items-center justify-between border-t border-gray-200 bg-white px-3 py-2 mt-3">
+                <div class="text-xs text-gray-700">
                     Showing <?php echo (($data['pagination']['current_page'] - 1) * $data['pagination']['limit']) + 1; ?> to
                     <?php echo min($data['pagination']['current_page'] * $data['pagination']['limit'], $data['pagination']['total_records']); ?> of
                     <?php echo $data['pagination']['total_records']; ?> results
                 </div>
-                <div class="pagination-nav-desktop">
-                    <nav class="flex space-x-2">
-                        <?php for ($i = 1; $i <= $data['pagination']['total_pages']; $i++): ?>
-                            <a href="?page=<?php echo $i; ?><?php echo !empty($data['search']) ? '&search=' . urlencode($data['search']) : ''; ?>"
-                                class="pagination-btn <?php echo $i === $data['pagination']['current_page'] ? 'active' : ''; ?>">
-                                <?php echo $i; ?>
-                            </a>
-                        <?php endfor; ?>
-                    </nav>
-                </div>
+                <nav class="flex space-x-1" id="paginationNav">
+                    <?php 
+                    $roleFilter = isset($_GET['role']) ? $_GET['role'] : '';
+                    $statusFilter = isset($_GET['status']) ? $_GET['status'] : '';
+                    for ($i = 1; $i <= $data['pagination']['total_pages']; $i++): 
+                    ?>
+                        <a href="?page=<?php echo $i; ?><?php echo !empty($data['search']) ? '&search=' . urlencode($data['search']) : ''; ?><?php echo !empty($roleFilter) ? '&role=' . urlencode($roleFilter) : ''; ?><?php echo !empty($statusFilter) ? '&status=' . urlencode($statusFilter) : ''; ?>"
+                            class="px-2.5 py-1 text-xs font-medium rounded <?php echo $i === $data['pagination']['current_page'] ? 'bg-blue-600 text-white' : 'text-gray-600 bg-white border border-gray-300 hover:bg-gray-50'; ?>">
+                            <?php echo $i; ?>
+                        </a>
+                    <?php endfor; ?>
+                </nav>
             </div>
         <?php endif; ?>
     </div>
@@ -412,64 +459,74 @@ ob_start();
         window.open(exportUrl, '_blank');
     }
 
-    // Real-time table filtering (client-side)
+    // Debounce timer for search
+    let searchTimer = null;
+
+    // Server-side search with debounce
     function filterUsersTable() {
         const searchInput = document.getElementById('searchInput');
         const roleFilter = document.getElementById('roleFilter');
         const statusFilter = document.getElementById('statusFilter');
 
-        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-        const roleValue = roleFilter ? roleFilter.value.toLowerCase() : '';
-        const statusValue = statusFilter ? statusFilter.value.toLowerCase() : '';
+        const searchTerm = searchInput ? searchInput.value : '';
+        const roleValue = roleFilter ? roleFilter.value : '';
+        const statusValue = statusFilter ? statusFilter.value : '';
 
-        const tableBody = document.getElementById('usersTableBody');
-        if (!tableBody) return;
-
-        const rows = tableBody.getElementsByTagName('tr');
-
-        for (let i = 0; i < rows.length; i++) {
-            const row = rows[i];
-            const cells = row.getElementsByTagName('td');
-            let shouldShow = true;
-
-            // Search filter
-            if (searchTerm) {
-                let found = false;
-                for (let j = 0; j < cells.length - 1; j++) { // -1 to exclude action column
-                    const cellText = cells[j].textContent.toLowerCase();
-                    if (cellText.includes(searchTerm)) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) shouldShow = false;
-            }
-
-            // Role filter
-            if (roleValue && shouldShow) {
-                const roleCell = row.querySelector('.badge');
-                if (roleCell) {
-                    const roleText = roleCell.textContent.toLowerCase();
-                    if (!roleText.includes(roleValue)) {
-                        shouldShow = false;
-                    }
-                }
-            }
-
-            // Status filter
-            if (statusValue && shouldShow) {
-                const statusCell = row.querySelector('.badge');
-                if (statusCell) {
-                    const statusText = statusCell.textContent.toLowerCase();
-                    if (!statusText.includes(statusValue)) {
-                        shouldShow = false;
-                    }
-                }
-            }
-
-            row.style.display = shouldShow ? '' : 'none';
+        // Clear previous timer
+        if (searchTimer) {
+            clearTimeout(searchTimer);
         }
+
+        // Debounce search to avoid too many requests
+        searchTimer = setTimeout(() => {
+            const params = new URLSearchParams();
+            params.append('page', '1'); // Reset to page 1 on search
+            if (searchTerm) params.append('search', searchTerm);
+            if (roleValue) params.append('role', roleValue);
+            if (statusValue) params.append('status', statusValue);
+
+            window.location.href = '?' + params.toString();
+        }, 500);
     }
+
+    // For dropdown filters, apply immediately
+    document.getElementById('roleFilter').addEventListener('change', function() {
+        if (searchTimer) clearTimeout(searchTimer);
+        applyFilters();
+    });
+
+    document.getElementById('statusFilter').addEventListener('change', function() {
+        if (searchTimer) clearTimeout(searchTimer);
+        applyFilters();
+    });
+
+    function applyFilters() {
+        const searchInput = document.getElementById('searchInput');
+        const roleFilter = document.getElementById('roleFilter');
+        const statusFilter = document.getElementById('statusFilter');
+
+        const params = new URLSearchParams();
+        params.append('page', '1');
+        if (searchInput && searchInput.value) params.append('search', searchInput.value);
+        if (roleFilter && roleFilter.value) params.append('role', roleFilter.value);
+        if (statusFilter && statusFilter.value) params.append('status', statusFilter.value);
+
+        window.location.href = '?' + params.toString();
+    }
+
+    // Set filter values from URL on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const roleFilter = document.getElementById('roleFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        
+        if (urlParams.get('role') && roleFilter) {
+            roleFilter.value = urlParams.get('role');
+        }
+        if (urlParams.get('status') && statusFilter) {
+            statusFilter.value = urlParams.get('status');
+        }
+    });
 
 
 
@@ -658,7 +715,8 @@ ob_start();
         // Show loading state
         vendorSelect.innerHTML = '<option value="">Loading vendors...</option>';
 
-        fetch('../../api/masters.php?path=vendors&status=active')
+        // Request all vendors with a high limit
+        fetch('../../api/masters.php?path=vendors&status=active&limit=1000')
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.data && data.data.records) {
@@ -671,7 +729,7 @@ ob_start();
                 }
             })
             .catch(error => {
-                fetch('../vendors/get-vendor.php?action=list')
+                fetch('../vendors/get-vendor.php?action=list&limit=1000')
                     .then(response => response.json())
                     .then(data => {
                         if (data.success && data.vendors) {

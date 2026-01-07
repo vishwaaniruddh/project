@@ -1,11 +1,19 @@
 <?php
 require_once __DIR__ . '/BaseModel.php';
+require_once __DIR__ . '/Role.php';
+require_once __DIR__ . '/../services/PermissionService.php';
 
 class User extends BaseModel {
     protected $table = 'users';
+    protected $fillable = ['username', 'email', 'phone', 'password_hash', 'plain_password', 'role', 'role_id', 'vendor_id', 'status', 'jwt_token'];
+    
+    private $roleModel;
+    private $permissionService;
     
     public function __construct() {
         parent::__construct();
+        $this->roleModel = new Role();
+        $this->permissionService = new PermissionService();
     }
     
     public function create($data) {
@@ -14,6 +22,35 @@ class User extends BaseModel {
             $data['password_hash'] = password_hash($data['password'], PASSWORD_DEFAULT);
             $data['plain_password'] = $data['password']; // Store plain password for testing
             unset($data['password']);
+        }
+        
+        // Backward compatibility: sync legacy role with role_id
+        if (isset($data['role_id']) && file_exists(__DIR__ . '/../config/auth_compatibility.php')) {
+            require_once __DIR__ . '/../config/auth_compatibility.php';
+            
+            // Map role_id to legacy role
+            $legacyRoleMap = [
+                1 => 'admin', // Superadmin -> admin
+                2 => 'admin', // Admin -> admin
+                3 => 'admin', // Manager -> admin
+                4 => 'admin', // Engineer -> admin
+                5 => 'vendor' // Vendor -> vendor
+            ];
+            
+            $data['role'] = $legacyRoleMap[$data['role_id']] ?? 'admin';
+        }
+        
+        // Backward compatibility: sync role_id with legacy role
+        if (isset($data['role']) && !isset($data['role_id']) && file_exists(__DIR__ . '/../config/auth_compatibility.php')) {
+            require_once __DIR__ . '/../config/auth_compatibility.php';
+            
+            // Map legacy role to role_id
+            $roleIdMap = [
+                'admin' => 2,  // Admin role
+                'vendor' => 5  // Vendor role
+            ];
+            
+            $data['role_id'] = $roleIdMap[$data['role']] ?? 2;
         }
         
         return parent::create($data);
@@ -28,6 +65,18 @@ class User extends BaseModel {
         } else {
             // Remove password field if empty (don't update password)
             unset($data['password']);
+        }
+        
+        // Backward compatibility: sync legacy role with role_id
+        if (isset($data['role_id']) && file_exists(__DIR__ . '/../config/auth_compatibility.php')) {
+            require_once __DIR__ . '/../config/auth_compatibility.php';
+            AuthCompatibility::syncLegacyRole($id, $data['role_id']);
+        }
+        
+        // Backward compatibility: sync role_id with legacy role
+        if (isset($data['role']) && !isset($data['role_id']) && file_exists(__DIR__ . '/../config/auth_compatibility.php')) {
+            require_once __DIR__ . '/../config/auth_compatibility.php';
+            AuthCompatibility::syncRoleId($id, $data['role']);
         }
         
         return parent::update($id, $data);
@@ -61,16 +110,31 @@ class User extends BaseModel {
         return $this->update($userId, ['jwt_token' => $token]);
     }
     
-    public function getAllWithPagination($page = 1, $limit = 20, $search = '') {
+    public function getAllWithPagination($page = 1, $limit = 20, $search = '', $role = '', $status = '') {
         $offset = ($page - 1) * $limit;
         
-        $whereClause = '';
+        $whereConditions = [];
         $params = [];
         
         if (!empty($search)) {
-            $whereClause = "WHERE u.username LIKE ? OR u.email LIKE ? OR u.role LIKE ? OR v.name LIKE ?";
+            $whereConditions[] = "(u.username LIKE ? OR u.email LIKE ? OR u.phone LIKE ? OR v.name LIKE ?)";
             $searchTerm = "%$search%";
-            $params = [$searchTerm, $searchTerm, $searchTerm, $searchTerm];
+            $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
+        }
+        
+        if (!empty($role)) {
+            $whereConditions[] = "u.role = ?";
+            $params[] = $role;
+        }
+        
+        if (!empty($status)) {
+            $whereConditions[] = "u.status = ?";
+            $params[] = $status;
+        }
+        
+        $whereClause = '';
+        if (!empty($whereConditions)) {
+            $whereClause = 'WHERE ' . implode(' AND ', $whereConditions);
         }
         
         // Get total count
@@ -79,10 +143,11 @@ class User extends BaseModel {
         $stmt->execute($params);
         $total = $stmt->fetchColumn();
         
-        // Get paginated results with vendor information
-        $sql = "SELECT u.*, v.name as vendor_name 
+        // Get paginated results with vendor and role information
+        $sql = "SELECT u.*, v.name as vendor_name, r.name as role_name, r.display_name as role_display_name
                 FROM {$this->table} u 
                 LEFT JOIN vendors v ON u.vendor_id = v.id 
+                LEFT JOIN roles r ON u.role_id = r.id
                 $whereClause 
                 ORDER BY u.created_at DESC 
                 LIMIT $limit OFFSET $offset";
@@ -156,10 +221,23 @@ class User extends BaseModel {
             }
         }
         
-        // Role validation
-        if (empty($data['role'])) {
+        // Role ID validation (RBAC)
+        if (isset($data['role_id'])) {
+            if (empty($data['role_id'])) {
+                $errors['role_id'] = 'Role is required';
+            } else {
+                // Validate that role_id exists in roles table
+                $role = $this->roleModel->find($data['role_id']);
+                if (!$role) {
+                    $errors['role_id'] = 'Invalid role selected';
+                }
+            }
+        }
+        
+        // Legacy role validation (for backward compatibility)
+        if (empty($data['role']) && empty($data['role_id'])) {
             $errors['role'] = 'Role is required';
-        } elseif (!in_array($data['role'], ['admin', 'vendor'])) {
+        } elseif (!empty($data['role']) && !in_array($data['role'], ['admin', 'vendor'])) {
             $errors['role'] = 'Invalid role selected';
         }
         
@@ -169,7 +247,7 @@ class User extends BaseModel {
         }
         
         // Vendor validation for vendor role
-        if ($data['role'] === 'vendor') {
+        if ($data['role'] === 'vendor' || (isset($data['role_id']) && $data['role_id'] == 5)) {
             if (empty($data['vendor_id'])) {
                 $errors['vendor_id'] = 'Please select a vendor when role is vendor';
             } else {
@@ -194,6 +272,35 @@ class User extends BaseModel {
         ");
         $stmt->execute([$id]);
         return $stmt->fetch();
+    }
+    
+    /**
+     * Get role details for a user
+     * 
+     * @param int $userId User ID
+     * @return array|null Role data or null if not found
+     */
+    public function getRole(int $userId): ?array
+    {
+        $user = $this->find($userId);
+        
+        if (!$user || empty($user['role_id'])) {
+            return null;
+        }
+        
+        return $this->roleModel->find($user['role_id']);
+    }
+    
+    /**
+     * Get effective permissions for a user
+     * Uses PermissionService to get role permissions + user overrides
+     * 
+     * @param int $userId User ID
+     * @return array Array of permission records
+     */
+    public function getPermissions(int $userId): array
+    {
+        return $this->permissionService->getUserPermissions($userId);
     }
     
     public function getUserStats() {

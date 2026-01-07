@@ -3,7 +3,8 @@
 // exceptions on errors for this catch block to work perfectly with mysqli.
 // If not, you may need to manually set mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-$localConn = new mysqli('localhost', 'reporting', 'reporting', 'site_installation_management');
+ini_set('max_execution_time', 900);
+$localConn = new mysqli('localhost', 'reporting', 'reporting', 'u444388293_karvy_project');
 $serverConn = new mysqli('193.203.184.112', 'u444388293_karvy_project', 'AVav@@2025', 'u444388293_karvy_project');
 
 if ($localConn->connect_errno || $serverConn->connect_errno) {

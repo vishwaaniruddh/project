@@ -30,13 +30,24 @@ try {
     $errors = $boqModel->validateItemData($data);
     
     if (!empty($errors)) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Validation failed',
-            'errors' => $errors
-        ]);
+    // Convert errors array to a single string
+    $errorMessage = implode(', ', $errors);
+
+    echo json_encode([
+        'success' => false,
+        'message' => "Failed: $errorMessage"
+    ]);
         exit;
     }
+    
+    // if (!empty($errors)) {
+    //     echo json_encode([
+    //         'success' => false,
+    //         'message' => 'Validation failed',
+    //         'errors' => $errors
+    //     ]);
+    //     exit;
+    // }
     
     // Create BOQ item
     $itemId = $boqModel->create($data);

@@ -244,5 +244,18 @@ class BoqItem {
         // Alias for getAll() method for compatibility
         return $this->getAll();
     }
+    
+    public function findByItemCode($itemCode) {
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE item_code = ?");
+        $stmt->execute([$itemCode]);
+        return $stmt->fetch();
+    }
+    
+    public function findByItemName($itemName) {
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE item_name = ?");
+        $stmt->execute([$itemName]);
+        return $stmt->fetch();
+    }
+    
 }
 ?>

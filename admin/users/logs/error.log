@@ -4,3 +4,29 @@
 [05-Nov-2025 16:04:48 UTC] Database connected successfully to: site_installation_management on localhost
 [05-Nov-2025 16:04:56 UTC] Database connected successfully to: site_installation_management on localhost
 [05-Nov-2025 16:30:40 UTC] Database connected successfully to: site_installation_management on localhost
+[27-Dec-2025 11:15:49 UTC] Bulk upload AJAX request received
+[27-Dec-2025 11:15:49 UTC] Request method: POST
+[27-Dec-2025 11:15:49 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryBFrb8sHq2jGgLcAT
+[27-Dec-2025 11:18:12 UTC] Bulk upload AJAX request received
+[27-Dec-2025 11:18:12 UTC] Request method: POST
+[27-Dec-2025 11:18:12 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryGl9KplKsZNrj0Ab0
+[27-Dec-2025 11:28:48 UTC] Bulk upload AJAX request received
+[27-Dec-2025 11:28:48 UTC] Request method: POST
+[27-Dec-2025 11:28:48 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundarydruYK4PVa7A9ACEI
+[27-Dec-2025 11:34:11 UTC] Bulk upload AJAX request received
+[27-Dec-2025 11:34:11 UTC] Request method: POST
+[27-Dec-2025 11:34:11 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryhaMrNBzA2CHlFFDE
+[27-Dec-2025 11:35:13 UTC] Bulk upload AJAX request received
+[27-Dec-2025 11:35:13 UTC] Request method: POST
+[27-Dec-2025 11:35:13 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundary0NrlNbdzDdgI8ByV
+[27-Dec-2025 11:39:33 UTC] Bulk upload AJAX request received
+[27-Dec-2025 11:39:33 UTC] Request method: POST
+[27-Dec-2025 11:39:33 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryGDrgGE8nWAerQBN7
+[27-Dec-2025 11:43:16 UTC] Bulk upload AJAX request received
+[27-Dec-2025 11:43:16 UTC] Request method: POST
+[27-Dec-2025 11:43:16 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryoBiv7LSMDnG7Sgu4
+[27-Dec-2025 11:45:32 UTC] Bulk upload AJAX request received
+[27-Dec-2025 11:45:32 UTC] Request method: POST
+[27-Dec-2025 11:45:32 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryABE3E4LkI4OXrthe
+{"timestamp":"2026-01-07 07:12:06","type":"EXCEPTION","message":"Class \"AuditService\" not found","file":"C:\\xampp\\htdocs\\project\\controllers\\UsersController.php","line":36,"ip_address":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/143.0.0.0 Safari\/537.36","request_uri":"\/project\/admin\/users\/","trace":"#0 C:\\xampp\\htdocs\\project\\admin\\users\\index.php(4): UsersController->__construct()\n#1 {main}"}
+{"timestamp":"2026-01-07 11:38:32","type":"EXCEPTION","message":"Class \"AuditService\" not found","file":"C:\\xampp\\htdocs\\project\\controllers\\UsersController.php","line":36,"ip_address":"::1","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/143.0.0.0 Safari\/537.36","request_uri":"\/project\/admin\/users\/","trace":"#0 C:\\xampp\\htdocs\\project\\admin\\users\\index.php(4): UsersController->__construct()\n#1 {main}"}

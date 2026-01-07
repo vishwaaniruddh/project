@@ -298,11 +298,12 @@ class MaterialRequest {
     public function getAllWithDetails() {
         $sql = "SELECT mr.*, 
                        s.site_id, s.location,
+                       s.po_number,s.site_ticket_id,
                        v.name as vendor_name,
                        id.dispatch_status, id.dispatch_date, id.courier_name, 
                        id.tracking_number, id.expected_delivery_date, id.actual_delivery_date
                 FROM {$this->table} mr
-                LEFT JOIN sites s ON mr.site_id = s.id
+                INNER JOIN sites s ON mr.site_id = s.id
                 LEFT JOIN vendors v ON mr.vendor_id = v.id
                 LEFT JOIN inventory_dispatches id ON mr.id = id.material_request_id
                 ORDER BY mr.created_date DESC";

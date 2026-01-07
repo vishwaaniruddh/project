@@ -287,7 +287,8 @@ class SiteSurvey {
     
     public function getAllWithDetails() {
         $sql = "SELECT ss.*, 
-                       s.site_id, s.location,
+                       s.site_id, s.location, s.delegated_vendor,
+                       s.po_number,s.site_ticket_id,
                        v.name as vendor_name,
                        u.username as approved_by_name,
                        ss.technical_remarks as notes,
@@ -302,7 +303,7 @@ class SiteSurvey {
                            'Analytic Cameras: ', COALESCE(ss.analytic_cameras, 'N/A')
                        ) as survey_data
                 FROM site_surveys ss
-                LEFT JOIN sites s ON ss.site_id = s.id
+                INNER JOIN sites s ON ss.site_id = s.id
                 LEFT JOIN vendors v ON ss.vendor_id = v.id
                 LEFT JOIN users u ON ss.approved_by = u.id
                 ORDER BY ss.created_at DESC";

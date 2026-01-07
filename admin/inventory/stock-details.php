@@ -217,7 +217,9 @@ ob_start();
                     </thead>
                     <tbody>
                         <?php foreach ($stockDetails as $stock): ?>
-                        <tr>
+                        <tr class="<?php echo ($stock['activity_status'] === 'deleted') 
+                                                            ? 'bg-red-50 border-l-4 border-red-500 opacity-70' 
+                                                            : ''; ?>">
                             <td>
                                 <div>
                                     <?php if ($stock['serial_number']): ?>
@@ -293,6 +295,7 @@ ob_start();
                                     <div class="text-sm text-gray-500">No warranty</div>
                                 <?php endif; ?>
                             </td>
+                            
                             <td>
                                 <div class="flex items-center space-x-2">
                                     <?php if ($stock['status'] === 'available'): ?>
@@ -307,6 +310,28 @@ ob_start();
                                             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
                                         </svg>
                                     </button>
+                                    
+                                    
+                                    
+                                     <!--<button onclick="deleteStockItem(<?php echo $stock['id']; ?>)" -->
+                                     <!--                       class="btn btn-sm btn-secondary"-->
+                                     <!--                       title="Delete Item">-->
+                                     <!--                   Delete-->
+                                     <!--               </button>-->
+
+                                    
+                                    
+                                    <?php if ($stock['activity_status'] !== 'deleted'): ?>
+                                                <button onclick="deleteStockItem(<?php echo $stock['id']; ?>)"
+                                                    class="btn btn-sm btn-secondary">
+                                                    Delete
+                                                </button>
+                                            <?php else: ?>
+                                                <span class="text-xs text-red-600 italic">Deleted</span>
+                                            <?php endif; ?>
+
+                                    
+
                                 </div>
                             </td>
                         </tr>
@@ -394,6 +419,90 @@ function editStockItem(stockId) {
     // Redirect to edit page
     window.location.href = `stock-entries/edit-stock.php?id=${stockId}`;
 }
+
+
+
+
+
+// function deleteStockItem(stockId) {
+//     const remark = prompt("Please enter delete remark / reason:");
+
+//     if (remark === null) {
+//         // Cancel pressed
+//         return;
+//     }
+
+//     if (remark.trim() === "") {
+//         alert("Delete remark is mandatory.");
+//         return;
+//     }
+
+//     if (!confirm("Are you sure you want to delete this stock item?")) {
+//         return;
+//     }
+
+//     fetch('delete-stock-item.php', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/x-www-form-urlencoded'
+//         },
+//         body: 'item_id=' + encodeURIComponent(stockId) +
+//               '&remark=' + encodeURIComponent(remark)
+//     })
+//     .then(res => res.json())
+//     .then(data => {
+//         if (data.success) {
+//             alert('Stock item deleted successfully');
+//             location.reload();
+//         } else {
+//             alert(data.message);
+//         }
+//     })
+//     .catch(() => {
+//         alert('Server error');
+//     });
+// }
+
+function deleteStockItem(stockId) {
+    const remark = prompt("Please enter delete remark / reason:");
+
+    if (remark === null || remark.trim() === "") {
+        alert("Delete remark is mandatory.");
+        return;
+    }
+
+    if (!confirm("Are you sure you want to delete this stock item?")) {
+        return;
+    }
+
+    fetch('delete-stock-item.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'item_id=' + encodeURIComponent(stockId) +
+              '&remark=' + encodeURIComponent(remark)
+    })
+    .then(res => {
+        if (!res.ok) throw new Error('HTTP error');
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Stock item deleted successfully');
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Server error');
+    });
+}
+
+
+
 
 // Print functionality
 function printStockDetails() {

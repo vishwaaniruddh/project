@@ -3,7 +3,10 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../models/Site.php';
 require_once __DIR__ . '/../models/SiteSurvey.php';
 require_once __DIR__ . '/../models/BoqItem.php';
+require_once __DIR__ . '/../models/BoqMaster.php';
+require_once __DIR__ . '/../models/BoqMasterItem.php';
 require_once __DIR__ . '/../models/SiteDelegation.php';
+require_once __DIR__ . '/../models/MaterialRequest.php';
 
 // Require vendor authentication
 //Auth::requireVendor();
@@ -119,6 +122,25 @@ if ($surveyId && $survey && $survey['id'] != $surveyId) {
 $boqModel = new BoqItem();
 $boqItems = $boqModel->getActive();
 
+// Get active BOQ Masters for selection
+$boqMasterModel = new BoqMaster();
+$boqMasters = $boqMasterModel->getActive();
+
+// Get existing material requests for this site
+$materialRequestModel = new MaterialRequest();
+$existingRequests = $materialRequestModel->findBySite($siteId);
+
+// Check if there's an active request (approved, dispatched, or completed) that should prevent new requests
+$hasActiveRequest = false;
+$activeRequestStatus = null;
+foreach ($existingRequests as $req) {
+    if (in_array($req['status'], ['approved', 'dispatched', 'partially_dispatched', 'completed', 'pending'])) {
+        $hasActiveRequest = true;
+        $activeRequestStatus = $req['status'];
+        break;
+    }
+}
+
 $title = 'Material Request - ' . ($site['site_id'] ?? 'Site #' . $siteId);
 ob_start();
 ?>
@@ -169,6 +191,98 @@ ob_start();
     </div>
 </div>
 
+<!-- Existing Material Requests -->
+<?php if (!empty($existingRequests)): ?>
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">
+            <svg class="w-5 h-5 inline mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"></path>
+            </svg>
+            Previous Material Requests
+        </h3>
+        <span class="text-sm text-gray-500"><?php echo count($existingRequests); ?> request(s) found</span>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request ID</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request Date</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Required Date</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <?php foreach ($existingRequests as $request): 
+                    $items = json_decode($request['items'] ?? '[]', true);
+                    $itemCount = is_array($items) ? count($items) : 0;
+                    
+                    // Status badge colors
+                    $statusColors = [
+                        'draft' => 'bg-gray-100 text-gray-800',
+                        'pending' => 'bg-yellow-100 text-yellow-800',
+                        'approved' => 'bg-blue-100 text-blue-800',
+                        'dispatched' => 'bg-purple-100 text-purple-800',
+                        'partially_dispatched' => 'bg-indigo-100 text-indigo-800',
+                        'completed' => 'bg-green-100 text-green-800',
+                        'rejected' => 'bg-red-100 text-red-800',
+                        'cancelled' => 'bg-gray-100 text-gray-600'
+                    ];
+                    $statusColor = $statusColors[$request['status']] ?? 'bg-gray-100 text-gray-800';
+                ?>
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-sm font-medium text-gray-900">#<?php echo $request['id']; ?></td>
+                    <td class="px-4 py-3 text-sm text-gray-500"><?php echo date('M j, Y', strtotime($request['request_date'])); ?></td>
+                    <td class="px-4 py-3 text-sm text-gray-500"><?php echo date('M j, Y', strtotime($request['required_date'])); ?></td>
+                    <td class="px-4 py-3 text-sm text-gray-500"><?php echo $itemCount; ?> item(s)</td>
+                    <td class="px-4 py-3">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo $statusColor; ?>">
+                            <?php echo ucfirst(str_replace('_', ' ', $request['status'])); ?>
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm">
+                        <button type="button" onclick="viewRequestDetails(<?php echo $request['id']; ?>)" class="text-blue-600 hover:text-blue-800 mr-3">
+                            <svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            View
+                        </button>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if ($hasActiveRequest): ?>
+<!-- Active Request Notice - Cannot create new request -->
+<div class="bg-yellow-50 rounded-lg border border-yellow-200 p-6 mb-8">
+    <div class="flex items-start">
+        <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+        </div>
+        <div class="ml-3">
+            <h3 class="text-lg font-medium text-yellow-800">Material Request Already Exists</h3>
+            <p class="mt-2 text-sm text-yellow-700">
+                A material request for this site is already <strong><?php echo ucfirst(str_replace('_', ' ', $activeRequestStatus)); ?></strong>. 
+                You cannot create a new material request until the existing one is completed or cancelled.
+            </p>
+            <p class="mt-2 text-sm text-yellow-700">
+                Please view the existing request details above.
+            </p>
+        </div>
+    </div>
+</div>
+<?php else: ?>
 <!-- Material Request Form -->
 <form id="materialRequestForm" action="process-material-request.php" method="POST">
     <input type="hidden" name="site_id" value="<?php echo $siteId; ?>">
@@ -196,25 +310,54 @@ ob_start();
 
     <!-- Material Items -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-gray-900">Material Items</h3>
-            <button type="button" onclick="addMaterialItem()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Material Items</h3>
+        
+        <!-- BOQ Master Selection -->
+        <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <label for="boq_master_select" class="block text-sm font-medium text-blue-900 mb-2">
+                <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
                 </svg>
-                Add Item
-            </button>
+                Select BOQ Master *
+            </label>
+            <select id="boq_master_select" name="boq_master_id" class="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white" onchange="loadBoqMasterItems(this.value)" required>
+                <option value="">-- Select a BOQ Master to load materials --</option>
+                <?php foreach ($boqMasters as $master): ?>
+                    <option value="<?php echo $master['boq_id']; ?>"><?php echo htmlspecialchars($master['boq_name']); ?></option>
+                <?php endforeach; ?>
+            </select>
+            <p class="text-xs text-blue-600 mt-1">Select a BOQ Master to load all materials for this request</p>
         </div>
         
-        <div id="materialItemsContainer">
-            <!-- Material items will be added here dynamically -->
+        <!-- Materials Table -->
+        <div id="materialsTableSection" class="hidden">
+            <div class="flex justify-between items-center mb-3">
+                <h4 class="text-md font-medium text-gray-900">Materials List</h4>
+                <span id="itemCount" class="text-sm text-gray-500"></span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Code</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Quantity</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                        </tr>
+                    </thead>
+                    <tbody id="materialsTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Materials will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
         </div>
         
         <div id="noItemsMessage" class="text-center py-8 text-gray-500">
             <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
             </svg>
-            <p>No material items added yet. Click "Add Item" to start building your request.</p>
+            <p>Select a BOQ Master above to load all materials for this request.</p>
         </div>
     </div>
 
@@ -266,107 +409,189 @@ ob_start();
         </div>
     </div>
 </form>
+<?php endif; ?>
 
 <script>
-let itemCounter = 0;
 const boqItems = <?php echo json_encode($boqItems); ?>;
+let currentBoqMasterItems = [];
+const hasActiveRequest = <?php echo $hasActiveRequest ? 'true' : 'false'; ?>;
 
 // Set minimum required date to tomorrow
-document.getElementById('required_date').min = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+if (!hasActiveRequest) {
+    document.getElementById('required_date').min = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+}
 
-function addMaterialItem() {
-    itemCounter++;
-    const container = document.getElementById('materialItemsContainer');
-    const noItemsMessage = document.getElementById('noItemsMessage');
+// View request details in modal
+function viewRequestDetails(requestId) {
+    fetch(`get-material-request-details.php?id=${requestId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showRequestModal(data.request);
+            } else {
+                alert('Error loading request details: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading request details.');
+        });
+}
+
+function showRequestModal(request) {
+    const items = request.items_data || [];
+    let itemsHtml = '';
     
-    const itemHtml = `
-        <div class="material-item border border-gray-200 rounded-lg p-4 mb-4" id="item_${itemCounter}">
-            <div class="flex justify-between items-start mb-4">
-                <h4 class="text-md font-medium text-gray-900">Material Item #${itemCounter}</h4>
-                <button type="button" onclick="removeMaterialItem(${itemCounter})" class="text-red-600 hover:text-red-800">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                    </svg>
-                </button>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">BOQ Item *</label>
-                    <select name="items[${itemCounter}][boq_item_id]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required onchange="updateItemDetails(${itemCounter}, this.value)">
-                        <option value="">Select Item</option>
-                        ${boqItems.map(item => `<option value="${item.id}" data-code="${item.item_code}" data-unit="${item.unit}">${item.item_name}</option>`).join('')}
-                    </select>
+    if (items.length > 0) {
+        itemsHtml = `
+            <table class="min-w-full divide-y divide-gray-200 mt-4">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Item</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Code</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Unit</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    ${items.map(item => `
+                        <tr>
+                            <td class="px-3 py-2 text-sm text-gray-900">${item.item_name || item.material_name || '-'}</td>
+                            <td class="px-3 py-2 text-sm text-gray-500">${item.item_code || '-'}</td>
+                            <td class="px-3 py-2 text-sm text-gray-900">${item.quantity || '-'}</td>
+                            <td class="px-3 py-2 text-sm text-gray-500">${item.unit || '-'}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    } else {
+        itemsHtml = '<p class="text-gray-500 mt-4">No items found in this request.</p>';
+    }
+    
+    const modalHtml = `
+        <div id="requestModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onclick="closeRequestModal(event)">
+            <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Material Request #${request.id}</h3>
+                    <button onclick="closeRequestModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Item Code</label>
-                    <input type="text" name="items[${itemCounter}][item_code]" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50" readonly>
+                
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span class="text-gray-500">Request Date:</span>
+                        <span class="ml-2 text-gray-900">${request.request_date}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Required Date:</span>
+                        <span class="ml-2 text-gray-900">${request.required_date}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Status:</span>
+                        <span class="ml-2 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">${request.status}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Vendor:</span>
+                        <span class="ml-2 text-gray-900">${request.vendor_name || 'N/A'}</span>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Quantity *</label>
-                    <input type="number" name="items[${itemCounter}][quantity]" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Unit</label>
-                    <input type="text" name="items[${itemCounter}][unit]" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50" readonly>
-                </div>
-                <div class="md:col-span-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                    <input type="text" name="items[${itemCounter}][notes]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Any specific requirements or notes for this item...">
+                
+                ${request.request_notes ? `<div class="mt-4"><span class="text-gray-500">Notes:</span><p class="text-gray-900 mt-1">${request.request_notes}</p></div>` : ''}
+                
+                <h4 class="text-md font-medium text-gray-900 mt-6">Items (${items.length})</h4>
+                ${itemsHtml}
+                
+                <div class="mt-6 flex justify-end">
+                    <button onclick="closeRequestModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Close</button>
                 </div>
             </div>
         </div>
     `;
     
-    container.insertAdjacentHTML('beforeend', itemHtml);
-    noItemsMessage.style.display = 'none';
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
 
-function removeMaterialItem(itemId) {
-    const item = document.getElementById(`item_${itemId}`);
-    if (item) {
-        item.remove();
-        
-        // Show no items message if no items left
-        const container = document.getElementById('materialItemsContainer');
-        if (container.children.length === 0) {
-            document.getElementById('noItemsMessage').style.display = 'block';
-        }
-    }
+function closeRequestModal(event) {
+    if (event && event.target.id !== 'requestModal') return;
+    const modal = document.getElementById('requestModal');
+    if (modal) modal.remove();
 }
 
-function updateItemDetails(itemId, boqItemId) {
-    const item = boqItems.find(item => item.id == boqItemId);
-    if (item) {
-        const itemContainer = document.getElementById(`item_${itemId}`);
-        itemContainer.querySelector('input[name*="[item_code]"]').value = item.item_code || '';
-        itemContainer.querySelector('input[name*="[unit]"]').value = item.unit || '';
+// Load BOQ Master items when selected
+function loadBoqMasterItems(boqMasterId) {
+    const tableSection = document.getElementById('materialsTableSection');
+    const tableBody = document.getElementById('materialsTableBody');
+    const noItemsMessage = document.getElementById('noItemsMessage');
+    const itemCount = document.getElementById('itemCount');
+    
+    if (!boqMasterId) {
+        tableSection.classList.add('hidden');
+        noItemsMessage.classList.remove('hidden');
+        currentBoqMasterItems = [];
+        return;
     }
+    
+    // Show loading state
+    tableSection.classList.remove('hidden');
+    noItemsMessage.classList.add('hidden');
+    tableBody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">Loading materials...</td></tr>';
+    
+    // Fetch items for the selected BOQ Master
+    fetch(`get-boq-master-items.php?boq_master_id=${boqMasterId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.items.length > 0) {
+                currentBoqMasterItems = data.items;
+                renderMaterialsTable();
+                itemCount.textContent = `${data.items.length} item(s)`;
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No materials found for this BOQ Master.</td></tr>';
+                itemCount.textContent = '0 items';
+                currentBoqMasterItems = [];
+            }
+        })
+        .catch(error => {
+            console.error('Error loading BOQ Master items:', error);
+            tableBody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-red-500">Error loading materials. Please try again.</td></tr>';
+            itemCount.textContent = '';
+        });
 }
 
-function addRecommendedCameras() {
-    addMaterialItem();
-    // Auto-select camera-related items if available
-    const lastItem = document.querySelector('.material-item:last-child');
-    const select = lastItem.querySelector('select');
-    const cameraItem = boqItems.find(item => item.item_name.toLowerCase().includes('camera'));
-    if (cameraItem) {
-        select.value = cameraItem.id;
-        updateItemDetails(itemCounter, cameraItem.id);
-        lastItem.querySelector('input[name*="[quantity]"]').value = <?php echo $survey['total_cameras'] ?? 1; ?>;
+// Render materials in table format
+function renderMaterialsTable() {
+    const tableBody = document.getElementById('materialsTableBody');
+    
+    if (currentBoqMasterItems.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No materials available.</td></tr>';
+        return;
     }
-}
-
-function addRecommendedPOE() {
-    addMaterialItem();
-    // Auto-select POE-related items if available
-    const lastItem = document.querySelector('.material-item:last-child');
-    const select = lastItem.querySelector('select');
-    const poeItem = boqItems.find(item => item.item_name.toLowerCase().includes('poe') || item.item_name.toLowerCase().includes('rack'));
-    if (poeItem) {
-        select.value = poeItem.id;
-        updateItemDetails(itemCounter, poeItem.id);
-        lastItem.querySelector('input[name*="[quantity]"]').value = 1;
-    }
+    
+    let html = '';
+    currentBoqMasterItems.forEach((item, index) => {
+        html += `
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3">
+                    <div class="text-sm font-medium text-gray-900">${item.item_name}</div>
+                    <input type="hidden" name="items[${index}][boq_item_id]" value="${item.boq_item_id}">
+                    <input type="hidden" name="items[${index}][item_code]" value="${item.item_code || ''}">
+                    <input type="hidden" name="items[${index}][unit]" value="${item.unit || ''}">
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-500">${item.item_code || '-'}</td>
+                <td class="px-4 py-3">
+                    <input type="number" name="items[${index}][quantity]" min="0" value="${item.default_quantity || 1}" 
+                           class="w-24 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-500">${item.unit || '-'}</td>
+                <td class="px-4 py-3 text-sm text-gray-500">${item.category || '-'}</td>
+            </tr>
+        `;
+    });
+    
+    tableBody.innerHTML = html;
 }
 
 function saveDraft() {
@@ -396,9 +621,14 @@ function saveDraft() {
 document.getElementById('materialRequestForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
-    const container = document.getElementById('materialItemsContainer');
-    if (container.children.length === 0) {
-        alert('Please add at least one material item before submitting.');
+    const boqMasterSelect = document.getElementById('boq_master_select');
+    if (!boqMasterSelect.value) {
+        alert('Please select a BOQ Master.');
+        return;
+    }
+    
+    if (currentBoqMasterItems.length === 0) {
+        alert('No materials available for this BOQ Master.');
         return;
     }
     
@@ -422,9 +652,6 @@ document.getElementById('materialRequestForm').addEventListener('submit', functi
         alert('An error occurred while submitting the request.');
     });
 });
-
-// Add initial item
-addMaterialItem();
 </script>
 
 <?php

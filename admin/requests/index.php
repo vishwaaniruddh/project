@@ -42,6 +42,22 @@ ob_start();
         <h1 class="text-2xl font-semibold text-gray-900">Material Requests</h1>
         <p class="mt-2 text-sm text-gray-700">Manage material requests from vendors</p>
     </div>
+    <div class="relative inline-block">
+
+        <a href="bulk_material_requests_upload.php" class="btn btn-secondary">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            </svg> Upload Material Requests In Bulk
+        </a>
+
+
+
+
+        <div id="bulkUploadMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+            <div class="py-1">
+            </div>
+        </div>
+    </div>
     <div class="flex space-x-2">
         <button onclick="exportRequests()" class="btn btn-secondary">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -189,13 +205,13 @@ ob_start();
             <table class="data-table">
                 <thead>
                     <tr>
+                        <th>Actions</th>
                         <th>Request Details</th>
                         <th>Site</th>
                         <th>Vendor</th>
                         <th>Dates</th>
                         <th>Items</th>
                         <th>Status</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -211,6 +227,40 @@ ob_start();
                     <?php else: ?>
                         <?php foreach ($requests as $request): ?>
                         <tr>
+                            
+                            
+                             <td>
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="viewRequest(<?php echo $request['id']; ?>)" class="btn btn-sm btn-secondary" title="View Details">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </button>
+                                    <?php if ($request['status'] === 'pending'): ?>
+                                        <button onclick="approveRequest(<?php echo $request['id']; ?>)" class="btn btn-sm btn-success" title="Approve Request">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </button>
+                                        <button onclick="rejectRequest(<?php echo $request['id']; ?>)" class="btn btn-sm btn-danger" title="Reject Request">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </button>
+                                    <?php endif; ?>
+                                    <?php if ($request['status'] === 'approved'): ?>
+                                        <button onclick="createDispatch(<?php echo $request['id']; ?>)" class="btn btn-sm btn-primary" title="Create Dispatch">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                            
+                            
+                            
                             <td>
                                 <div>
                                     <div class="text-sm font-medium text-gray-900">Request #<?php echo $request['id']; ?></div>
@@ -261,35 +311,7 @@ ob_start();
                                     <?php echo ucfirst($request['status']); ?>
                                 </span>
                             </td>
-                            <td>
-                                <div class="flex items-center space-x-2">
-                                    <button onclick="viewRequest(<?php echo $request['id']; ?>)" class="btn btn-sm btn-secondary" title="View Details">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
-                                        </svg>
-                                    </button>
-                                    <?php if ($request['status'] === 'pending'): ?>
-                                        <button onclick="approveRequest(<?php echo $request['id']; ?>)" class="btn btn-sm btn-success" title="Approve Request">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                            </svg>
-                                        </button>
-                                        <button onclick="rejectRequest(<?php echo $request['id']; ?>)" class="btn btn-sm btn-danger" title="Reject Request">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                            </svg>
-                                        </button>
-                                    <?php endif; ?>
-                                    <?php if ($request['status'] === 'approved'): ?>
-                                        <button onclick="createDispatch(<?php echo $request['id']; ?>)" class="btn btn-sm btn-primary" title="Create Dispatch">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                            </svg>
-                                        </button>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
+                           
                         </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>

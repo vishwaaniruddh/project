@@ -13,6 +13,7 @@ require_once __DIR__ . '/../models/MaterialRequest.php';
 require_once __DIR__ . '/../models/Installation.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/Inventory.php';
+require_once __DIR__ . '/../models/BoqMasterItem.php';
 
 class TestSuite {
     private $db;
@@ -40,6 +41,7 @@ class TestSuite {
         $this->testInstallationModel();
         $this->testUserModel();
         $this->testInventoryModel();
+        $this->testBoqMasterItemModel();
         
         // Authentication Tests
         $this->testAuthenticationSystem();
@@ -244,6 +246,33 @@ class TestSuite {
         $this->test("Inventory Model - Get Inward Receipts", function() use ($inventoryModel) {
             $result = $inventoryModel->getInwardReceipts(1, 10);
             return is_array($result) && isset($result['receipts']);
+        });
+    }
+    
+    private function testBoqMasterItemModel() {
+        echo "\n🔧 BOQ MASTER ITEM MODEL TESTS\n";
+        echo "-" . str_repeat("-", 50) . "\n";
+        
+        $boqMasterItemModel = new BoqMasterItem();
+        
+        $this->test("BoqMasterItem Model - Get Stats", function() use ($boqMasterItemModel) {
+            $stats = $boqMasterItemModel->getStats();
+            return is_array($stats) && isset($stats['total']);
+        });
+        
+        $this->test("BoqMasterItem Model - Validation Method Exists", function() use ($boqMasterItemModel) {
+            return method_exists($boqMasterItemModel, 'validateData');
+        });
+        
+        $this->test("BoqMasterItem Model - Duplicate Detection Method Exists", function() use ($boqMasterItemModel) {
+            return method_exists($boqMasterItemModel, 'isDuplicate');
+        });
+        
+        $this->test("BoqMasterItem Model - CRUD Methods Exist", function() use ($boqMasterItemModel) {
+            return method_exists($boqMasterItemModel, 'create') &&
+                   method_exists($boqMasterItemModel, 'update') &&
+                   method_exists($boqMasterItemModel, 'delete') &&
+                   method_exists($boqMasterItemModel, 'find');
         });
     }
     

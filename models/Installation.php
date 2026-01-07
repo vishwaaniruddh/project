@@ -273,6 +273,7 @@ class Installation {
     public function getAllWithDetails() {
         $sql = "SELECT id.*, 
                        s.site_id, s.location,
+                       s.po_number,s.site_ticket_id,
                        v.name as vendor_name,
                        id.status,
                        COALESCE(
@@ -293,7 +294,7 @@ class Installation {
                        id.created_at,
                        id.updated_at
                 FROM installation_delegations id
-                LEFT JOIN sites s ON id.site_id = s.id
+                INNER JOIN sites s ON id.site_id = s.id
                 LEFT JOIN vendors v ON id.vendor_id = v.id
                 ORDER BY id.created_at DESC";
         

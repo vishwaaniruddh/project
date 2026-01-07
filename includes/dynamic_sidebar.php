@@ -132,7 +132,7 @@ function renderMenuIcon($iconName, $isSubitem = false) {
     ];
     
     $iconPath = $icons[$iconName] ?? $icons['dashboard'];
-    $iconSize = $isSubitem ? 'w-4 h-4 mr-2' : 'w-5 h-5 mr-3';
+    $iconSize = $isSubitem ? 'w-3 h-3 mr-1.5' : 'w-4 h-4 mr-2';
     
     return '<svg class="' . $iconSize . '" fill="currentColor" viewBox="0 0 20 20">' . $iconPath . '</svg>';
 }

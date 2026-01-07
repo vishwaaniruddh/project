@@ -34,3 +34,68 @@
 [08-Dec-2025 15:00:45 UTC] Bulk upload AJAX request received
 [08-Dec-2025 15:00:45 UTC] Request method: POST
 [08-Dec-2025 15:00:45 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryPLW67yxzezCabMhp
+[09-Dec-2025 05:32:10 UTC] Bulk upload AJAX request received
+[09-Dec-2025 05:32:10 UTC] Request method: POST
+[09-Dec-2025 05:32:10 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryDywQCMBNiW2Eq7pS
+{"timestamp":"2025-12-12 06:51:46","type":"WARNING","message":"Trying to access array offset on null","file":"\/home\/u444388293\/domains\/sarsspl.com\/public_html\/karvytech\/project\/controllers\/SitesController.php","line":91,"ip_address":"27.107.226.38","user_agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/143.0.0.0 Safari\/537.36","request_uri":"\/admin\/sites\/create.php"}
+[25-Dec-2025 06:51:58 UTC] Bulk upload AJAX request received
+[25-Dec-2025 06:51:58 UTC] Request method: POST
+[25-Dec-2025 06:51:58 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryq9KzHVBj7GyeTHv8
+[25-Dec-2025 07:02:30 UTC] Bulk upload AJAX request received
+[25-Dec-2025 07:02:30 UTC] Request method: POST
+[25-Dec-2025 07:02:30 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryKKEbXjHthTKi8xtV
+[25-Dec-2025 07:05:03 UTC] Bulk upload AJAX request received
+[25-Dec-2025 07:05:03 UTC] Request method: POST
+[25-Dec-2025 07:05:03 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryMhhF3IUBWaEVe1lT
+[25-Dec-2025 07:07:28 UTC] Bulk upload AJAX request received
+[25-Dec-2025 07:07:28 UTC] Request method: POST
+[25-Dec-2025 07:07:28 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryXMdo3BLcXjM4mBxD
+[25-Dec-2025 07:09:11 UTC] Bulk upload AJAX request received
+[25-Dec-2025 07:09:11 UTC] Request method: POST
+[25-Dec-2025 07:09:11 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryUhRpS9a6dx8UbbRY
+[25-Dec-2025 07:09:58 UTC] Bulk upload AJAX request received
+[25-Dec-2025 07:09:58 UTC] Request method: POST
+[25-Dec-2025 07:09:58 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryg3sw8aSmKxvbl4ir
+[31-Dec-2025 05:57:45 UTC] Bulk upload AJAX request received
+[31-Dec-2025 05:57:45 UTC] Request method: POST
+[31-Dec-2025 05:57:45 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryJLUCBecgsbLnAiQC
+[31-Dec-2025 06:16:12 UTC] Bulk upload AJAX request received
+[31-Dec-2025 06:16:12 UTC] Request method: POST
+[31-Dec-2025 06:16:12 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundarygJRZlnT5BA9Iwz0w
+[31-Dec-2025 06:23:12 UTC] Bulk upload AJAX request received
+[31-Dec-2025 06:23:12 UTC] Request method: POST
+[31-Dec-2025 06:23:12 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryQXcl7TB3xQl1OsWx
+[31-Dec-2025 06:23:12 UTC] PHP Error [2]: Undefined array key "updated" in /home/u444388293/domains/sarsspl.com/public_html/karvytech/project/admin/sites/vendor_assign_bulk_upload.php on line 1039
+[31-Dec-2025 06:23:12 UTC] PHP Error [2]: Undefined array key "updated" in /home/u444388293/domains/sarsspl.com/public_html/karvytech/project/admin/sites/vendor_assign_bulk_upload.php on line 166
+[31-Dec-2025 06:30:54 UTC] Bulk upload AJAX request received
+[31-Dec-2025 06:30:54 UTC] Request method: POST
+[31-Dec-2025 06:30:54 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundary08uR3K3Jefm0FM3G
+[31-Dec-2025 06:30:54 UTC] PHP Error [2]: Undefined array key "updated" in /home/u444388293/domains/sarsspl.com/public_html/karvytech/project/admin/sites/vendor_assign_bulk_upload.php on line 1039
+[31-Dec-2025 06:30:54 UTC] PHP Error [2]: Undefined array key "updated" in /home/u444388293/domains/sarsspl.com/public_html/karvytech/project/admin/sites/vendor_assign_bulk_upload.php on line 166
+[31-Dec-2025 06:34:37 UTC] Bulk upload AJAX request received
+[31-Dec-2025 06:34:37 UTC] Request method: POST
+[31-Dec-2025 06:34:37 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryV2UgLlANkVIi9WLS
+[31-Dec-2025 06:34:37 UTC] PHP Error [2]: Undefined array key "updated" in /home/u444388293/domains/sarsspl.com/public_html/karvytech/project/admin/sites/vendor_assign_bulk_upload.php on line 1039
+[31-Dec-2025 06:34:37 UTC] PHP Error [2]: Undefined array key "updated" in /home/u444388293/domains/sarsspl.com/public_html/karvytech/project/admin/sites/vendor_assign_bulk_upload.php on line 166
+[31-Dec-2025 06:37:31 UTC] Bulk upload AJAX request received
+[31-Dec-2025 06:37:31 UTC] Request method: POST
+[31-Dec-2025 06:37:31 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryVajvkdRt1Iq7TMfh
+[31-Dec-2025 06:37:31 UTC] PHP Error [2]: Undefined array key "updated" in /home/u444388293/domains/sarsspl.com/public_html/karvytech/project/admin/sites/vendor_assign_bulk_upload.php on line 1039
+[31-Dec-2025 06:37:31 UTC] PHP Error [2]: Undefined array key "updated" in /home/u444388293/domains/sarsspl.com/public_html/karvytech/project/admin/sites/vendor_assign_bulk_upload.php on line 166
+[31-Dec-2025 06:44:31 UTC] Bulk upload AJAX request received
+[31-Dec-2025 06:44:31 UTC] Request method: POST
+[31-Dec-2025 06:44:31 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryw7jxQvFqOZARYOpd
+[31-Dec-2025 06:44:31 UTC] PHP Error [2]: Undefined array key "updated" in /home/u444388293/domains/sarsspl.com/public_html/karvytech/project/admin/sites/vendor_assign_bulk_upload.php on line 1051
+[31-Dec-2025 06:44:31 UTC] PHP Error [2]: Undefined array key "updated" in /home/u444388293/domains/sarsspl.com/public_html/karvytech/project/admin/sites/vendor_assign_bulk_upload.php on line 166
+[31-Dec-2025 13:38:18 UTC] Bulk upload AJAX request received
+[31-Dec-2025 13:38:18 UTC] Request method: POST
+[31-Dec-2025 13:38:18 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundarygXcqZBQpHSP94Tyq
+[31-Dec-2025 13:46:20 UTC] Bulk upload AJAX request received
+[31-Dec-2025 13:46:20 UTC] Request method: POST
+[31-Dec-2025 13:46:20 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundaryClSdYQALgbS6Hi4M
+[31-Dec-2025 13:51:43 UTC] Bulk upload AJAX request received
+[31-Dec-2025 13:51:43 UTC] Request method: POST
+[31-Dec-2025 13:51:43 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundarytkfeRE4lKC7bbdFD
+[31-Dec-2025 13:53:02 UTC] Bulk upload AJAX request received
+[31-Dec-2025 13:53:02 UTC] Request method: POST
+[31-Dec-2025 13:53:02 UTC] Content type: multipart/form-data; boundary=----WebKitFormBoundary0N56An6p8Yy9B7PA

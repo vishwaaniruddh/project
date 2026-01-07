@@ -94,6 +94,7 @@ class Site extends BaseModel {
         $sql = "SELECT s.*, 
                        ct.name as city, st.name as state, co.name as country,
                        cu.name as customer,
+                        banks.name as bank_name,
                        sd.id as delegation_id, v.name as delegated_vendor_name,
                        sd.status as delegation_status, sd.delegation_date,
                        ss.id as survey_id, ss.survey_status as actual_survey_status,
@@ -102,7 +103,10 @@ class Site extends BaseModel {
                            WHEN ss.survey_status = 'completed' THEN 1
                            WHEN ss.survey_status = 'approved' THEN 1
                            ELSE 0
-                       END as has_survey_submitted
+                       END as has_survey_submitted,
+                       mr.material_request_count,
+                       mr.latest_request_status,
+                       mr.latest_request_id
                 FROM {$this->table} s 
                 LEFT JOIN cities ct ON s.city_id = ct.id 
                 LEFT JOIN states st ON s.state_id = st.id 
@@ -110,6 +114,7 @@ class Site extends BaseModel {
                 LEFT JOIN customers cu ON s.customer_id = cu.id 
                 LEFT JOIN site_delegations sd ON s.id = sd.site_id AND sd.status = 'active'
                 LEFT JOIN vendors v ON sd.vendor_id = v.id
+                LEFT JOIN banks ON s.bank_id=banks.id
                 LEFT JOIN (
                     SELECT ss1.site_id, ss1.id, ss1.survey_status, ss1.submitted_date
                     FROM site_surveys ss1
@@ -119,6 +124,14 @@ class Site extends BaseModel {
                         GROUP BY site_id
                     ) ss2 ON ss1.site_id = ss2.site_id AND ss1.id = ss2.max_id
                 ) ss ON s.id = ss.site_id
+                LEFT JOIN (
+                    SELECT site_id, 
+                           COUNT(*) as material_request_count,
+                           MAX(id) as latest_request_id,
+                           (SELECT status FROM material_requests WHERE site_id = mr2.site_id ORDER BY id DESC LIMIT 1) as latest_request_status
+                    FROM material_requests mr2
+                    GROUP BY site_id
+                ) mr ON s.id = mr.site_id
                 $whereClause 
                 ORDER BY s.created_at DESC 
                 LIMIT $limit OFFSET $offset";
@@ -321,5 +334,52 @@ class Site extends BaseModel {
         $stmt->execute();
         return $stmt->fetchAll();
     }
+    
+    
+         // 🔑 UNIQUE SITE TICKET GENERATOR
+    public function generateSiteTicketId(): string
+{
+    $year = date('Y');
+
+    $row = $this->db->query(
+        "SELECT site_ticket_id
+         FROM sites
+         WHERE site_ticket_id LIKE 'KARVY-$year-%'
+         ORDER BY id DESC
+         LIMIT 1"
+    )->fetch();
+
+    if ($row && !empty($row['site_ticket_id'])) {
+        $last = (int) substr($row['site_ticket_id'], -6);
+        $next = $last + 1;
+    } else {
+        $next = 1;
+    }
+
+    return 'KARVY-' . $year . '-' . str_pad($next, 6, '0', STR_PAD_LEFT);
+}
+
+public function getLastTicketSequence(): int
+{
+    $year = date('Y');
+
+    $row = $this->db->query(
+        "SELECT site_ticket_id
+         FROM sites
+         WHERE site_ticket_id LIKE 'KARVY-$year-%'
+         ORDER BY id DESC
+         LIMIT 1"
+    )->fetch();
+
+    if ($row && !empty($row['site_ticket_id'])) {
+        return (int) substr($row['site_ticket_id'], -6);
+    }
+
+    return 0;
+}
+
+    
+    
+    
 }
 ?>

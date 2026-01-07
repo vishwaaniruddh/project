@@ -81,18 +81,50 @@ ob_start();
             <table class="data-table" id="boqTable">
                 <thead>
                     <tr>
+                        <th>Actions</th>
                         <th>Item Details</th>
                         <th>Code</th>
                         <th>Category</th>
                         <th>Unit</th>
                         <th>Serial Required</th>
                         <th>Status</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($result['items'] as $item): ?>
                     <tr>
+                        <td>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="viewBoqItem(<?php echo $item['id']; ?>)" class="btn btn-sm btn-secondary" title="View">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </button>
+                                <button onclick="editBoqItem(<?php echo $item['id']; ?>)" class="btn btn-sm btn-primary" title="Edit">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
+                                    </svg>
+                                </button>
+                                <button onclick="toggleBoqStatus(<?php echo $item['id']; ?>, '<?php echo $item['status']; ?>')" class="btn btn-sm <?php echo $item['status'] === 'active' ? 'btn-warning' : 'btn-success'; ?>" title="<?php echo $item['status'] === 'active' ? 'Deactivate' : 'Activate'; ?>">
+                                    <?php if ($item['status'] === 'active'): ?>
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    <?php else: ?>
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    <?php endif; ?>
+                                </button>
+                                <button onclick="deleteBoqItem(<?php echo $item['id']; ?>)" class="btn btn-sm btn-danger" title="Delete">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 012 0v4a1 1 0 11-2 0V7zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V7a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
                         <td>
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-10 w-10">
@@ -137,38 +169,6 @@ ob_start();
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo $item['status'] === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?>">
                                 <?php echo ucfirst($item['status']); ?>
                             </span>
-                        </td>
-                        <td>
-                            <div class="flex items-center space-x-2">
-                                <button onclick="viewBoqItem(<?php echo $item['id']; ?>)" class="btn btn-sm btn-secondary" title="View">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-                                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
-                                    </svg>
-                                </button>
-                                <button onclick="editBoqItem(<?php echo $item['id']; ?>)" class="btn btn-sm btn-primary" title="Edit">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
-                                    </svg>
-                                </button>
-                                <button onclick="toggleBoqStatus(<?php echo $item['id']; ?>, '<?php echo $item['status']; ?>')" class="btn btn-sm <?php echo $item['status'] === 'active' ? 'btn-warning' : 'btn-success'; ?>" title="<?php echo $item['status'] === 'active' ? 'Deactivate' : 'Activate'; ?>">
-                                    <?php if ($item['status'] === 'active'): ?>
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"></path>
-                                        </svg>
-                                    <?php else: ?>
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                        </svg>
-                                    <?php endif; ?>
-                                </button>
-                                <button onclick="deleteBoqItem(<?php echo $item['id']; ?>)" class="btn btn-sm btn-danger" title="Delete">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"></path>
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 012 0v4a1 1 0 11-2 0V7zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V7a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                    </svg>
-                                </button>
-                            </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -368,6 +368,11 @@ ob_start();
 </div>
 
 <script>
+    
+// Ye ek hi jagah define kar do, jaise main.js me ya script ke start me
+
+
+    
 // Search functionality
 document.getElementById('searchInput').addEventListener('keyup', debounce(function() {
     applyFilters();
@@ -403,6 +408,8 @@ document.getElementById('createBoqForm').addEventListener('submit', function(e) 
     submitForm('createBoqForm', function(data) {
         closeModal('createBoqModal');
         showAlert('BOQ item created successfully!', 'success');
+        // showAlert('Item created successfully!', 'success');
+
         setTimeout(() => location.reload(), 1500);
     });
 });

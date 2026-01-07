@@ -16,7 +16,8 @@ try {
     $inventoryModel = new Inventory();
     
     // Validate required fields
-    $requiredFields = ['boq_item_id', 'minimum_stock', 'maximum_stock', 'unit_cost'];
+  //  $requiredFields = ['boq_item_id', 'minimum_stock', 'maximum_stock', 'unit_cost'];
+    $requiredFields = ['boq_item_id', 'stock_quantity', 'unit_cost'];
     foreach ($requiredFields as $field) {
         if (!isset($_POST[$field]) || $_POST[$field] === '') {
             throw new Exception("Field '$field' is required");
@@ -27,22 +28,25 @@ try {
     $minStock = floatval($_POST['minimum_stock']);
     $maxStock = floatval($_POST['maximum_stock']);
     $unitCost = floatval($_POST['unit_cost']);
+    $stockQuantity = intval($_POST['stock_quantity']);
     
     // Validate values
-    if ($minStock < 0) {
-        throw new Exception('Minimum stock cannot be negative');
-    }
-    
-    if ($maxStock < $minStock) {
-        throw new Exception('Maximum stock must be greater than or equal to minimum stock');
-    }
-    
+    /*
+        if ($minStock < 0) {
+            throw new Exception('Minimum stock cannot be negative');
+        }
+        
+        if ($maxStock < $minStock) {
+            throw new Exception('Maximum stock must be greater than or equal to minimum stock');
+        }
+    */
     if ($unitCost < 0) {
         throw new Exception('Unit cost cannot be negative');
     }
     
     // Update stock levels
-    $result = $inventoryModel->updateStockLevels($boqItemId, $minStock, $maxStock, $unitCost);
+   // $result = $inventoryModel->updateStockLevels($boqItemId, $minStock, $maxStock, $unitCost);
+    $result = $inventoryModel->updateStockLevelsNew($boqItemId, $minStock, $maxStock, $unitCost, $stockQuantity);
     
     if (!$result) {
         throw new Exception('Failed to update stock levels');

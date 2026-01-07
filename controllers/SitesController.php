@@ -65,6 +65,7 @@ class SitesController extends BaseController {
     public function store() {
         try {
             $currentUser = Auth::getCurrentUser();
+            $siteTicketId = $this->siteModel->generateSiteTicketId();
             
             $data = [
                 'site_id' => trim($_POST['site_id'] ?? ''),
@@ -88,7 +89,8 @@ class SitesController extends BaseController {
                 'is_material_request_generated' => isset($_POST['is_material_request_generated']) ? 1 : 0,
                 'survey_submission_date' => !empty($_POST['survey_submission_date']) ? $_POST['survey_submission_date'] : null,
                 'installation_date' => !empty($_POST['installation_date']) ? $_POST['installation_date'] : null,
-                'created_by' => $currentUser['username']
+                'created_by' => $currentUser['username'],
+                'site_ticket_id' => $siteTicketId
             ];
             
             // Validate data

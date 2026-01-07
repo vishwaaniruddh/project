@@ -24,6 +24,7 @@ $lowStock = isset($_GET['low_stock']);
 
 // Get stock overview
 $stockItems = $inventoryModel->getStockOverview($search, $category, $lowStock, $warehouseId);
+//echo '<pre>';print_r($stockItems);echo '</pre>';die;
 $categories = $boqModel->getCategories();
 $warehouses = $warehouseModel->getAll('', 'active');
 
@@ -228,18 +229,19 @@ ob_start();
                 </svg>
                 Individual Entries
             </a>
-            <button onclick="openModal('updateStockModal')" class="btn btn-primary btn-sm">
-                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>
-                </svg>
-                Update Unit Cost
-            </button>
+            <!--<button onclick="openModal('updateStockModal')" class="btn btn-primary btn-sm">-->
+            <!--    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">-->
+            <!--        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>-->
+            <!--    </svg>-->
+            <!--    Update Unit Cost-->
+            <!--</button>-->
         </div>
         
         <div class="overflow-x-auto">
             <table class="data-table" id="stockTable">
                 <thead>
                     <tr>
+                        <th>Actions</th>
                         <th>Item Details</th>
                         <th>Category</th>
                         <th>Warehouse</th>
@@ -249,12 +251,31 @@ ob_start();
                         <th>Stock Status</th>
                         <th>Unit Cost</th>
                         <th>Total Value</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($stockItems as $item): ?>
                     <tr>
+                        
+                        
+                        <td>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="viewStockDetails(<?php echo $item['boq_item_id']; ?>)" class="btn btn-sm btn-secondary" title="View Details">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </button>
+                                <button onclick="updateStockLevels(<?php echo $item['boq_item_id']; ?>,<?php echo number_format($item['available_stock'] ?? 0); ?>)" class="btn btn-sm btn-primary" title="Update Levels">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                        
+                        
+                        
                         <td>
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-10 w-10">
@@ -324,21 +345,11 @@ ob_start();
                         <td>
                             <div class="text-sm text-gray-900">₹<?php echo number_format($item['total_value'], 2); ?></div>
                         </td>
-                        <td>
-                            <div class="flex items-center space-x-2">
-                                <button onclick="viewStockDetails(<?php echo $item['boq_item_id']; ?>)" class="btn btn-sm btn-secondary" title="View Details">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-                                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
-                                    </svg>
-                                </button>
-                                <button onclick="updateStockLevels(<?php echo $item['boq_item_id']; ?>)" class="btn btn-sm btn-primary" title="Update Levels">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
+                        
+                        
+                        
+                        
+                        
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -348,48 +359,52 @@ ob_start();
 </div>
 
 <!-- Update Unit Cost Modal -->
-<div id="updateStockModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 class="modal-title">Update Unit Cost</h3>
-            <button type="button" class="modal-close" onclick="closeModal('updateStockModal')">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                </svg>
-            </button>
-        </div>
-        <form id="updateStockForm">
-            <div class="modal-body">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="form-group">
-                        <label for="stock_item" class="form-label">Select Item *</label>
-                        <select id="stock_item" name="boq_item_id" class="form-select" required>
-                            <option value="">Select Item</option>
-                            <?php foreach ($stockItems as $item): ?>
-                                <option value="<?php echo $item['boq_item_id']; ?>">
-                                    <?php echo htmlspecialchars($item['item_name']); ?> (<?php echo htmlspecialchars($item['item_code']); ?>)
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="unit_cost" class="form-label">Unit Cost *</label>
-                        <input type="number" id="unit_cost" name="unit_cost" step="0.01" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="notes" class="form-label">Notes</label>
-                        <textarea id="notes" name="notes" rows="3" class="form-input" 
-                                  placeholder="Any notes about this unit cost update..."></textarea>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" onclick="closeModal('updateStockModal')" class="btn btn-secondary">Cancel</button>
-                <button type="submit" class="btn btn-primary">Update Unit Cost</button>
-            </div>
-        </form>
-    </div>
-</div>
+<!--<div id="updateStockModal" class="modal">-->
+<!--    <div class="modal-content">-->
+<!--        <div class="modal-header">-->
+<!--            <h3 class="modal-title">Update Unit Cost</h3>-->
+<!--            <button type="button" class="modal-close" onclick="closeModal('updateStockModal')">-->
+<!--                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">-->
+<!--                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>-->
+<!--                </svg>-->
+<!--            </button>-->
+<!--        </div>-->
+<!--        <form id="updateStockForm">-->
+<!--            <div class="modal-body">-->
+<!--                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">-->
+<!--                    <div class="form-group">-->
+<!--                        <label for="stock_item" class="form-label">Select Item *</label>-->
+<!--                        <select id="stock_item" name="boq_item_id" class="form-select" required>-->
+<!--                            <option value="">Select Item</option>-->
+<!--                            <?php foreach ($stockItems as $item): ?>-->
+<!--                                <option value="<?php echo $item['boq_item_id']; ?>">-->
+<!--                                    <?php echo htmlspecialchars($item['item_name']); ?> (<?php echo htmlspecialchars($item['item_code']); ?>)-->
+<!--                                </option>-->
+<!--                            <?php endforeach; ?>-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label for="unit_cost" class="form-label">Unit Cost *</label>-->
+<!--                        <input type="number" id="unit_cost" name="unit_cost" step="0.01" class="form-input" required>-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label for="stock_quantity" class="form-label">Stock Quantity *</label>-->
+<!--                         <input type="number" id="stock_quantity" name="stock_quantity" class="form-input" max="1" min="1" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label for="notes" class="form-label">Notes</label>-->
+<!--                        <textarea id="notes" name="notes" rows="3" class="form-input" -->
+<!--                                  placeholder="Any notes about this unit cost update..."></textarea>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="modal-footer">-->
+<!--                <button type="button" onclick="closeModal('updateStockModal')" class="btn btn-secondary">Cancel</button>-->
+<!--                <button type="submit" class="btn btn-primary">Update Unit Cost</button>-->
+<!--            </div>-->
+<!--        </form>-->
+<!--    </div>-->
+<!--</div>-->
 
 <script>
 // Search functionality
@@ -430,10 +445,18 @@ function viewStockDetails(boqItemId) {
     window.open(`stock-details.php?item_id=${boqItemId}`, '_blank');
 }
 
-function updateStockLevels(boqItemId) {
+function updateStockLevels(boqItemId,stockQty) {
     document.getElementById('stock_item').value = boqItemId;
+    document.getElementById('stock_quantity').value = stockQty;
+    document.getElementById('stock_quantity').max = stockQty;
     openModal('updateStockModal');
 }
+
+document.getElementById('stock_quantity').addEventListener("input", () => {
+  if (document.getElementById('stock_quantity').value !== "" && Number(document.getElementById('stock_quantity').value) > Number(document.getElementById('stock_quantity').max)) {
+    document.getElementById('stock_quantity').value = document.getElementById('stock_quantity').max;
+  }
+});
 
 // Update stock form submission
 document.getElementById('updateStockForm').addEventListener('submit', function(e) {
