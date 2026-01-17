@@ -111,7 +111,8 @@ class Inventory {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
-    public function getIndividualStockEntries($boqItemId = null, $search = '', $location = '') {
+    public function getIndividualStockEntries($boqItemId = null, $search = '', $location = '', $page = 1, $limit = 50) {
+        $offset = ($page - 1) * $limit;
         $whereClause = '';
         $params = [];
         $conditions = [];
@@ -136,15 +137,38 @@ class Inventory {
             $whereClause = "WHERE " . implode(" AND ", $conditions);
         }
         
+        // Get total count
+        $countSql = "SELECT COUNT(*) 
+                     FROM inventory_stock ist
+                     JOIN boq_items bi ON CAST(ist.boq_item_id AS CHAR) = CAST(bi.id AS CHAR)
+                     $whereClause";
+        
+        $stmt = $this->db->prepare($countSql);
+        $stmt->execute($params);
+        $total = $stmt->fetchColumn();
+        
+        // Get paginated results
         $sql = "SELECT ist.*, bi.item_name, bi.item_code, bi.unit, bi.category, bi.icon_class
                 FROM inventory_stock ist
                 JOIN boq_items bi ON CAST(ist.boq_item_id AS CHAR) = CAST(bi.id AS CHAR)
                 $whereClause
-                ORDER BY bi.item_name, ist.batch_number, ist.serial_number";
+                ORDER BY bi.item_name, ist.batch_number, ist.serial_number
+                LIMIT ? OFFSET ?";
+        
+        $params[] = $limit;
+        $params[] = $offset;
         
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        return [
+            'entries' => $entries,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'pages' => ceil($total / $limit)
+        ];
     }
     
     public function getStockByItem($boqItemId) {
@@ -608,73 +632,147 @@ class Inventory {
         $totalItems = 0;
         $totalValue = 0;
         
-        foreach ($items as $item) {
-            $boqItemId = $item['boq_item_id'];
-            $requestedQuantity = intval($item['quantity_dispatched']);
-            $specifiedSerials = $item['serial_numbers'] ?? [];
-            
-            // Get available stock items for dispatch
-            $stockItems = [];
-            
-            if (!empty($specifiedSerials)) {
-                // Admin specified serial numbers - try to get those specific items
-                $stockItems = $this->getStockBySerialNumbers($specifiedSerials);
+        // Start transaction for better performance
+        $this->db->beginTransaction();
+        
+        try {
+            foreach ($items as $item) {
+                $boqItemId = $item['boq_item_id'];
+                $requestedQuantity = intval($item['quantity_dispatched']);
                 
-                // Check if all specified serials are available
-                $foundSerials = array_column($stockItems, 'serial_number');
-                $missingSerials = array_diff($specifiedSerials, $foundSerials);
-                
-                if (!empty($missingSerials)) {
-                    throw new Exception("Serial numbers not available: " . implode(', ', $missingSerials));
-                }
-                
-                // Check if we have enough items
-                if (count($stockItems) < $requestedQuantity) {
-                    throw new Exception("Not enough items available for BOQ item ID $boqItemId");
-                }
-            } else {
-                // No serial numbers specified - auto-select available items
-                $stockItems = $this->getAvailableStock($boqItemId, $requestedQuantity);
-                
-                if (count($stockItems) < $requestedQuantity) {
-                    $available = count($stockItems);
-                    throw new Exception("Insufficient stock for BOQ item ID $boqItemId. Requested: $requestedQuantity, Available: $available");
-                }
-            }
-            
-            // Dispatch the selected items
-            $itemsToDispatch = array_slice($stockItems, 0, $requestedQuantity);
-            
-            foreach ($itemsToDispatch as $stockItem) {
-                // Insert dispatch item record
-                $sql = "INSERT INTO inventory_dispatch_items 
-                        (dispatch_id, inventory_stock_id, boq_item_id, unit_cost, 
-                         item_condition, dispatch_notes, warranty_period)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)";
-                
+                // Check if item requires serial numbers
+                $sql = "SELECT need_serial_number FROM boq_items WHERE id = ?";
                 $stmt = $this->db->prepare($sql);
-                $stmt->execute([
-                    $dispatchId,
-                    $stockItem['id'],
-                    $boqItemId,
-                    $stockItem['unit_cost'],
-                    $item['item_condition'] ?? 'new',
-                    $item['remarks'] ?? null,
-                    $item['warranty_period'] ?? null
-                ]);
+                $stmt->execute([$boqItemId]);
+                $boqItem = $stmt->fetch(PDO::FETCH_ASSOC);
+                $needsSerial = $boqItem && $boqItem['need_serial_number'] == 1;
                 
-                // Update stock item status to 'dispatched'
-                $this->updateStockItemStatus($stockItem['id'], 'dispatched', $dispatchId);
-                
-                $totalItems++;
-                $totalValue += $stockItem['unit_cost'];
+                if ($needsSerial) {
+                    // For serialized items, use individual serial numbers
+                    $individualRecords = !empty($item['individual_records']) ? json_decode($item['individual_records'], true) : [];
+                    
+                    if (empty($individualRecords)) {
+                        throw new Exception("Serial numbers required for BOQ item ID $boqItemId");
+                    }
+                    
+                    // Get stock items by serial numbers
+                    $serialNumbers = array_column($individualRecords, 'serial_number');
+                    $serialNumbers = array_filter($serialNumbers); // Remove empty values
+                    
+                    if (count($serialNumbers) < $requestedQuantity) {
+                        throw new Exception("Not enough serial numbers provided for BOQ item ID $boqItemId");
+                    }
+                    
+                    $stockItems = $this->getStockBySerialNumbers($serialNumbers);
+                    
+                    // Check if all specified serials are available
+                    $foundSerials = array_column($stockItems, 'serial_number');
+                    $missingSerials = array_diff($serialNumbers, $foundSerials);
+                    
+                    if (!empty($missingSerials)) {
+                        throw new Exception("Serial numbers not available: " . implode(', ', $missingSerials));
+                    }
+                    
+                    // Dispatch each serialized item
+                    foreach ($stockItems as $stockItem) {
+                        // Insert dispatch item record
+                        $sql = "INSERT INTO inventory_dispatch_items 
+                                (dispatch_id, inventory_stock_id, boq_item_id, unit_cost, 
+                                 item_condition, dispatch_notes, warranty_period)
+                                VALUES (?, ?, ?, ?, ?, ?, ?)";
+                        
+                        $stmt = $this->db->prepare($sql);
+                        $stmt->execute([
+                            $dispatchId,
+                            $stockItem['id'],
+                            $boqItemId,
+                            $stockItem['unit_cost'],
+                            $item['item_condition'] ?? 'new',
+                            $item['remarks'] ?? null,
+                            $item['warranty_period'] ?? null
+                        ]);
+                        
+                        // Update stock item status to 'dispatched'
+                        $this->updateStockItemStatus($stockItem['id'], 'dispatched', $dispatchId);
+                        
+                        $totalItems++;
+                        $totalValue += $stockItem['unit_cost'];
+                    }
+                } else {
+                    // For non-serialized items, use bulk update approach for better performance
+                    // Get available stock IDs with limit
+                    $sql = "SELECT id, unit_cost 
+                            FROM inventory_stock 
+                            WHERE boq_item_id = ? 
+                            AND CAST(item_status AS CHAR) = CAST('available' AS CHAR)
+                            AND CAST(quality_status AS CHAR) = CAST('good' AS CHAR)
+                            AND CAST(activity_status AS CHAR) = CAST('active' AS CHAR)
+                            ORDER BY id ASC
+                            LIMIT ?";
+                    
+                    $stmt = $this->db->prepare($sql);
+                    $stmt->execute([$boqItemId, $requestedQuantity]);
+                    $stockItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    
+                    if (count($stockItems) < $requestedQuantity) {
+                        $available = count($stockItems);
+                        throw new Exception("Insufficient stock for BOQ item ID $boqItemId. Requested: $requestedQuantity, Available: $available");
+                    }
+                    
+                    // Batch insert dispatch items
+                    $stockIds = array_column($stockItems, 'id');
+                    $avgUnitCost = array_sum(array_column($stockItems, 'unit_cost')) / count($stockItems);
+                    
+                    // Prepare batch insert
+                    $values = [];
+                    $placeholders = [];
+                    foreach ($stockItems as $stockItem) {
+                        $placeholders[] = "(?, ?, ?, ?, ?, ?, ?)";
+                        $values[] = $dispatchId;
+                        $values[] = $stockItem['id'];
+                        $values[] = $boqItemId;
+                        $values[] = $stockItem['unit_cost'];
+                        $values[] = $item['item_condition'] ?? 'new';
+                        $values[] = $item['remarks'] ?? null;
+                        $values[] = $item['warranty_period'] ?? null;
+                        
+                        $totalValue += $stockItem['unit_cost'];
+                    }
+                    
+                    // Batch insert dispatch items
+                    $sql = "INSERT INTO inventory_dispatch_items 
+                            (dispatch_id, inventory_stock_id, boq_item_id, unit_cost, 
+                             item_condition, dispatch_notes, warranty_period)
+                            VALUES " . implode(', ', $placeholders);
+                    
+                    $stmt = $this->db->prepare($sql);
+                    $stmt->execute($values);
+                    
+                    // Batch update stock status
+                    $stockIdsList = implode(',', $stockIds);
+                    $sql = "UPDATE inventory_stock 
+                            SET item_status = 'dispatched', 
+                                dispatch_id = ?,
+                                dispatched_at = NOW(),
+                                updated_by = ?
+                            WHERE id IN ($stockIdsList)";
+                    
+                    $stmt = $this->db->prepare($sql);
+                    $stmt->execute([$dispatchId, $currentUser['id']]);
+                    
+                    $totalItems += count($stockItems);
+                }
             }
+            
+            // Commit transaction
+            $this->db->commit();
+            return true;
+            
+        } catch (Exception $e) {
+            // Rollback on error
+            $this->db->rollBack();
+            throw $e;
         }
-        
-        // Update dispatch totals (commented out - columns may not exist)
-        // $this->updateDispatchTotals($dispatchId, $totalItems, $totalValue);
-        
-        return true;
     }
     
     public function updateStockItemStatus($stockId, $status, $dispatchId = null) {
@@ -753,8 +851,13 @@ class Inventory {
         $stmt->execute($params);
         $total = $stmt->fetchColumn();
         
-        // Get paginated results
-        $sql = "SELECT id.*, s.site_id as site_code, v.name as vendor_name, u.username as dispatched_by_name
+        // Get paginated results with calculated totals
+        $sql = "SELECT id.*, 
+                       s.site_id as site_code, 
+                       v.name as vendor_name, 
+                       u.username as dispatched_by_name,
+                       (SELECT COUNT(*) FROM inventory_dispatch_items WHERE dispatch_id = id.id) as total_items,
+                       (SELECT COALESCE(SUM(unit_cost), 0) FROM inventory_dispatch_items WHERE dispatch_id = id.id) as total_value
                 FROM inventory_dispatches id
                 LEFT JOIN sites s ON id.site_id = s.id
                 LEFT JOIN vendors v ON id.vendor_id = v.id
@@ -1099,9 +1202,17 @@ class Inventory {
             $boqItemId = $item['boq_item_id'];
             $requestedQuantity = intval($item['quantity']);
             
-            // Get available stock for this item
-            $availableStock = $this->getAvailableStock($boqItemId);
-            $availableQuantity = count($availableStock);
+            // Get available stock count efficiently using COUNT query instead of fetching all records
+            $sql = "SELECT COUNT(*) as available_count
+                    FROM inventory_stock ist
+                    WHERE ist.boq_item_id = ? 
+                    AND CAST(ist.item_status AS CHAR) = CAST('available' AS CHAR)
+                    AND CAST(ist.quality_status AS CHAR) = CAST('good' AS CHAR)
+                    AND CAST(ist.activity_status AS CHAR) = CAST('active' AS CHAR)";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$boqItemId]);
+            $availableQuantity = intval($stmt->fetchColumn());
             
             // Get item details
             $sql = "SELECT item_name, item_code, unit FROM boq_items WHERE id = ?";
@@ -1116,8 +1227,7 @@ class Inventory {
                 'requested_quantity' => $requestedQuantity,
                 'available_quantity' => $availableQuantity,
                 'is_sufficient' => $availableQuantity >= $requestedQuantity,
-                'shortage' => max(0, $requestedQuantity - $availableQuantity),
-                'available_items' => $availableStock
+                'shortage' => max(0, $requestedQuantity - $availableQuantity)
             ];
         }
         

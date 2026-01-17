@@ -754,3 +754,6 @@
 {"timestamp":"2026-01-07 07:11:51","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
 {"timestamp":"2026-01-07 11:38:20","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
 {"timestamp":"2026-01-07 12:47:29","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2026-01-13 05:23:44","level":"WARNING","message":"User login failed","user_id":"guest","ip_address":"::1","context":{"username":"admin@example.com","success":false}}
+{"timestamp":"2026-01-13 05:23:58","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}
+{"timestamp":"2026-01-17 06:48:41","level":"INFO","message":"User login successful","user_id":1,"ip_address":"::1","context":{"username":"admin@example.com","success":true}}

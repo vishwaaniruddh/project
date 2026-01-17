@@ -5,6 +5,10 @@ ini_set('display_errors', 1);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../../logs/dispatch_debug.log');
 
+// Increase execution time for large dispatches
+set_time_limit(300); // 5 minutes
+ini_set('memory_limit', '256M'); // Increase memory limit
+
 // Create logs directory if it doesn't exist
 $logDir = __DIR__ . '/../../logs';
 if (!is_dir($logDir)) {
